@@ -77,7 +77,6 @@ public class ParallelWorldMixin {
 		if(ex == null) {
 			setupThreadpool(4);
 			LOGGER.info("setupThreadpool");
-
 		}
 
 		if (p != null) {
