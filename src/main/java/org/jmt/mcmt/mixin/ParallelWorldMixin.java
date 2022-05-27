@@ -3,7 +3,7 @@ package org.jmt.mcmt.mixin;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import org.jmt.mcmt.MCMTMod;
-import org.jmt.mcmt.GeneralConfig;
+import org.jmt.mcmt.config.GeneralConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;

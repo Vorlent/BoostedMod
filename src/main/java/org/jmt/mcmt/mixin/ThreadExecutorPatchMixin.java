@@ -29,7 +29,7 @@ public abstract class ThreadExecutorPatchMixin {
 	/**
 	 * Override isOnThread for MinecraftServer so that it returns true if the thread is in our threadpool
 	 */
-	@Inject(method = "isOnThread()I;", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "isOnThread()Z", at = @At("HEAD"), cancellable = true)
 	private void isOnThread(CallbackInfoReturnable<Boolean> cir) {
 		if((Object)this instanceof MinecraftServer) {
 			MinecraftServer server = (MinecraftServer)(Object)this;

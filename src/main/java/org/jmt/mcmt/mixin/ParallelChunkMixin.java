@@ -1,20 +1,10 @@
 package org.jmt.mcmt.mixin;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerChunkManager;
-import net.minecraft.server.world.ServerWorld;
-import org.jmt.mcmt.GeneralConfig;
+import org.jmt.mcmt.config.GeneralConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Phaser;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(ServerChunkManager.class)
 public class ParallelChunkMixin {

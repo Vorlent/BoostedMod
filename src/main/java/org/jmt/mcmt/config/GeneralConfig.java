@@ -1,4 +1,4 @@
-package org.jmt.mcmt;
+package org.jmt.mcmt.config;
 
 import java.util.List;
 import java.util.Set;
