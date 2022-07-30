@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 //import org.jmt.mcmt.asmdest.ASMHookTerminator;
+import org.jmt.mcmt.ThreadCoordinator;
 import org.jmt.mcmt.config.GeneralConfig;
 
 import javax.annotation.Nullable;
@@ -28,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -40,6 +42,8 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 	protected ChunkLock loadingChunkLock = new ChunkLock();
 	Logger log = LogManager.getLogger();
 	Marker chunkCleaner = MarkerManager.getMarker("ChunkCleaner");
+
+	private ExecutorService executor;
 
 	public ParallelServerChunkManager(ServerWorld world, LevelStorage.Session session, DataFixer dataFixer,
 							  StructureManager structureManager, Executor workerExecutor, ChunkGenerator chunkGenerator, int viewDistance,
@@ -55,18 +59,15 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 	@Override
 	@Nullable
 	public Chunk getChunk(int chunkX, int chunkZ, ChunkStatus requiredStatus, boolean load) {
-		if (GeneralConfig.disabled || GeneralConfig.disableChunkProvider) {
-			if (/* ASMHookTerminator.isThreadPooled("Main", Thread.currentThread()) */ true) {
-				return CompletableFuture.supplyAsync(() -> {
-		            return this.getChunk(chunkX, chunkZ, requiredStatus, load);
-		         }, null /* this.executor */).join();
-			}
-			return super.getChunk(chunkX, chunkZ, requiredStatus, load);
-		}
-		if (true /*ASMHookTerminator.isThreadPooled("Main", Thread.currentThread()) */) {
+		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
+
+		if (threadCoordinator.isThreadPooled("Main", Thread.currentThread())) {
 			return CompletableFuture.supplyAsync(() -> {
-	            return this.getChunk(chunkX, chunkZ, requiredStatus, load);
-	         }, null /* this.executor */).join();
+				return this.getChunk(chunkX, chunkZ, requiredStatus, load);
+			}, this.mainThreadExecutor).join();
+		}
+		if (GeneralConfig.disabled || GeneralConfig.disableChunkProvider) {
+			return super.getChunk(chunkX, chunkZ, requiredStatus, load);
 		}
 		
 		long i = ChunkPos.toLong(chunkX, chunkZ);
@@ -79,7 +80,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		//log.debug("Missed chunk " + i + " on status "  + requiredStatus.toString());
 		
 		Chunk cl;
-		if (true /* ASMHookTerminator.shouldThreadChunks() */) {
+		if (threadCoordinator.shouldThreadChunks()) {
 			// Multithread but still limit to 1 load op per chunk
 			long[] locks = loadingChunkLock.lock(i, 0);
 			try {
@@ -101,17 +102,8 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		cacheChunk(i, cl, requiredStatus);
 		return cl;
 	}
-	
-	@SuppressWarnings("unused")
-	private Chunk getChunkyThing(long chunkPos, ChunkStatus requiredStatus, boolean load) {
-		Chunk cl;
-		synchronized (this) {
-			cl = super.getChunk(ChunkPos.getPackedX(chunkPos), ChunkPos.getPackedZ(chunkPos), requiredStatus, load);
-		}
-		return cl;
-	}
 
-	@Override
+	/*@Override
 	@Nullable
 	public WorldChunk getWorldChunk(int chunkX, int chunkZ) {
 		if (GeneralConfig.disabled) {
@@ -121,7 +113,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 
 		Chunk c = lookupChunk(i, ChunkStatus.FULL, false);
 		if (c != null) {
-			return (WorldChunk)c; //TODO
+			return chunk instanceof WorldChunk ? (WorldChunk)chunk : null; //TODO
 		}
 		
 		//log.debug("Missed chunk " + i + " now");
@@ -129,7 +121,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		WorldChunk cl = super.getWorldChunk(chunkX, chunkZ);
 		cacheChunk(i, cl, ChunkStatus.FULL);
 		return cl;
-	}
+	}*/
 
 	public Chunk lookupChunk(long chunkPos, ChunkStatus status, boolean compute) {
 		int oldaccess = access.getAndIncrement();
