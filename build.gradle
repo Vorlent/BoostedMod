@@ -54,6 +54,10 @@ jar {
 	}
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/mcmt-fabric.accesswidener")
+}
+
 // configure the maven publication
 publishing {
 	publications {

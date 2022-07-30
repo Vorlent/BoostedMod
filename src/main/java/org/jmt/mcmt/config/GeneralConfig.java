@@ -26,24 +26,24 @@ public class GeneralConfig {
     //////////////////////
 
     // General
-    public static boolean disabled;
+    public static boolean disabled = false;
 
     // Parallelism
     public static int paraMax;
     public static ParaMaxMode paraMaxMode;
 
     // World
-    public static boolean disableWorld;
-    public static boolean disableWorldPostTick;
+    public static boolean disableWorld = false;
+    public static boolean disableWorldPostTick = true;
 
     //WorldChunk
-    public static boolean disableMultiChunk;
+    public static boolean disableMultiChunk = false;
 
     // Entity
-    public static boolean disableEntity;
+    public static boolean disableEntity = true;
 
     // TE
-    public static boolean disableTileEntity;
+    public static boolean disableTileEntity = true;
     public static boolean chunkLockModded;
     public static Set<Class<?>> teWhiteList;
     public static Set<Class<?>> teBlackList;
@@ -55,7 +55,7 @@ public class GeneralConfig {
     public static List<String> teUnfoundBlackList;
 
     // Misc
-    public static boolean disableEnvironment;
+    public static boolean disableEnvironment = true;
     public static boolean disableChunkProvider;
 
     //Debug
