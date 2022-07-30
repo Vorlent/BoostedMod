@@ -3,6 +3,7 @@ package org.jmt.mcmt.mixin;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import org.jmt.mcmt.MCMTMod;
+import org.jmt.mcmt.ThreadCoordinator;
 import org.jmt.mcmt.config.GeneralConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,46 +23,15 @@ import java.util.function.BooleanSupplier;
 public class ParallelWorldMixin {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("ParallelWorldMixin");
-
-	private static Phaser p;
-	private static ExecutorService ex;
 	private static MinecraftServer mcs;
-	private static AtomicBoolean isTicking = new AtomicBoolean();
-	private static AtomicInteger threadID = new AtomicInteger();
+
 	private static long tickStart = 0;
 
-	private static Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<String, Set<Thread>>();
-
 	// Statistics
-	private static AtomicInteger currentWorlds = new AtomicInteger();
-
-	//Operation logging
-	private static Set<String> currentTasks = ConcurrentHashMap.newKeySet();
 
 	private static long[] lastTickTime = new long[32];
 	private static int lastTickTimePos = 0;
 	private static int lastTickTimeFill = 0;
-
-
-	private static void setupThreadpool(int parallelism) {
-		threadID = new AtomicInteger();
-		final ClassLoader cl = MCMTMod.class.getClassLoader();
-		ForkJoinPool.ForkJoinWorkerThreadFactory fjpf = p -> {
-			ForkJoinWorkerThread fjwt = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
-			fjwt.setName("MCMT-Pool-Thread-"+threadID.getAndIncrement());
-			regThread("MCMT", fjwt);
-			fjwt.setContextClassLoader(cl);
-			return fjwt;
-		};
-		ex = new ForkJoinPool(
-				parallelism,
-				fjpf,
-				null, false);
-	}
-
-	private static void regThread(String poolName, Thread thread) {
-		mcThreadTracker.computeIfAbsent(poolName, s -> ConcurrentHashMap.newKeySet()).add(thread);
-	}
 
 	//original mod also hooked BasicEventHooks.onPostWorldTick(serverworld);
 
@@ -72,26 +42,26 @@ public class ParallelWorldMixin {
 			args="ldc=levels", shift = At.Shift.AFTER, ordinal=0),
 		method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void injectPreTick(CallbackInfo info) {
+		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		LOGGER.info("injectPreTick start");
 
-		if(ex == null) {
-			setupThreadpool(4);
+		if(threadCoordinator.getExecutorService() == null) {
+			threadCoordinator.setupThreadpool(4);
 			LOGGER.info("setupThreadpool");
 		}
 
-		if (p != null) {
+		if (threadCoordinator.getPhaser() != null) {
 			LOGGER.warn("Multiple servers?");
 			return;
 		} else {
 			tickStart = System.nanoTime();
-			isTicking.set(true);
-			p = new Phaser();
-			p.register();
+			threadCoordinator.getIsTicking().set(true);
+			threadCoordinator.setPhaser(new Phaser());
+			threadCoordinator.getPhaser().register();
 			mcs = (MinecraftServer) (Object) this;
 			//StatsCommand.setServer(mcs);
 		}
 		LOGGER.info("injectPreTick end");
-
 	}
 
 	/**
@@ -104,6 +74,7 @@ public class ParallelWorldMixin {
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"),
 			method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void redirectTick(ServerWorld serverWorld, BooleanSupplier shouldKeepTicking) {
+		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		LOGGER.info("redirectTick start"  + serverWorld.getRegistryKey().getValue());
 		if (GeneralConfig.disabled || GeneralConfig.disableWorld) {
 			try {
@@ -125,19 +96,19 @@ public class ParallelWorldMixin {
 			String taskName = null;
 			if (GeneralConfig.opsTracing) {
 				taskName =  "WorldTick: " + serverWorld.toString() + "@" + serverWorld.hashCode();
-				currentTasks.add(taskName);
+				threadCoordinator.getCurrentTasks().add(taskName);
 			}
 			String finalTaskName = taskName;
-			p.register();
-			ex.execute(() -> {
+			threadCoordinator.getPhaser().register();
+			threadCoordinator.getExecutorService().execute(() -> {
 				try {
-					currentWorlds.incrementAndGet();
+					threadCoordinator.getCurrentWorlds().incrementAndGet();
 					serverWorld.tick(shouldKeepTicking);
 				} finally {
-					p.arriveAndDeregister();
-					LOGGER.warn(p.toString());
-					currentWorlds.decrementAndGet();
-					if (GeneralConfig.opsTracing) currentTasks.remove(finalTaskName);
+					threadCoordinator.getPhaser().arriveAndDeregister();
+					LOGGER.warn(threadCoordinator.getPhaser().toString());
+					threadCoordinator.getCurrentWorlds().decrementAndGet();
+					if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 				}
 				LOGGER.info("redirectTick end" + serverWorld.getRegistryKey().getValue());
 			});
@@ -152,6 +123,7 @@ public class ParallelWorldMixin {
 			args="ldc=connection"),
 		method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void injectPostTick(CallbackInfo info) {
+		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		LOGGER.info("injectPostTick");
 		if (mcs != (MinecraftServer) (Object) this) {
 			LOGGER.warn("Multiple servers?");
@@ -162,10 +134,10 @@ public class ParallelWorldMixin {
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			LOGGER.warn(p.toString());
-			p.arriveAndAwaitAdvance();
-			isTicking.set(false);
-			p = null;
+			LOGGER.warn(threadCoordinator.getPhaser().toString());
+			threadCoordinator.getPhaser().arriveAndAwaitAdvance();
+			threadCoordinator.getIsTicking().set(false);
+			threadCoordinator.setPhaser(null);
 			//PostExecute logic
 			/*Deque<Runnable> queue = PostExecutePool.POOL.getQueue();
 			Iterator<Runnable> qi = queue.iterator();

@@ -3,6 +3,7 @@ package org.jmt.mcmt.mixin;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.chunk.WorldChunk;
+import org.jmt.mcmt.ThreadCoordinator;
 import org.jmt.mcmt.config.GeneralConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,21 +18,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Mixin(ServerChunkManager.class)
 public class ParallelEnvironmentMixin {
 
-	private static Phaser p;
-	private static ExecutorService ex;
-
-	// Statistics
-	private static AtomicInteger currentEnvs = new AtomicInteger();
-
-	//Operation logging
-	private static Set<String> currentTasks = ConcurrentHashMap.newKeySet();
-
 	/**
 	 * Redirect the environment simulation (plant growth etc) for each tick onto an execution sheduler
 	 */
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickChunk(Lnet/minecraft/world/chunk/WorldChunk;I)V"),
 			method = "tickChunks()V")
-	private void redirectTickChunk(WorldChunk chunk, int randomTickSpeed) {
+	private void redirectTickChunk(ServerWorld instance, WorldChunk chunk, int randomTickSpeed) {
+		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
+
 		ServerWorld world = (ServerWorld)chunk.getWorld();
 		if (GeneralConfig.disabled  || GeneralConfig.disableEnvironment) {
 			world.tickChunk(chunk, randomTickSpeed);
@@ -40,18 +34,18 @@ public class ParallelEnvironmentMixin {
 		String taskName = null;
 		if (GeneralConfig.opsTracing) {
 			taskName = "EnvTick: " + chunk.toString() + "@" + chunk.hashCode();
-			currentTasks.add(taskName);
+			threadCoordinator.getCurrentTasks().add(taskName);
 		}
 		String finalTaskName = taskName;
-		p.register();
-		ex.execute(() -> {
+		threadCoordinator.getPhaser().register();
+		threadCoordinator.getExecutorService().execute(() -> {
 			try {
-				currentEnvs.incrementAndGet();
+				threadCoordinator.getCurrentEnvs().incrementAndGet();
 				world.tickChunk(chunk, randomTickSpeed);
 			} finally {
-				currentEnvs.decrementAndGet();
-				p.arriveAndDeregister();
-				if (GeneralConfig.opsTracing) currentTasks.remove(finalTaskName);
+				threadCoordinator.getCurrentEnvs().decrementAndGet();
+				threadCoordinator.getPhaser().arriveAndDeregister();
+				if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 			}
 		});
 	}
