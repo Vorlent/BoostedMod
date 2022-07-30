@@ -1,23 +1,32 @@
 package org.jmt.mcmt.mixin;
 
+import com.mojang.datafixers.DataFixer;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerChunkManager;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.structure.StructureManager;
+import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.chunk.ChunkStatusChangeListener;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.level.storage.LevelStorage;
+import org.jmt.mcmt.ThreadCoordinator;
 import org.jmt.mcmt.config.GeneralConfig;
+import org.jmt.mcmt.parallelized.ParallelServerChunkManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ServerChunkManager.class)
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
+
+@Mixin(ServerWorld.class)
 public class ParallelChunkMixin {
-
 	/**
-	 * Intercept the upper bound of the for loop in getChunk. Returning 0 will skip the entire loop.
-	 * The loop checks the chunk cache. Skipping the loop forces the ChunkManager to always obtain a future which allows us to parallelize chunk loading
+	 * Inject our ParallelServerChunkManager
 	 */
-	@ModifyConstant(method = "getChunk(IILnet/minecraft/world/chunk/ChunkStatus;Z)Lnet/minecraft/world/chunk/Chunk;", constant = @Constant(intValue = 4))
-	private int injected(int value) {
-		if(!GeneralConfig.disableMultiChunk) {
-			return 0; // read 0 values from the chunk cache
-		}
-		return value; // read value entries from the chunk cache
+	@Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/server/world/ServerChunkManager"))
+	private ServerChunkManager parallelServerChunkManager(ServerWorld world, LevelStorage.Session session, DataFixer dataFixer, StructureManager structureTemplateManager, Executor workerExecutor, ChunkGenerator chunkGenerator, int viewDistance, int simulationDistance, boolean dsync, WorldGenerationProgressListener worldGenerationProgressListener, ChunkStatusChangeListener chunkStatusChangeListener, Supplier<PersistentStateManager> persistentStateManagerFactory) {
+		return new ParallelServerChunkManager(world, session, dataFixer, structureTemplateManager, workerExecutor, chunkGenerator, viewDistance, simulationDistance, dsync, worldGenerationProgressListener, chunkStatusChangeListener, persistentStateManagerFactory);
 	}
 }
