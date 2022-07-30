@@ -1,1 +1,6 @@
 accessWidener	v1	named
+accessible class net/minecraft/server/world/ServerChunkManager$MainThreadExecutor
+accessible field net/minecraft/server/world/ServerChunkManager mainThreadExecutor Lnet/minecraft/server/world/ServerChunkManager$MainThreadExecutor;
+accessible method net/minecraft/server/world/ServerChunkManager$MainThreadExecutor runTask ()Z
+accessible method net/minecraft/server/world/ServerChunkManager getChunkHolder (J)Lnet/minecraft/server/world/ChunkHolder;
+accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage pointOfInterestStorage Lnet/minecraft/world/poi/PointOfInterestStorage;
