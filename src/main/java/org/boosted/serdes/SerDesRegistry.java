@@ -11,7 +11,7 @@ import org.boosted.serdes.pools.PostExecutePool;
 import org.boosted.config.SerDesConfig;
 import org.boosted.config.SerDesConfig.FilterConfig;
 import org.boosted.config.SerDesConfig.PoolConfig;
-import org.jmt.mcmt.serdes.filter.*;
+import org.boosted.serdes.filter.*;
 import org.boosted.serdes.pools.ChunkLockPool;
 import org.boosted.serdes.pools.ISerDesPool;
 import org.boosted.serdes.pools.ISerDesPool.ISerDesOptions;
@@ -165,19 +165,8 @@ public class SerDesRegistry {
 						registry.put(pc.getName(), (ISerDesPool)o);
 						((ISerDesPool)o).init(pc.getName(), pc.getInitParams());
 					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
+				} catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException | SecurityException |
+						 InstantiationException | IllegalArgumentException | InvocationTargetException e) {
 					e.printStackTrace();
 				}
 			}

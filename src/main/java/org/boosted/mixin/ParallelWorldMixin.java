@@ -125,11 +125,11 @@ public class ParallelWorldMixin {
 			LOGGER.warn("Multiple servers?");
 			return;
 		} else {
-			try {
+			/*try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
-			}
+			}*/
 			LOGGER.warn(threadCoordinator.getPhaser().toString());
 			threadCoordinator.getPhaser().arriveAndAwaitAdvance();
 			threadCoordinator.getIsTicking().set(false);
@@ -144,8 +144,9 @@ public class ParallelWorldMixin {
 			}*/
 
 			lastTickTime[lastTickTimePos] = System.nanoTime() - tickStart;
-			lastTickTimePos = (lastTickTimePos+1)%lastTickTime.length;
-			lastTickTimeFill = Math.min(lastTickTimeFill+1, lastTickTime.length-1);
+			LOGGER.info("Tick time " + lastTickTime[lastTickTimePos] / 1000000 + "ms");
+			lastTickTimePos = (lastTickTimePos+1) % lastTickTime.length;
+			lastTickTimeFill = Math.min(lastTickTimeFill + 1, lastTickTime.length - 1);
 		}
 	}
 }
