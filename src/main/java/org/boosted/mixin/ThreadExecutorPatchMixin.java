@@ -18,9 +18,9 @@ public abstract class ThreadExecutorPatchMixin {
 	 */
 	@Inject(method = "isOnThread()Z", at = @At("HEAD"), cancellable = true)
 	private void isOnThread(CallbackInfoReturnable<Boolean> cir) {
-		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		if((Object)this instanceof MinecraftServer) {
 			MinecraftServer server = (MinecraftServer)(Object)this;
+			final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 			cir.setReturnValue(this.isOnThread() || threadCoordinator.serverExecutionThreadPatch(server));
 		}
 	}
