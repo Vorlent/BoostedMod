@@ -1,7 +1,11 @@
 package org.boosted;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -27,12 +31,45 @@ public class ThreadCoordinator {
 
     private final AtomicBoolean isTicking = new AtomicBoolean();
 
+    private BoostedGlobalContext boostedContext;
+
+    private HashMap<World, BoostedWorldContext> boostedContextMapping = new HashMap<World, BoostedWorldContext>();
+
     private final static ThreadCoordinator instance;
     static {
         instance = new ThreadCoordinator();
     }
     public static ThreadCoordinator getInstance() {
         return instance;
+    }
+
+    public BoostedWorldContext getBoostedContext(World world) {
+        return boostedContextMapping.get(world);
+    }
+
+    public void setBoostedContext(World world, BoostedWorldContext context) {
+        boostedContextMapping.put(world, context);
+    }
+
+    /** Because I am not aware of a way of adding new attributes to existing classes
+     we must construct a hashmap that points at the object instead
+     because the world isn't pointing at our boosted world context
+     we will have to do our own garbage collection
+     */
+    public void garbageCollectBoostedWorldContexts(Iterable<ServerWorld> worlds) {
+        Set<World> reachableWorlds = new HashSet<>();
+        worlds.iterator().forEachRemaining(reachableWorlds::add);
+        Set<World> unreachableWorlds = new HashSet<>(boostedContextMapping.keySet());
+        unreachableWorlds.removeAll(reachableWorlds);
+        unreachableWorlds.forEach(boostedContextMapping::remove);
+    }
+
+    public BoostedGlobalContext getBoostedContext() {
+        return boostedContext;
+    }
+
+    public void setBoostedContext(BoostedGlobalContext boostedContext) {
+        this.boostedContext = boostedContext;
     }
 
     public boolean shouldThreadChunks() {

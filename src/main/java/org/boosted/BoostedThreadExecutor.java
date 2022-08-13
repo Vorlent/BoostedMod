@@ -1,7 +1,12 @@
 package org.boosted;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.util.profiler.SampleType;
+import net.minecraft.util.profiler.Sampler;
 import net.minecraft.util.thread.ThreadExecutor;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 
 /**
@@ -13,10 +18,21 @@ import net.minecraft.world.World;
  */
 public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
     private Thread serverThread;
-
-    BoostedThreadExecutor(World world, Thread serverThread) {
-        super("Thread executor for " + serverThread.getName());
+    BoostedThreadExecutor() {
+        this(null);
+    }
+    BoostedThreadExecutor(Thread serverThread) {
+        super("Boosted Thread executor");
         this.serverThread = serverThread;
+    }
+
+    @Override
+    public String getName() {
+        return serverThread == null ? "Boosted Thread executor" : "Boosted Thread executor for " + serverThread.getName();
+    }
+    @Override
+    public List<Sampler> createSamplers() {
+        return ImmutableList.of(Sampler.create(this.getName() + "-pending-tasks", SampleType.EVENT_LOOPS, this::getTaskCount));
     }
 
     @Override
@@ -39,11 +55,30 @@ public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
         return serverThread;
     }
 
+
+    /**
+     * This threadpool ensures that all queued tasks will be executed on a designated thread.
+     * However, running worlds on a thread pool will mean that after every tick, the world can be ran on a different thread,
+     * therefore any world sent to a thread pool must update this server thread before simulating the world
+     * @param serverThread the current thread of the thread pool that will be executing the world
+     */
+    public void setServerThread(Thread serverThread) {
+        this.serverThread = serverThread;
+    }
+
     @Override
     public void executeTask(Runnable task) {
+        if(serverThread == null) {
+            throw new IllegalStateException("no thread to execute on available");
+        }
         if(!isOnThread()) {
             throw new IllegalStateException("runTask must be executed on thread " + serverThread.getName());
         }
         super.executeTask(task);
+    }
+
+    @Override
+    public void runTasks() {
+        super.runTasks();
     }
 }

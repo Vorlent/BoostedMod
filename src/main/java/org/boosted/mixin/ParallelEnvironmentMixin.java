@@ -19,7 +19,7 @@ public class ParallelEnvironmentMixin {
 			method = "tickChunks()V")
 	private void redirectTickChunk(ServerWorld instance, WorldChunk chunk, int randomTickSpeed) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-
+		//TODO implement mid tick between environment simulantions
 		ServerWorld world = (ServerWorld)chunk.getWorld();
 		if (GeneralConfig.disabled  || GeneralConfig.disableEnvironment) {
 			world.tickChunk(chunk, randomTickSpeed);

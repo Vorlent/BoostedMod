@@ -2,6 +2,9 @@ package org.boosted.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
+import org.boosted.BoostedGlobalContext;
+import org.boosted.BoostedWorldContext;
 import org.boosted.ThreadCoordinator;
 import org.boosted.config.GeneralConfig;
 import org.slf4j.Logger;
@@ -42,7 +45,7 @@ public class ParallelWorldMixin {
 		LOGGER.info("injectPreTick start");
 
 		if(threadCoordinator.getExecutorService() == null) {
-			threadCoordinator.setupThreadpool(4);
+			threadCoordinator.setupThreadpool(Runtime.getRuntime().availableProcessors());
 			LOGGER.info("setupThreadpool");
 		}
 
@@ -56,6 +59,15 @@ public class ParallelWorldMixin {
 			threadCoordinator.getPhaser().register();
 			mcs = (MinecraftServer) (Object) this;
 			//StatsCommand.setServer(mcs);
+			if(threadCoordinator.getBoostedContext() == null) {
+				threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
+			}
+			for(World world : mcs.getWorlds()) {
+				if (threadCoordinator.getBoostedContext(world) == null) {
+					threadCoordinator.setBoostedContext(world, new BoostedWorldContext(world));
+				}
+			}
+			threadCoordinator.getBoostedContext().preTick().runTasks();
 		}
 		LOGGER.info("injectPreTick end");
 	}
@@ -74,6 +86,7 @@ public class ParallelWorldMixin {
 		LOGGER.info("redirectTick start"  + serverWorld.getRegistryKey().getValue());
 		if (GeneralConfig.disabled || GeneralConfig.disableWorld) {
 			try {
+				//TODO switch to single threaded executors
 				serverWorld.tick(shouldKeepTicking);
 			} catch (Exception e) {
 				throw e;
@@ -82,7 +95,7 @@ public class ParallelWorldMixin {
 			}
 			return;
 		}
-		if (mcs != (MinecraftServer) (Object) this) {
+		if (mcs != (Object) this) {
 			LOGGER.warn("Multiple servers?");
 			GeneralConfig.disabled = true;
 			serverWorld.tick(shouldKeepTicking);
@@ -97,10 +110,16 @@ public class ParallelWorldMixin {
 			String finalTaskName = taskName;
 			threadCoordinator.getPhaser().register();
 			threadCoordinator.getExecutorService().execute(() -> {
+				BoostedWorldContext boostedWorldContext = threadCoordinator.getBoostedContext(serverWorld);
 				try {
 					threadCoordinator.getCurrentWorlds().incrementAndGet();
+					boostedWorldContext.setThread(Thread.currentThread());
+					boostedWorldContext.preTick().runTasks();
 					serverWorld.tick(shouldKeepTicking);
+					boostedWorldContext.postTick().runTasks();
 				} finally {
+
+					boostedWorldContext.setThread(null);
 					threadCoordinator.getPhaser().arriveAndDeregister();
 					LOGGER.warn(threadCoordinator.getPhaser().toString());
 					threadCoordinator.getCurrentWorlds().decrementAndGet();
@@ -121,7 +140,7 @@ public class ParallelWorldMixin {
 	private void injectPostTick(CallbackInfo info) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		LOGGER.info("injectPostTick");
-		if (mcs != (MinecraftServer) (Object) this) {
+		if (mcs != (Object) this) {
 			LOGGER.warn("Multiple servers?");
 			return;
 		} else {
@@ -142,6 +161,9 @@ public class ParallelWorldMixin {
 				r.run();
 				qi.remove();
 			}*/
+
+			threadCoordinator.getBoostedContext().postTick().runTasks();
+			threadCoordinator.garbageCollectBoostedWorldContexts(mcs.getWorlds());
 
 			lastTickTime[lastTickTimePos] = System.nanoTime() - tickStart;
 			LOGGER.info("Tick time " + lastTickTime[lastTickTimePos] / 1000000 + "ms");
