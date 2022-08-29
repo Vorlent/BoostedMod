@@ -1,5 +1,6 @@
 package org.boosted.mixin;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -13,9 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.HashSet;
 import java.util.Set;
 
-@Mixin(targets = "net.minecraft.block.AbstractBlock.AbstractBlockState")
+@Mixin(AbstractBlock.AbstractBlockState.class)
 public abstract class OnEntityCollisionPatchMixin {
-
 	@Shadow protected abstract BlockState asBlockState();
 
 	static Set<Class<?>> onCollisionFixBypassClass = new HashSet<>();
