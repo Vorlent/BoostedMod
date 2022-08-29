@@ -131,7 +131,7 @@ public class ParallelWorldMixin {
 	}
 
 	/**
-	 * After launching the worlds on separate threads, the main thread must wait for all worlds to finish processing
+	 * After launching all worlds on separate threads, the main thread must wait for all worlds to finish processing
 	 * before we can simulate the next tick.
 	 */
 	@Inject(at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap (Ljava/lang/String;)V",

@@ -13,13 +13,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class ParallelEnvironmentMixin {
 
 	/**
-	 * Redirect the environment simulation (plant growth etc) for each tick onto an execution sheduler
+	 * Redirect the environment simulation (plant growth etc.) for each tick onto an execution scheduler
 	 */
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickChunk(Lnet/minecraft/world/chunk/WorldChunk;I)V"),
 			method = "tickChunks()V")
 	private void redirectTickChunk(ServerWorld instance, WorldChunk chunk, int randomTickSpeed) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		//TODO implement mid tick between environment simulantions
+		//TODO implement mid tick between environment simulations
 		ServerWorld world = (ServerWorld)chunk.getWorld();
 		if (GeneralConfig.disabled  || GeneralConfig.disableEnvironment) {
 			world.tickChunk(chunk, randomTickSpeed);

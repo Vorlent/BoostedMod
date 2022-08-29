@@ -13,7 +13,7 @@ public class ParallelEntityMixin {
 
 	/**
 	 * Intercept the Entity.tick() call in ServerWorld and distribute entities with the execution scheduler
-	 * @param entity the entity to parallelise
+	 * @param entity the entity to parallelize
 	 */
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;tick()V"),
 			method = "tickEntity(Lnet/minecraft/entity/Entity;)V")
@@ -34,14 +34,8 @@ public class ParallelEntityMixin {
 		threadCoordinator.getExecutorService().execute(() -> {
 			try {
 				threadCoordinator.getCurrentEnts().incrementAndGet();
-				//final ISerDesFilter filter = SerDesRegistry.getFilter(SerDesHookTypes.EntityTick, entity.getClass());
-				Object filter = null;
 				threadCoordinator.getCurrentTEs().incrementAndGet();
-				if (filter != null) {
-					//filter.serialise(entity::tick, entity, entity.getPosition(), serverworld, SerDesHookTypes.EntityTick);
-				} else {
-					entity.tick();
-				}
+				entity.tick();
 			} finally {
 				threadCoordinator.getCurrentEnts().decrementAndGet();
 				threadCoordinator.getPhaser().arriveAndDeregister();

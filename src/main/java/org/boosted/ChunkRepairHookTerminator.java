@@ -29,7 +29,7 @@ import java.util.function.BooleanSupplier;
 import net.minecraft.world.biome.provider.SingleBiomeProviderSettings;
 /* */
 /**
- * Handles chunk forcing in scenarios where world corruption has occured
+ * Handles chunk forcing in scenarios where world corruption has occurred
  *
  * @author jediminer543
  *

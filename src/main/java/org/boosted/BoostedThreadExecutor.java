@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.util.profiler.SampleType;
 import net.minecraft.util.profiler.Sampler;
 import net.minecraft.util.thread.ThreadExecutor;
-import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  * A very simple ThreadExecutor that lets us queue tasks
  * and explicitly process them on a specific thread.
  * The intention is that we are going to issue tasks to other world threads
- * and wait for the other world to finish processing its current tick or a potentially more fine grained unit of work
+ * and wait for the other world to finish processing its current tick or a potentially more fine-grained unit of work
  * and then empty out the current queue
  */
 public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
@@ -58,7 +57,7 @@ public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
 
     /**
      * This threadpool ensures that all queued tasks will be executed on a designated thread.
-     * However, running worlds on a thread pool will mean that after every tick, the world can be ran on a different thread,
+     * However, running worlds on a thread pool will mean that after every tick, the world can be run on a different thread,
      * therefore any world sent to a thread pool must update this server thread before simulating the world
      * @param serverThread the current thread of the thread pool that will be executing the world
      */

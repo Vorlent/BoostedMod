@@ -14,7 +14,7 @@ public class ParallelTileEntityMixin {
 
 	/**
 	 * Intercept the BlockEntityTickInvoker.tick() call in World and distribute tile entities with the execution scheduler
-	 * @param beTickInvoker the block entity invoker to parallelise
+	 * @param beTickInvoker the block entity invoker to parallelize
 	 */
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockEntityTickInvoker;tick ()V"),
 			method = "tickBlockEntities()V")

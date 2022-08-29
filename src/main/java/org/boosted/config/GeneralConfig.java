@@ -48,7 +48,7 @@ public class GeneralConfig {
     public static Set<Class<?>> teWhiteList;
     public static Set<Class<?>> teBlackList;
 
-    // Any TE class strings that aren't avaliable in the current environment
+    // Any TE class strings that aren't available in the current environment
     // We use classes for the main operation as class-class comparisons are memhash based
     // So (should) be MUCH faster than string-string comparisons
     public static List<String> teUnfoundWhiteList;

@@ -187,7 +187,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		log.debug(chunkCleaner, "ChunkCleaner terminating");
 	}
 	
-	protected class ChunkCacheAddress {
+	protected static class ChunkCacheAddress {
 		
 		protected long chunk;
 		protected ChunkStatus status;
