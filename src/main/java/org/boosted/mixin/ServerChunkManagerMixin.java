@@ -35,6 +35,22 @@ public abstract class ServerChunkManagerMixin extends ChunkManager {
         return value; // read value entries from the chunk cache
     }
 
+    /**
+     * if (Thread.currentThread() != this.serverThread) {
+     * will be replaced by
+     * if (Thread.currentThread() != Thread.currentThread()) {
+     * which always evaluates to false, which bypasses the if statement
+     * to execute getChunk in the current thread instead of dispatching it to the main thread.
+     * @param mgr
+     * @return current thread
+     */
+
+    @Redirect(method = {"getChunk(IILnet/minecraft/world/chunk/ChunkStatus;Z)Lnet/minecraft/world/chunk/Chunk;", "getWorldChunk(II)Lnet/minecraft/world/chunk/WorldChunk;"},
+            at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/ServerChunkManager;serverThread:Ljava/lang/Thread;", opcode = Opcodes.GETFIELD))
+    private Thread bypassServerThread(ServerChunkManager mgr) {
+        return Thread.currentThread();
+    }
+
     @Inject(method = "getChunk(IILnet/minecraft/world/chunk/ChunkStatus;Z)Lnet/minecraft/world/chunk/Chunk;", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/world/ServerChunkManager$MainThreadExecutor;runTasks (Ljava/util/function/BooleanSupplier;)V"),
             locals = LocalCapture.CAPTURE_FAILHARD)
