@@ -28,7 +28,7 @@ public class ParallelWorldMixin {
 
 	// Statistics
 
-	private static long[] lastTickTime = new long[32];
+	private static final long[] lastTickTime = new long[32];
 	private static int lastTickTimePos = 0;
 	private static int lastTickTimeFill = 0;
 

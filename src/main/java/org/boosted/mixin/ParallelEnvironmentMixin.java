@@ -27,7 +27,7 @@ public class ParallelEnvironmentMixin {
 		}
 		String taskName = null;
 		if (GeneralConfig.opsTracing) {
-			taskName = "EnvTick: " + chunk.toString() + "@" + chunk.hashCode();
+			taskName = "EnvTick: " + chunk + "@" + chunk.hashCode();
 			threadCoordinator.getCurrentTasks().add(taskName);
 		}
 		String finalTaskName = taskName;

@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 
 public class ParallelServerChunkManager extends ServerChunkManager {
 
-	protected Map<ChunkCacheAddress, ChunkCacheLine> chunkCache = new ConcurrentHashMap<ChunkCacheAddress, ChunkCacheLine>();
+	protected Map<ChunkCacheAddress, ChunkCacheLine> chunkCache = new ConcurrentHashMap<>();
 	protected AtomicInteger access = new AtomicInteger(Integer.MIN_VALUE);
 	protected static final int CACHE_SIZE = 512;
 	protected Thread cacheThread;
@@ -206,9 +206,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof ChunkCacheAddress) {
-				if ((((ChunkCacheAddress) obj).chunk == chunk) && (((ChunkCacheAddress) obj).status.equals(status))) {
-					return true;
-				}
+				return (((ChunkCacheAddress) obj).chunk == chunk) && (((ChunkCacheAddress) obj).status.equals(status));
 			}
 			return false;
 		}

@@ -68,7 +68,7 @@ public class GeneralConfig {
     public static boolean opsTracing;
     public static int logcap;
 
-    public static enum ParaMaxMode {
+    public enum ParaMaxMode {
         Standard,
         Override,
         Reduction
