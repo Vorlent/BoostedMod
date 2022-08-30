@@ -75,21 +75,21 @@ public class ChunkRepairHookTerminator {
 		}
 		*/
         int failcount = 0;
-        if (Thread.currentThread().getName().equals(mainThread)) {
+        if (isMainThread()) {
             mainThreadChunkLoadCount.set(0);
             mainThreadChunkLoad.set(true);
         }
         while (!isDone.getAsBoolean()) {
             if (!executor.runTask()) {
                 if(isDone.getAsBoolean()) {
-                    if (Thread.currentThread().getName().equals(mainThread)) {
+                    if (isMainThread()) {
                         mainThreadChunkLoad.set(false);
                     }
                     break;
                 }
                 // Nothing more to execute
                 if (!GeneralConfig.enableChunkTimeout || failcount++ < GeneralConfig.timeoutCount) {
-                    if (Thread.currentThread().getName().equals(mainThread)) {
+                    if (isMainThread()) {
                         mainThreadChunkLoadCount.incrementAndGet();
                     }
                     Thread.yield();
@@ -100,9 +100,8 @@ public class ChunkRepairHookTerminator {
                     if (GeneralConfig.enableTimeoutRegen || GeneralConfig.enableBlankReturn) {
 
                         if (GeneralConfig.enableBlankReturn) {
-							Chunk out = new WorldChunk(scp.getWorld(), new ChunkPos(chunkpos));
-							// SCIENCE
-							completableFuture.complete(Either.left(out));
+							Chunk blankChunk = new WorldChunk(scp.getWorld(), new ChunkPos(chunkpos));
+							completableFuture.complete(Either.left(blankChunk));
                         } else {
                             try {
                                 NbtCompound cnbt = scp.threadedAnvilChunkStorage.getNbt(new ChunkPos(chunkpos));
@@ -141,6 +140,10 @@ public class ChunkRepairHookTerminator {
                 }
             }
         }
+    }
+
+    private static boolean isMainThread() {
+        return Thread.currentThread().getName().equals(mainThread);
     }
 
     public static void checkNull(Object o) {
