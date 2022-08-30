@@ -9,7 +9,9 @@
     "ParallelWorldMixin",
     "ServerChunkManagerMixin",
     "ParallelWorldMixin",
-    "EntityMoveToWorldMixin"
+    "EntityMoveToWorldMixin",
+    "EndPortalBlockMixin",
+    "FabricDimensionsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
