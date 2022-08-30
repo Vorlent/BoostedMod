@@ -27,9 +27,15 @@ public class BoostedWorldContext {
         return postTick;
     }
 
+    /**
+     * Using a thread pool means the threads change all the time, we have to
+     * update the threads in the executors, etc. every time the thread changes
+     * @param thread the thread that is supposed to execute this world
+     */
     public void setThread(Thread thread) {
         preTick.setServerThread(thread);
         midTick.setServerThread(thread);
         postTick.setServerThread(thread);
+        world.thread = thread;
     }
 }

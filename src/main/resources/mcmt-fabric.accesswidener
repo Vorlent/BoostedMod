@@ -4,3 +4,5 @@ accessible field net/minecraft/server/world/ServerChunkManager mainThreadExecuto
 accessible method net/minecraft/server/world/ServerChunkManager$MainThreadExecutor runTask ()Z
 accessible method net/minecraft/server/world/ServerChunkManager getChunkHolder (J)Lnet/minecraft/server/world/ChunkHolder;
 accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage pointOfInterestStorage Lnet/minecraft/world/poi/PointOfInterestStorage;
+accessible field net/minecraft/world/World thread Ljava/lang/Thread;
+mutable field net/minecraft/world/World thread Ljava/lang/Thread;

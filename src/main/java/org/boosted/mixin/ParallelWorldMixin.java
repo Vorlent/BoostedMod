@@ -42,7 +42,7 @@ public class ParallelWorldMixin {
 		method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void injectPreTick(CallbackInfo info) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		LOGGER.info("injectPreTick start");
+		//LOGGER.info("injectPreTick start");
 
 		if(threadCoordinator.getExecutorService() == null) {
 			threadCoordinator.setupThreadpool(Runtime.getRuntime().availableProcessors());
@@ -69,7 +69,7 @@ public class ParallelWorldMixin {
 			}
 			threadCoordinator.getBoostedContext().preTick().runTasks();
 		}
-		LOGGER.info("injectPreTick end");
+		//LOGGER.info("injectPreTick end");
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class ParallelWorldMixin {
 			method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void redirectTick(ServerWorld serverWorld, BooleanSupplier shouldKeepTicking) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		LOGGER.info("redirectTick start"  + serverWorld.getRegistryKey().getValue());
+		//LOGGER.info("redirectTick start"  + serverWorld.getRegistryKey().getValue());
 		if (GeneralConfig.disabled || GeneralConfig.disableWorld) {
 			try {
 				//TODO switch to single threaded executors
@@ -121,11 +121,11 @@ public class ParallelWorldMixin {
 
 					boostedWorldContext.setThread(null);
 					threadCoordinator.getPhaser().arriveAndDeregister();
-					LOGGER.warn(threadCoordinator.getPhaser().toString());
+					//LOGGER.warn(threadCoordinator.getPhaser().toString());
 					threadCoordinator.getCurrentWorlds().decrementAndGet();
 					if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 				}
-				LOGGER.info("redirectTick end" + serverWorld.getRegistryKey().getValue());
+				//LOGGER.info("redirectTick end" + serverWorld.getRegistryKey().getValue());
 			});
 		}
 	}
@@ -139,34 +139,26 @@ public class ParallelWorldMixin {
 		method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void injectPostTick(CallbackInfo info) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		LOGGER.info("injectPostTick");
+		//LOGGER.info("injectPostTick");
 		if (mcs != (Object) this) {
 			LOGGER.warn("Multiple servers?");
 			return;
 		} else {
-			/*try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}*/
-			LOGGER.warn(threadCoordinator.getPhaser().toString());
+			// wait until all worlds have finished
 			threadCoordinator.getPhaser().arriveAndAwaitAdvance();
 			threadCoordinator.getIsTicking().set(false);
 			threadCoordinator.setPhaser(null);
-			//PostExecute logic
-			/*Deque<Runnable> queue = PostExecutePool.POOL.getQueue();
-			Iterator<Runnable> qi = queue.iterator();
-			while (qi.hasNext()) {
-				Runnable r = qi.next();
-				r.run();
-				qi.remove();
-			}*/
+
+			// Go back to main thread
+			for(World world : mcs.getWorlds()) {
+				threadCoordinator.getBoostedContext(world).setThread(Thread.currentThread());
+			}
 
 			threadCoordinator.getBoostedContext().postTick().runTasks();
 			threadCoordinator.garbageCollectBoostedWorldContexts(mcs.getWorlds());
 
 			lastTickTime[lastTickTimePos] = System.nanoTime() - tickStart;
-			LOGGER.info("Tick time " + lastTickTime[lastTickTimePos] / 1000000 + "ms");
+			//LOGGER.info("Tick time " + lastTickTime[lastTickTimePos] / 1000000 + "ms");
 			lastTickTimePos = (lastTickTimePos+1) % lastTickTime.length;
 			lastTickTimeFill = Math.min(lastTickTimeFill + 1, lastTickTime.length - 1);
 		}
