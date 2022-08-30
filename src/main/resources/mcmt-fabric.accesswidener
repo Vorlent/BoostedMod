@@ -6,3 +6,5 @@ accessible method net/minecraft/server/world/ServerChunkManager getChunkHolder (
 accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage pointOfInterestStorage Lnet/minecraft/world/poi/PointOfInterestStorage;
 accessible field net/minecraft/world/World thread Ljava/lang/Thread;
 mutable field net/minecraft/world/World thread Ljava/lang/Thread;
+accessible field net/minecraft/server/world/ServerChunkManager serverThread Ljava/lang/Thread;
+mutable field net/minecraft/server/world/ServerChunkManager serverThread Ljava/lang/Thread;

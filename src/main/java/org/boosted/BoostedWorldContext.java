@@ -1,5 +1,6 @@
 package org.boosted;
 
+import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.world.World;
 
 public class BoostedWorldContext {
@@ -37,5 +38,6 @@ public class BoostedWorldContext {
         midTick.setServerThread(thread);
         postTick.setServerThread(thread);
         world.thread = thread;
+        ((ServerChunkManager)world.getChunkManager()).serverThread = thread;
     }
 }
