@@ -11,7 +11,9 @@
     "ParallelWorldMixin",
     "EntityMoveToWorldMixin",
     "EndPortalBlockMixin",
-    "FabricDimensionsMixin"
+    "FabricDimensionsMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "TeleportCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1

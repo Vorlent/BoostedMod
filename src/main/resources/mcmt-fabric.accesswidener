@@ -8,3 +8,6 @@ accessible field net/minecraft/world/World thread Ljava/lang/Thread;
 mutable field net/minecraft/world/World thread Ljava/lang/Thread;
 accessible field net/minecraft/server/world/ServerChunkManager serverThread Ljava/lang/Thread;
 mutable field net/minecraft/server/world/ServerChunkManager serverThread Ljava/lang/Thread;
+accessible class net/minecraft/server/command/TeleportCommand$LookTarget
+accessible method net/minecraft/server/command/TeleportCommand teleport (Lnet/minecraft/server/command/ServerCommandSource;Lnet/minecraft/entity/Entity;Lnet/minecraft/server/world/ServerWorld;DDDLjava/util/Set;FFLnet/minecraft/server/command/TeleportCommand$LookTarget;)V
+accessible field net/minecraft/server/command/TeleportCommand INVALID_POSITION_EXCEPTION Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;
