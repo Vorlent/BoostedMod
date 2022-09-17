@@ -11,3 +11,4 @@ mutable field net/minecraft/server/world/ServerChunkManager serverThread Ljava/l
 accessible class net/minecraft/server/command/TeleportCommand$LookTarget
 accessible method net/minecraft/server/command/TeleportCommand teleport (Lnet/minecraft/server/command/ServerCommandSource;Lnet/minecraft/entity/Entity;Lnet/minecraft/server/world/ServerWorld;DDDLjava/util/Set;FFLnet/minecraft/server/command/TeleportCommand$LookTarget;)V
 accessible field net/minecraft/server/command/TeleportCommand INVALID_POSITION_EXCEPTION Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;
+accessible class net/minecraft/test/StructureTestListener

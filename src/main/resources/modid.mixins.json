@@ -13,7 +13,8 @@
     "EndPortalBlockMixin",
     "FabricDimensionsMixin",
     "ServerPlayNetworkHandlerMixin",
-    "TeleportCommandMixin"
+    "TeleportCommandMixin",
+    "FabricGameTestUncrasherMixin"
   ],
   "injectors": {
     "defaultRequire": 1

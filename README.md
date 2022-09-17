@@ -122,5 +122,7 @@ and the returned entity is e.g. used to merge transferred item entities in the n
 If the overworld and nether are on separate threads then running nether code in the overworld thread
 is obviously a no go.
 
+Invisible undocumented changes via fabric X-api mod can also ruin your week.
+
 Realistically speaking, a single Mojang employee working on multithreading could do
 Boosted stage one themselves within a month.

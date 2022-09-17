@@ -61,7 +61,7 @@ jar {
 }
 
 loom {
-	accessWidenerPath = file("src/main/resources/mcmt-fabric.accesswidener")
+	accessWidenerPath = file("src/main/resources/boosted.accesswidener")
 }
 
 // configure the maven publication

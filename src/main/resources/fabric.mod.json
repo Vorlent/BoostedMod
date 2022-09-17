@@ -25,7 +25,7 @@
   "mixins": [
     "modid.mixins.json"
   ],
-  "accessWidener": "mcmt-fabric.accesswidener",
+  "accessWidener": "boosted.accesswidener",
   "depends": {
     "fabricloader": ">=0.13.3",
     "fabric": "*",
