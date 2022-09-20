@@ -14,7 +14,8 @@
     "FabricDimensionsMixin",
     "ServerPlayNetworkHandlerMixin",
     "TeleportCommandMixin",
-    "FabricGameTestUncrasherMixin"
+    "fabricgametest.FabricGameTestUncrasherMixin",
+    "fabricgametest.FabricGameTestBypassMixin"
   ],
   "injectors": {
     "defaultRequire": 1

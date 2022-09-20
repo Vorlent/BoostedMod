@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.fabricgametest;
 
 import net.minecraft.test.GameTestState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public class FabricGameTestUncrasherMixin {
 	@Inject(method = "finishPassedTest(Lnet/minecraft/test/GameTestState;Ljava/lang/String;)V",
 		at = @At("HEAD"), cancellable = true)
 	private static void finishPassedTest(GameTestState test, String output, CallbackInfo info) {
-		if(test.getPos()  == null) {
+		if(test.getPos() == null) {
 			info.cancel();
 		}
 	}
@@ -29,7 +29,7 @@ public class FabricGameTestUncrasherMixin {
 	@Inject(method = "passTest(Lnet/minecraft/test/GameTestState;Ljava/lang/String;)V",
 			at = @At("HEAD"), cancellable = true)
 	private static void passTest(GameTestState test, String output, CallbackInfo info) {
-		if(test.getPos()  == null) {
+		if(test.getPos() == null) {
 			info.cancel();
 		}
 	}

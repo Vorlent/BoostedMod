@@ -37,12 +37,161 @@ Having invisible code mess with you is not something I wish upon anyone. The fab
 tests in the following location: `data.minecraft.gametest.structures.<testName>.snbt` and it will crash your minecraft
 instance if you aren't smart enough to reverse engineer fabric gametest-api.
 
+# McTester
+
+Create the following file in `run/config/mctester.properties`
+```
+isDevelopment=true
+autostart=serveronly
+autostart.shuffle=true
+#autostart.shuffle.seed=
+crashOnFail=serveronly
+shutdownAfterTest=serveronly
+stayUpAfterFail=false
+includeExampleTests=false
+```
+
+Also, since McTester and fabric-gametest-api are incompatible, you can instead use
+```
+import mctester.annotation.TestRegistryHelper;
+
+public class <Fabric>Mod implements ModInitializer {
+	@Override
+	public void onInitialize() {
+		TestRegistryHelper.shouldWarnOnMissingStructureFile = false;
+	}
+}
+```
+To ignore the missing structure file and use the conventions of fabric-gametest-api. 
+
+
 # Structure Block
 
 https://minecraft.fandom.com/wiki/Structure_Block
 
 Structures are saved in `.minecraft/saves/(WorldName)/generated/(namespace)/structures`.
 
+They can be exported to the `/run` folder with the `/test export <testName>` command.
+
 # McTester Autorun
 
 What does it do? It runs `/test runall`.
+
+# What are FabricGameTestBypassMixin and FabricGameTestUncrasherMixin?
+
+The first mixin is there to reenable vanilla logic to function with
+Gametester in case fabric cannot find a structure.
+Uncrasher is there to prevent the test visualization from running as it is prone
+to crashing minecraft if the structure remains unloaded (= null).
+
+# How to write your first Test
+
+After theory follows practice:
+
+## 1. Add Jitpack to your build.gradle repositories
+```
+repositories {
+	allprojects {
+		repositories {
+			maven { url 'https://jitpack.io' }
+		}
+	}
+}
+
+```
+
+## 2. Add McTester to your build.gradle dependencies
+
+```
+dependencies {
+ // other dependencies ...
+ modImplementation 'com.github.2No2Name:McTester:v0.2.4'
+ // other dependencies ...
+}
+```
+
+## 3. Create the mctester.properties file
+
+Create the following file in `run/config/mctester.properties`
+
+```
+isDevelopment=true
+autostart=serveronly
+autostart.shuffle=true
+#autostart.shuffle.seed=
+crashOnFail=serveronly
+shutdownAfterTest=serveronly
+stayUpAfterFail=false
+includeExampleTests=false
+```
+
+## 4. Disable missing structure warning
+
+```
+import mctester.annotation.TestRegistryHelper;
+
+public class <Fabric>Mod implements ModInitializer {
+	@Override
+	public void onInitialize() {
+		TestRegistryHelper.shouldWarnOnMissingStructureFile = false;
+	}
+}
+```
+
+## 6. Create your test class
+
+```
+package <your-package>.test;
+
+import mctester.annotation.GameTest;
+import mctester.common.test.creation.GameTestHelper;
+
+import static net.minecraft.entity.EntityType.MINECART;
+
+public class Minecart {
+    @GameTest
+    public static void turn(GameTestHelper helper) {
+        helper.pressButton(0, 3, 1);
+        helper.succeedWhenEntityPresent(MINECART, 3, 2, 2);
+    }
+}
+```
+
+## 7. Register your tests
+
+```
+import mctester.annotation.TestRegistryHelper;
+import <your-package>.test.Minecart;
+
+public class <Fabric>Mod implements ModInitializer {
+	@Override
+	public void onInitialize() {
+        TestRegistryHelper.createTestsFromClass(Minecart.class);
+	}
+}
+```
+
+## 8. Create a structure
+
+Go and start Minecraft and create a superflat world with no structures.
+
+If you want to create a new structure you will have to use
+`/test create <lowercase-classname>.<lowercase-functionname> [<width>] [<height>] [<depth>]`
+to create the initial structure.
+
+Place blocks or entities inside the boundary. Once you are finished go to the structure block
+and open it's menu. On the left there is a `Load` or `Save` button which lets you switch between modes.
+Go to `Save` and press `SAVE` (on the right side in uppercase letters). This will save the structure inside your
+world save file. Now enter `/test exportthis` to export the test to the `/run` folder. This will create a `.snbt`
+file in `/run/gameteststructures/<classname>.<functionname>.sbnt`
+
+You should end up with a structure like this:
+
+![minecart.turn.snbt](McTester.turn.png)
+
+
+## 8. Run your test
+
+After you have exported the test, it is ready to run.
+Just press the button on the command block!
+Alternatively use `/test runthis` or `/test runall` to rerun via commands.

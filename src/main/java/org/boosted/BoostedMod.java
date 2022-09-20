@@ -18,7 +18,7 @@ public class BoostedMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-		TestRegistryHelper.shouldWarnOnMissingStructureFile = true;
+		TestRegistryHelper.shouldWarnOnMissingStructureFile = false;
 		TestRegistryHelper.createTestsFromClass(Diamond.class);
 	}
 }
