@@ -52,9 +52,9 @@ public class ThreadCoordinator {
     }
 
     /** Because I am not aware of a way of adding new attributes to existing classes
-     we must construct a hashmap that points at the object instead
-     because the world isn't pointing at our boosted world context
-     we will have to do our own garbage collection
+     we must construct a hashmap that points at the object instead.
+     Because the world isn't pointing at our boosted world context
+     we will have to do our own garbage collection.
      */
     public void garbageCollectBoostedWorldContexts(Iterable<ServerWorld> worlds) {
         Set<World> reachableWorlds = new HashSet<>();
@@ -84,23 +84,16 @@ public class ThreadCoordinator {
         mcThreadTracker.computeIfAbsent(poolName, s -> ConcurrentHashMap.newKeySet()).add(thread);
     }
 
-    public boolean serverExecutionThreadPatch(MinecraftServer ms) {
-        return isThreadPooled("MCMT", Thread.currentThread());
-    }
-
     public void setupThreadpool(int parallelism) {
         final ClassLoader cl = BoostedMod.class.getClassLoader();
         ForkJoinPool.ForkJoinWorkerThreadFactory fjpf = p -> {
             ForkJoinWorkerThread fjwt = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
-            fjwt.setName("MCMT-Pool-Thread-" + threadID.getAndIncrement());
-            regThread("MCMT", fjwt);
+            fjwt.setName("Boosted-Pool-Thread-" + threadID.getAndIncrement());
+            regThread("Boosted", fjwt);
             fjwt.setContextClassLoader(cl);
             return fjwt;
         };
-        executorService = new ForkJoinPool(
-                parallelism,
-                fjpf,
-                null, false);
+        executorService = new ForkJoinPool(parallelism, fjpf,null, false);
     }
 
     public Phaser getPhaser() {
@@ -113,10 +106,6 @@ public class ThreadCoordinator {
 
     public ExecutorService getExecutorService() {
         return executorService;
-    }
-
-    public Map<String, Set<Thread>> getMcThreadTracker() {
-        return mcThreadTracker;
     }
 
     public Set<String> getCurrentTasks() {

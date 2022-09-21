@@ -54,6 +54,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * The purpose of this UnsupportedEntity is to block wrong usage of APIs that have been invalidated by
+ * Boosted. Since methods are synchronous and sometimes entities are created asynchronously,
+ * it is impossible to return a valid entity. If anyone uses the returned entity, it would cause unpredictable
+ * problems and threaten stability.
+ */
 public class UnsupportedEntity extends Entity {
 
     public UnsupportedEntity(EntityType<?> type, World world) {

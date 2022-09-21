@@ -176,7 +176,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 			// System.out.println("CacheFill: " + size);
 			long maxAccess = chunkCache.values().stream().mapToInt(ccl -> ccl.lastAccess).max().orElseGet(() -> access.get());
 			long minAccess = chunkCache.values().stream().mapToInt(ccl -> ccl.lastAccess).min()
-					.orElseGet(() -> Integer.MIN_VALUE);
+					.orElse(Integer.MIN_VALUE);
 			long cutoff = minAccess + (long) ((maxAccess - minAccess) / ((float) size / ((float) CACHE_SIZE)));
 			for (Entry<ChunkCacheAddress, ChunkCacheLine> l : chunkCache.entrySet()) {
 				if (l.getValue().getLastAccess() < cutoff | l.getValue().getChunk() == null) {

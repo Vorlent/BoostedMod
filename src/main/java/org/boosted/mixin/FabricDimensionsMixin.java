@@ -20,6 +20,6 @@ public abstract class FabricDimensionsMixin {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			FabricDimensionInternals.changeDimension(teleported, destination, target)
 		);
-		return null; // may need to return fake entity that throws on every method call just in case
+		return null; // may need to return a fake entity that throws on every method call just in case
 	}
 }

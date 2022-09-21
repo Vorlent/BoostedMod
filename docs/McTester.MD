@@ -51,7 +51,7 @@ stayUpAfterFail=false
 includeExampleTests=false
 ```
 
-Also, since McTester and fabric-gametest-api are incompatible, you can instead use
+If you want to create new tests you can use
 ```
 import mctester.annotation.TestRegistryHelper;
 
@@ -62,7 +62,7 @@ public class <Fabric>Mod implements ModInitializer {
 	}
 }
 ```
-To ignore the missing structure file and use the conventions of fabric-gametest-api. 
+to ignore missing structure files. 
 
 
 # Structure Block

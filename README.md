@@ -70,8 +70,8 @@ Stage two concerns itself with a very limited case of multithreading that may be
 for anarchy servers like 2b2t. Players who are far away from each other and whose loaded chunks
 do not overlap can be treated as if they were in different dimensions. This means we are going to
 divide the loaded chunks into isolated islands and each isolated island will run in parallel.
-This does not solve the problem of hundreds of players being in the same location, it only solves situation
-where players are exploring an incredibly large world with lots of distance between bases.
+This does not solve the problem of hundreds of players being in the same location, it only solves the
+situation where players are exploring an incredibly large world with lots of distance between bases.
 There is also the pathological case where players create a very long highway so that
 all players are seeing their neighbor which prevents the entire highway from being split up
 onto multiple threads.
