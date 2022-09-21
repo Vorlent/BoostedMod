@@ -45,6 +45,6 @@ public abstract class EntityMoveToWorldMixin {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			instance.moveToWorld(destination)
 		);
-		return null; // may need to return fake entity that throws on every method call just in case
+		return null; // may need to return a fake entity that throws on every method call just in case
 	}
 }
