@@ -62,8 +62,11 @@ import java.util.stream.Stream;
  */
 public class UnsupportedEntity extends Entity {
 
+    private boolean initialized = false;
+
     public UnsupportedEntity(EntityType<?> type, World world) {
         super(type, world);
+        initialized = true;
     }
 
     public RuntimeException unsupportedOperation() {
@@ -123,7 +126,9 @@ public class UnsupportedEntity extends Entity {
     }
 
     protected void initDataTracker() {
-        throw unsupportedOperation();
+        if (initialized) {
+            throw unsupportedOperation();
+        }
     }
 
     public DataTracker getDataTracker() {
@@ -162,7 +167,9 @@ public class UnsupportedEntity extends Entity {
     }
 
     public void setPosition(double x, double y, double z) {
-        throw unsupportedOperation();
+        if (initialized) {
+            throw unsupportedOperation();
+        }
     }
 
     protected Box calculateBoundingBox() {
@@ -896,6 +903,9 @@ public class UnsupportedEntity extends Entity {
     }
 
     public int getMaxAir() {
+        if (!initialized) {
+            return 0;
+        }
         throw unsupportedOperation();
     }
 
@@ -1156,6 +1166,9 @@ public class UnsupportedEntity extends Entity {
     }
 
     protected float getEyeHeight(EntityPose pose, EntityDimensions dimensions) {
+        if (!initialized) {
+            return 0.0f;
+        }
         throw unsupportedOperation();
     }
 
@@ -1289,6 +1302,9 @@ public class UnsupportedEntity extends Entity {
     }
 
     protected int getBurningDuration() {
+        if (!initialized) {
+            return 0;
+        }
         throw unsupportedOperation();
     }
 

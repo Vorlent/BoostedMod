@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.ChunkStatusChangeListener;
+import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.apache.logging.log4j.LogManager;
@@ -102,7 +103,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		return cl;
 	}
 
-	/*@Override
+	@Override
 	@Nullable
 	public WorldChunk getWorldChunk(int chunkX, int chunkZ) {
 		if (GeneralConfig.disabled) {
@@ -112,7 +113,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 
 		Chunk c = lookupChunk(i, ChunkStatus.FULL, false);
 		if (c != null) {
-			return chunk instanceof WorldChunk ? (WorldChunk)chunk : null; //TODO
+			return c instanceof WorldChunk ? (WorldChunk)c : null; //TODO
 		}
 		
 		//log.debug("Missed chunk " + i + " now");
@@ -120,7 +121,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		WorldChunk cl = super.getWorldChunk(chunkX, chunkZ);
 		cacheChunk(i, cl, ChunkStatus.FULL);
 		return cl;
-	}*/
+	}
 
 	public Chunk lookupChunk(long chunkPos, ChunkStatus status, boolean compute) {
 		int oldaccess = access.getAndIncrement();

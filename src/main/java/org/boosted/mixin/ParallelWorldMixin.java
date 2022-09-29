@@ -150,7 +150,7 @@ public class ParallelWorldMixin {
 			threadCoordinator.setPhaser(null);
 
 			// Go back to main thread
-			for(World world : mcs.getWorlds()) {
+			for (World world : mcs.getWorlds()) {
 				threadCoordinator.getBoostedContext(world).setThread(Thread.currentThread());
 			}
 

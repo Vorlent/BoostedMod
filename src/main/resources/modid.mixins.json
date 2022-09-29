@@ -13,6 +13,7 @@
     "EndPortalBlockMixin",
     "FabricDimensionsMixin",
     "ServerPlayNetworkHandlerMixin",
+    "ServerPlayerEntityMixin",
     "TeleportCommandMixin",
     "fabricgametest.FabricGameTestUncrasherMixin",
     "fabricgametest.FabricGameTestBypassMixin"

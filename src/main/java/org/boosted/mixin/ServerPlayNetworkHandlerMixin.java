@@ -20,7 +20,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			method = "onSpectatorTeleport(Lnet/minecraft/network/packet/c2s/play/SpectatorTeleportC2SPacket;)V")
 	public void teleport(ServerPlayerEntity instance, ServerWorld serverWorld, double x, double y, double z, float yaw, float pitch) {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
-				this.getPlayer().teleport(serverWorld, x, y, z, yaw, pitch)
+			this.getPlayer().teleport(serverWorld, x, y, z, yaw, pitch)
 		);
 	}
 }

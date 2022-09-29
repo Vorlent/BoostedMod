@@ -57,6 +57,5 @@ public abstract class ServerChunkManagerMixin extends ChunkManager {
     private void chunkLoadDrive(int x, int z, ChunkStatus leastStatus, boolean create, CallbackInfoReturnable<Chunk> cir, Profiler profiler, long l, CompletableFuture i) {
         long chunkPos = ChunkPos.toLong(x, z);
         ChunkRepairHookTerminator.chunkLoadDrive(this.mainThreadExecutor, i::isDone, (ServerChunkManager) (Object) this, i, chunkPos);
-
     }
 }

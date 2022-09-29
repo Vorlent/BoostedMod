@@ -11,6 +11,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import org.boosted.ThreadCoordinator;
 import org.boosted.util.EnforceBoosted;
+import org.boosted.util.UnsupportedEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,6 +46,6 @@ public abstract class EntityMoveToWorldMixin {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			instance.moveToWorld(destination)
 		);
-		return null; // may need to return a fake entity that throws on every method call just in case
+		return new UnsupportedEntity(instance.getType(), destination); // may need to return a fake entity that throws on every method call just in case
 	}
 }

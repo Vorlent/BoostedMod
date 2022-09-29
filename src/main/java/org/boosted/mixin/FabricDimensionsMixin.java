@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.TeleportTarget;
 import org.boosted.ThreadCoordinator;
+import org.boosted.util.UnsupportedEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -20,6 +21,6 @@ public abstract class FabricDimensionsMixin {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			FabricDimensionInternals.changeDimension(teleported, destination, target)
 		);
-		return null; // may need to return a fake entity that throws on every method call just in case
+		return new UnsupportedEntity(teleported.getType(), destination); // may need to return a fake entity that throws on every method call just in case
 	}
 }

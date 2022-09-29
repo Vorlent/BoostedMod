@@ -4,6 +4,7 @@ import net.minecraft.block.EndPortalBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import org.boosted.ThreadCoordinator;
+import org.boosted.util.UnsupportedEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -17,6 +18,6 @@ public abstract class EndPortalBlockMixin {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			instance.moveToWorld(destination)
 		);
-		return null; // may need to return fake entity that throws on every method call just in case
+		return new UnsupportedEntity(instance.getType(), destination); // may need to return fake entity that throws on every method call just in case
 	}
 }
