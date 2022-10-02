@@ -12,6 +12,7 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -382,6 +383,83 @@ public class Portal {
             boolean success = startChecking.get() && netherArrows.size() == entityByName.size() && netherEntities.isEmpty();
             if (startChecking.get() && netherArrows.size() == entityByName.size()) {
                 netherArrows.forEach(Entity::kill); // get rid of items
+                netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+            }
+            return success;
+        });
+    }
+
+    private static int totalMinecartItemCount(Collection<ChestMinecartEntity> items) {
+        return items.stream().map(item -> item.getStack(0).getCount()).reduce(0, (acc, curr) -> acc + curr);
+    }
+
+    /**
+     * Send entities that contain items
+     */
+    @GameTest
+    public static void minecartchest(GameTestHelper helper) {
+        List<Item> cycledColors = Arrays.asList(Items.BLACK_CONCRETE, Items.RED_CONCRETE, Items.BLUE_CONCRETE, Items.YELLOW_CONCRETE, Items.GREEN_CONCRETE);
+
+        ArmorStandEntity itemsCounter = helper.spawnEntity(4, 2, 1, EntityType.ARMOR_STAND);
+        itemsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedCounter = helper.spawnEntity( 4, 2, 2, EntityType.ARMOR_STAND);
+        expectedCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
+        otherCounter.setCustomNameVisible(true);
+
+        MinecraftServer server = helper.gameTest.getWorld().getServer();
+        ServerWorld nether = server.getWorld(World.NETHER);
+        BlockPos gameTestPos = helper.gameTest.getPos();
+        Map<String, ChestMinecartEntity> entityByName = new HashMap<>();
+
+        helper.addAction(0, (gameTestHelper -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return;
+            }
+            Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(20);
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, box, entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+        }));
+
+        AtomicBoolean startChecking = new AtomicBoolean(false);
+        Random random = new Random();
+        long testPrefix = random.nextInt(0, 10000);
+        final int[] colorIndex = {0};
+
+        helper.addRepeatedAction((gameTestHelper, ticks) -> {
+            if (0 < ticks && ticks <= 100) {
+                ChestMinecartEntity minecartEntity = helper.spawnEntity(3,2,4, EntityType.CHEST_MINECART);
+                minecartEntity.setStack(0, new ItemStack(cycledColors.get(colorIndex[0]), 1));
+                colorIndex[0] = (colorIndex[0] + 1) % cycledColors.size();
+
+                minecartEntity.setCustomNameVisible(true);
+                minecartEntity.setCustomName(Text.of("" + testPrefix + ":" + entityByName.size()));
+                entityByName.put(minecartEntity.getCustomName().getString(), minecartEntity);
+                expectedCounter.setCustomName(Text.of("Expected: " + entityByName.size()));
+            }
+            if (ticks > 100) {
+                startChecking.set(true);
+            }
+        });
+        helper.succeedWhen(() -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return false;
+            }
+            clearNetherPortal(netherTeleportTarget, nether);
+            Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(10);
+            List<ChestMinecartEntity> netherMinecarts = nether.getEntitiesByType(EntityType.CHEST_MINECART, box, (Entity entity) -> entity.hasCustomName() && entityByName.get(entity.getCustomName().getString()) != null);
+            itemsCounter.setCustomName(Text.of("Items: " + totalMinecartItemCount(netherMinecarts)));
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, box, entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            otherCounter.setCustomName(Text.of("Other: " + netherEntities.size()));
+            boolean success = startChecking.get() && totalMinecartItemCount(netherMinecarts) == totalMinecartItemCount(entityByName.values()) && netherMinecarts.size() == entityByName.size() && netherEntities.isEmpty();
+            if (startChecking.get() && totalMinecartItemCount(netherMinecarts) == totalMinecartItemCount(entityByName.values()) && netherMinecarts.size() == entityByName.size()) {
+                netherMinecarts.forEach(Entity::kill); // get rid of items
                 netherEntities.forEach(Entity::kill); // get rid of unrelated entities
             }
             return success;
