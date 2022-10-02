@@ -11,6 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -311,6 +312,76 @@ public class Portal {
             boolean success = startChecking.get() && totalItemCount(netherItems) == totalItemCount(entityByName.values()) && netherItems.size() == cycledColors.size() && netherEntities.isEmpty();
             if (startChecking.get() && totalItemCount(netherItems) == totalItemCount(entityByName.values()) && netherItems.size() == cycledColors.size()) {
                 netherItems.forEach(Entity::kill); // get rid of items
+                netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+            }
+            return success;
+        });
+    }
+
+    /**
+     * Send arrows
+     */
+    @GameTest
+    public static void arrows(GameTestHelper helper) {
+        ArmorStandEntity arrowsCounter = helper.spawnEntity(4, 2, 1, EntityType.ARMOR_STAND);
+        arrowsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedCounter = helper.spawnEntity( 4, 2, 2, EntityType.ARMOR_STAND);
+        expectedCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
+        otherCounter.setCustomNameVisible(true);
+
+        MinecraftServer server = helper.gameTest.getWorld().getServer();
+        ServerWorld nether = server.getWorld(World.NETHER);
+        BlockPos gameTestPos = helper.gameTest.getPos();
+        Map<String, ArrowEntity> entityByName = new HashMap<>();
+
+        helper.addAction(0, (gameTestHelper -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return;
+            }
+            Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(20);
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, box, entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+        }));
+
+        AtomicBoolean startChecking = new AtomicBoolean(false);
+        Random random = new Random();
+        long testPrefix = random.nextInt(0, 10000);
+        final int[] colorIndex = {0};
+
+        helper.addRepeatedAction((gameTestHelper, ticks) -> {
+            if (0 < ticks && ticks <= 100) {
+                ArrowEntity arrowEntity = helper.spawnEntity(3,3,3, EntityType.ARROW);
+                arrowEntity.setVelocity(0.0f, 0.0f, 0.5f);
+
+                arrowEntity.setCustomNameVisible(true);
+                arrowEntity.setCustomName(Text.of("" + testPrefix + ":" + entityByName.size()));
+                entityByName.put(arrowEntity.getCustomName().getString(), arrowEntity);
+                expectedCounter.setCustomName(Text.of("Expected: " + entityByName.size()));
+            }
+            if (ticks > 100) {
+                startChecking.set(true);
+            }
+        });
+        helper.succeedWhen(() -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return false;
+            }
+            clearNetherPortal(netherTeleportTarget, nether);
+            Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(10);
+            List<ArrowEntity> netherArrows = nether.getEntitiesByType(EntityType.ARROW, box, (Entity entity) -> entity.hasCustomName() && entityByName.get(entity.getCustomName().getString()) != null);
+            arrowsCounter.setCustomName(Text.of("Arrows: " + netherArrows.size()));
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, box, entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            otherCounter.setCustomName(Text.of("Other: " + netherEntities.size()));
+            boolean success = startChecking.get() && netherArrows.size() == entityByName.size() && netherEntities.isEmpty();
+            if (startChecking.get() && netherArrows.size() == entityByName.size()) {
+                netherArrows.forEach(Entity::kill); // get rid of items
                 netherEntities.forEach(Entity::kill); // get rid of unrelated entities
             }
             return success;
