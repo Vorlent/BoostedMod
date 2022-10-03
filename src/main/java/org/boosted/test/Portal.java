@@ -600,5 +600,150 @@ public class Portal {
                 && overworldEntities.isEmpty();
         });
     }
+
+    /**
+     * Send items from the overworld to the nether and from the nether to the overworld at the same time.
+     * Item merging will occur which means the item quantities in the nether and overworld will be unbalanced,
+     * this is intentional because other mods would start duping as item merging is executed by the teleported item.
+     * If an item from the overworld is sent to the nether, it will merge with nether items but the merging code in the
+     * nether would be executed on the overworld thread. If the nether thread attempts its own item merging, then dupes
+     * are possible although rare.
+     */
+    @GameTest
+    public static void duplexitems(GameTestHelper helper) {
+        ArmorStandEntity netherItemsCounter = helper.spawnEntity(3, 2, 1, EntityType.ARMOR_STAND);
+        netherItemsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity overworldItemsCounter = helper.spawnEntity(4, 2, 1, EntityType.ARMOR_STAND);
+        overworldItemsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedNetherworldCounter = helper.spawnEntity( 4, 2, 2, EntityType.ARMOR_STAND);
+        expectedNetherworldCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedOverworldCounter = helper.spawnEntity( 4, 2, 3, EntityType.ARMOR_STAND);
+        expectedOverworldCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherNetherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
+        otherNetherCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherOverworldCounter = helper.spawnEntity( 1, 2, 2, EntityType.ARMOR_STAND);
+        otherOverworldCounter.setCustomNameVisible(true);
+
+        MinecraftServer server = helper.gameTest.getWorld().getServer();
+        ServerWorld overworld = server.getOverworld();
+        ServerWorld nether = server.getWorld(World.NETHER);
+        BlockPos gameTestPos = helper.gameTest.getPos();
+        Map<String, ItemEntity> netherEntityByName = new HashMap<>();
+        Map<String, ItemEntity> overworldEntityByName = new HashMap<>();
+
+        helper.addAction(0, (gameTestHelper -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return;
+            }
+            Box netherBox = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(20);
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, netherBox, entity -> !entity.hasCustomName()
+                    || (netherEntityByName.get(entity.getCustomName().getString()) == null
+                    && overworldEntityByName.get(entity.getCustomName().getString()) == null));
+            netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+
+            BlockPos overworldTeleportTarget = getNetherTeleportTarget(netherTeleportTarget, nether, helper.gameTest.getWorld());
+            if (overworldTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No overworld portal"));
+                return;
+            }
+            Box overworldBox = Box.from(Vec3d.ofCenter(overworldTeleportTarget)).expand(20);
+            List<Entity> overworldEntities = overworld.getEntitiesByClass(Entity.class, overworldBox, entity -> !entity.hasCustomName()
+                    || (netherEntityByName.get(entity.getCustomName().getString()) == null
+                    && overworldEntityByName.get(entity.getCustomName().getString()) == null));
+            overworldEntities.forEach(Entity::kill); // get rid of unrelated entities
+        }));
+
+        AtomicBoolean startChecking = new AtomicBoolean(false);
+        Random random = new Random();
+        long cowPrefix = random.nextLong();
+
+        helper.addRepeatedAction((gameTestHelper, ticks) -> {
+            if (0 < ticks && ticks <= 100) {
+                ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
+                    ItemEntity overworldEntity = helper.spawnEntity(3, 3, 3, EntityType.ITEM);
+                    overworldEntity.setVelocity(0.0,0.0,0.1);
+                    overworldEntity.setStack(new ItemStack(Items.ARROW, 1));
+                    overworldEntity.setInvulnerable(true);
+                    overworldEntity.setCustomNameVisible(true);
+                    overworldEntity.setCustomName(Text.of("" + cowPrefix + ".overworld:" + overworldEntityByName.size()));
+                    overworldEntityByName.put(overworldEntity.getCustomName().getString(), overworldEntity);
+                    expectedNetherworldCounter.setCustomName(Text.of("Expected (in Nether): " + overworldEntityByName.size()));
+                });
+
+                BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+                if (netherTeleportTarget == null) {
+                    helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                    return;
+                }
+                ThreadCoordinator.getInstance().getBoostedContext(nether).postTick().executeTask(() -> {
+                    ItemEntity netherEntity = EntityType.ITEM.create(nether);
+                    netherEntity.setStack(new ItemStack(Items.ARROW, 1));
+                    netherEntity.setPosition(netherTeleportTarget.getX() + 1, netherTeleportTarget.getY() + 1, netherTeleportTarget.getZ() + 2);
+                    netherEntity.setVelocity(0.0,0.0,-0.2);
+                    netherEntity.setInvulnerable(true);
+                    netherEntity.setCustomNameVisible(true);
+                    netherEntity.setCustomName(Text.of("" + cowPrefix + ".nether:" + netherEntityByName.size()));
+                    netherEntityByName.put(netherEntity.getCustomName().getString(), netherEntity);
+                    nether.spawnEntity(netherEntity);
+                    expectedOverworldCounter.setCustomName(Text.of("Expected (in Overworld): " + netherEntityByName.size()));
+                });
+            }
+            if (ticks > 105) { // boosted adds one tick delay
+                startChecking.set(true);
+            }
+        });
+        helper.succeedWhen(() -> {
+            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No nether portal"));
+                return false;
+            }
+            BlockPos overworldTeleportTarget = getNetherTeleportTarget(netherTeleportTarget, nether, helper.gameTest.getWorld());
+            if (overworldTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No overworld portal"));
+                return false;
+            }
+
+            clearNetherPortal(netherTeleportTarget, nether);
+            Box netherBox = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(10);
+            List<ItemEntity> netherItems = nether.getEntitiesByType(EntityType.ITEM, netherBox, (Entity entity) -> entity.hasCustomName()
+                    && overworldEntityByName.get(entity.getCustomName().getString()) != null);
+            netherItemsCounter.setCustomName(Text.of("Nether items: " + totalItemCount(netherItems)));
+            List<Entity> netherEntities = nether.getEntitiesByClass(Entity.class, netherBox, entity -> !entity.hasCustomName()
+                    || (netherEntityByName.get(entity.getCustomName().getString()) == null
+                    && overworldEntityByName.get(entity.getCustomName().getString()) == null));
+            otherNetherCounter.setCustomName(Text.of("Other (Nether): " + netherEntities.size()));
+
+            Box overworldBox = Box.from(Vec3d.ofCenter(overworldTeleportTarget)).expand(10);
+            List<ItemEntity> overworldItems = overworld.getEntitiesByType(EntityType.ITEM, overworldBox, (Entity entity) -> entity.hasCustomName()
+                    && netherEntityByName.get(entity.getCustomName().getString()) != null);
+            overworldItemsCounter.setCustomName(Text.of("Overworld items: " + totalItemCount(overworldItems)));
+            List<Entity> overworldEntities = overworld.getEntitiesByClass(Entity.class, overworldBox, entity -> !entity.hasCustomName()
+                    || (netherEntityByName.get(entity.getCustomName().getString()) == null
+                    && overworldEntityByName.get(entity.getCustomName().getString()) == null));
+            otherOverworldCounter.setCustomName(Text.of("Other (Overworld): " + overworldEntities.size()));
+
+            boolean success = startChecking.get()
+                    && totalItemCount(netherItems) + totalItemCount(overworldItems)
+                    == netherEntityByName.size() + overworldEntityByName.size();
+
+            if (success) {
+                netherItems.forEach(Entity::kill); // get rid of items
+                netherEntities.forEach(Entity::kill); // get rid of unrelated entities
+                overworldItems.forEach(Entity::kill); // get rid of items
+                overworldEntities.forEach(Entity::kill); // get rid of unrelated entities
+            }
+            return success
+                    && netherEntities.isEmpty()
+                    && overworldEntities.isEmpty();
+        });
+    }
 }
 
