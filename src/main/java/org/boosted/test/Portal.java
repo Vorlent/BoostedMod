@@ -9,9 +9,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.mob.BlazeEntity;
 import net.minecraft.entity.passive.CowEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.Item;
@@ -354,8 +352,6 @@ public class Portal {
         AtomicBoolean startChecking = new AtomicBoolean(false);
         Random random = new Random();
         long testPrefix = random.nextInt(0, 10000);
-        final int[] colorIndex = {0};
-
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
                 ArrowEntity arrowEntity = helper.spawnEntity(3,3,3, EntityType.ARROW);

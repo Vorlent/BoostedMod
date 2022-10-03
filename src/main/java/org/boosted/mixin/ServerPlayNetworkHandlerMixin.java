@@ -1,7 +1,5 @@
 package org.boosted.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;

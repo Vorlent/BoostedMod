@@ -35,7 +35,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockLocating;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.TeleportTarget;
@@ -47,7 +46,6 @@ import net.minecraft.world.event.listener.EntityGameEventHandler;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -62,7 +60,7 @@ import java.util.stream.Stream;
  */
 public class UnsupportedEntity extends Entity {
 
-    private boolean initialized = false;
+    private final boolean initialized;
 
     public UnsupportedEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -244,10 +242,6 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    private boolean doesNotCollide(Box box) {
-        throw unsupportedOperation();
-    }
-
     public void setOnGround(boolean onGround) {
         throw unsupportedOperation();
     }
@@ -300,14 +294,6 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    private double calculatePistonMovementFactor(Direction.Axis axis, double offsetFactor) {
-        throw unsupportedOperation();
-    }
-
-    private Vec3d adjustMovementForCollisions(Vec3d movement) {
-        throw unsupportedOperation();
-    }
-
     protected float calculateNextStepSoundDistance() {
         throw unsupportedOperation();
     }
@@ -349,10 +335,6 @@ public class UnsupportedEntity extends Entity {
     }
 
     protected void playStepSound(BlockPos pos, BlockState state) {
-        throw unsupportedOperation();
-    }
-
-    private void playAmethystChimeSound(BlockState state) {
         throw unsupportedOperation();
     }
 
@@ -412,14 +394,6 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    private boolean isBeingRainedOn() {
-        throw unsupportedOperation();
-    }
-
-    private boolean isInsideBubbleColumn() {
-        throw unsupportedOperation();
-    }
-
     public boolean isTouchingWaterOrRain() {
         throw unsupportedOperation();
     }
@@ -441,14 +415,6 @@ public class UnsupportedEntity extends Entity {
     }
 
     protected boolean updateWaterState() {
-        throw unsupportedOperation();
-    }
-
-    void checkWaterState() {
-        throw unsupportedOperation();
-    }
-
-    private void updateSubmergedInWaterState() {
         throw unsupportedOperation();
     }
 
@@ -661,10 +627,6 @@ public class UnsupportedEntity extends Entity {
     }
 
     public void updatePassengerPosition(net.minecraft.entity.Entity passenger) {
-        throw unsupportedOperation();
-    }
-
-    private void updatePassengerPosition(net.minecraft.entity.Entity passenger, net.minecraft.entity.Entity.PositionUpdater positionUpdater) {
         throw unsupportedOperation();
     }
 
@@ -1245,10 +1207,6 @@ public class UnsupportedEntity extends Entity {
     }
 
     public boolean hasPassengerType(Predicate<net.minecraft.entity.Entity> predicate) {
-        throw unsupportedOperation();
-    }
-
-    private Stream<net.minecraft.entity.Entity> streamIntoPassengers() {
         throw unsupportedOperation();
     }
 

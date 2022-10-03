@@ -1,18 +1,11 @@
 package org.boosted.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EnforceBoosted {
-    private static final List<String> whiteListedMethods = Collections.unmodifiableList(Arrays.asList(
-            "org.boosted.BoostedThreadExecutor;executeTask"
-    ));
+    private static final List<String> whiteListedMethods = List.of("org.boosted.BoostedThreadExecutor;executeTask");
 
     public static void enforceBoostedThreadExecutor(String injectedMethod) {
         StackWalker stackWalker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
@@ -26,7 +19,7 @@ public class EnforceBoosted {
                         .skip(1)
                         .map(frame -> frame.getClassName() + ";" + frame.getMethodName()).limit(5).collect(Collectors.toList())
         );
-        Optional<String> relevantFrame = callingFrame.stream().filter(method -> whiteListedMethods.contains(method)).findFirst();
+        Optional<String> relevantFrame = callingFrame.stream().filter(whiteListedMethods::contains).findFirst();
         if(relevantFrame.isEmpty()) {
             throw new UnsupportedOperationException("Calling " + injectedMethod + " outside of a org.boosted.BoostedThreadExecutor;executeTask is not allowed. Actual frames: " + callingFrame);
         }

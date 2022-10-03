@@ -2,7 +2,6 @@ package org.boosted.mixin;
 
 import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.fabricmc.fabric.impl.dimension.FabricDimensionInternals;
-import net.minecraft.block.EndPortalBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.TeleportTarget;

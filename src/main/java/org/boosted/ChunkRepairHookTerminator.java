@@ -146,10 +146,4 @@ public class ChunkRepairHookTerminator {
         return Thread.currentThread().getName().equals(mainThread);
     }
 
-    public static void checkNull(Object o) {
-        if (o == null) {
-            System.out.println("Null warning:");
-            new Throwable("Null trace").printStackTrace();
-        }
-    }
 }

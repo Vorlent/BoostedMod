@@ -1,6 +1,5 @@
 package org.boosted;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
@@ -17,7 +16,7 @@ public class ThreadCoordinator {
     private final Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<>();
     private Phaser phaser;
     private ExecutorService executorService;
-    private Set<String> currentTasks = ConcurrentHashMap.newKeySet();
+    private final Set<String> currentTasks = ConcurrentHashMap.newKeySet();
 
     private final AtomicInteger currentEnts = new AtomicInteger();
 
@@ -33,7 +32,7 @@ public class ThreadCoordinator {
 
     private BoostedGlobalContext boostedContext;
 
-    private HashMap<World, BoostedWorldContext> boostedContextMapping = new HashMap<World, BoostedWorldContext>();
+    private final HashMap<World, BoostedWorldContext> boostedContextMapping = new HashMap<>();
 
     private final static ThreadCoordinator instance;
     static {
