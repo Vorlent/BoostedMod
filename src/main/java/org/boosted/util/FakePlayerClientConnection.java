@@ -14,14 +14,12 @@ import javax.crypto.Cipher;
 
 public class FakePlayerClientConnection extends ClientConnection {
 
-    public static final FakePlayerClientConnection FAKE_CONNECTION = new FakePlayerClientConnection(NetworkSide.SERVERBOUND);
-
     public FakePlayerClientConnection(NetworkSide side) {
         super(side);
     }
     
     @Override
-    public void channelActive(ChannelHandlerContext context) throws Exception { }
+    public void channelActive(ChannelHandlerContext context) { }
     public void setState(NetworkState state) { }
     @Override
     public void channelInactive(ChannelHandlerContext context) { }
