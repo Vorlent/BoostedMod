@@ -29,6 +29,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.Heightmap;
+import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
@@ -831,17 +833,6 @@ public class Portal {
                     helper.gameTest.fail(new IllegalStateException("No nether portal"));
                     return;
                 }
-                /*ThreadCoordinator.getInstance().getBoostedContext(nether).postTick().executeTask(() -> {
-                    ServerPlayerEntity fakeNetherPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "" + testPrefix + ".netherworld." + netherEntityByName.size()));
-                    fakeNetherPlayer.setPosition(netherTeleportTarget.getX() + 1, netherTeleportTarget.getY() + 1, netherTeleportTarget.getZ() + 2);
-                    fakeNetherPlayer.setVelocity(0.0,0.0,-0.2);
-                    netherEntityByName.put(fakeNetherPlayer.getEntityName(), fakeNetherPlayer);
-                    FakePlayerClientConnection clientConnection = new FakePlayerClientConnection(NetworkSide.SERVERBOUND);
-                    server.getPlayerManager().onPlayerConnect(clientConnection, fakeNetherPlayer);
-                    fakeNetherPlayer.interactionManager.changeGameMode(GameMode.SURVIVAL);
-                    server.getNetworkIo().getConnections().add(clientConnection);
-                    expectedOverworldCounter.setCustomName(Text.of("Expected (in Overworld): " + netherEntityByName.size()));
-                });*/
             }
             if (ticks > 105) { // boosted adds one tick delay
                 startChecking.set(true);
@@ -903,6 +894,162 @@ public class Portal {
             return success
                     && netherEntities.isEmpty()
                     && overworldEntities.isEmpty();
+        });
+    }
+
+    private static TeleportTarget getEndTeleportTarget(ServerWorld origin, ServerWorld destination) {
+        boolean bl = origin.getRegistryKey() == World.END && destination.getRegistryKey() == World.OVERWORLD;
+        boolean bl2 = destination.getRegistryKey() == World.END;
+        if (bl || bl2) {
+            BlockPos blockPos = bl2 ? ServerWorld.END_SPAWN_POS : destination.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, destination.getSpawnPos());
+            return new TeleportTarget(new Vec3d((double) blockPos.getX() + 0.5, blockPos.getY(), (double) blockPos.getZ() + 0.5), Vec3d.ZERO, 0, 0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Send 100 cows through the end portal
+     */
+    @GameTest
+    public static void endportal(GameTestHelper helper) {
+        ArmorStandEntity cowsCounter = helper.spawnEntity(5, 2, 1, EntityType.ARMOR_STAND);
+        cowsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
+        expectedCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 5, EntityType.ARMOR_STAND);
+        otherCounter.setCustomNameVisible(true);
+
+        MinecraftServer server = helper.gameTest.getWorld().getServer();
+        ServerWorld endDimension = server.getWorld(World.END); // ensure the end is actually running
+        endDimension.resetIdleTimeout();
+        BlockPos gameTestPos = helper.gameTest.getPos();
+        Map<String, Entity> entityByName = new HashMap<>();
+
+        helper.addAction(0, (gameTestHelper -> {
+            TeleportTarget endTeleportTarget = getEndTeleportTarget(helper.gameTest.getWorld(), endDimension);
+            if (endTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No end portal"));
+                return;
+            }
+            Box box = Box.from(endTeleportTarget.position).expand(6);
+            List<Entity> endEntities = endDimension.getEntitiesByClass(Entity.class, box,
+                    entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+             endEntities.forEach(Entity::kill); // get rid of unrelated entities
+        }));
+
+        AtomicBoolean startChecking = new AtomicBoolean(false);
+        Random random = new Random();
+        long cowPrefix = random.nextLong();
+
+        helper.addRepeatedAction((gameTestHelper, ticks) -> {
+            if (0 < ticks && ticks <= 100) {
+                CowEntity cowEntity = helper.spawnWithNoFreeWill(EntityType.COW, 3, 2, 4);
+                cowEntity.setInvulnerable(true);
+                cowEntity.setCustomNameVisible(true);
+                cowEntity.setCustomName(Text.of("" + cowPrefix + ":" + entityByName.size()));
+                entityByName.put(cowEntity.getCustomName().getString(), cowEntity);
+                expectedCounter.setCustomName(Text.of("Expected: " + entityByName.size()));
+            }
+            if (ticks > 100) {
+                startChecking.set(true);
+            }
+        });
+        helper.succeedWhen(() -> {
+            TeleportTarget endTeleportTarget = getEndTeleportTarget(helper.gameTest.getWorld(), endDimension);
+            if (endTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No end portal"));
+                return false;
+            }
+            Box box = Box.from(endTeleportTarget.position).expand(6);
+            List<CowEntity> endCows = endDimension.getEntitiesByType(EntityType.COW, box,
+                    (Entity entity) -> entity.hasCustomName() && entityByName.get(entity.getCustomName().getString()) != null);
+            cowsCounter.setCustomName(Text.of("Cows: " + endCows.size()));
+            List<Entity> endEntities = endDimension.getEntitiesByClass(Entity.class, box,
+                    entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            otherCounter.setCustomName(Text.of("Other: " + endEntities.size()));
+            boolean success = startChecking.get() && endCows.size() == entityByName.size();
+            if (success) {
+                endCows.forEach((entity) -> entity.remove(Entity.RemovalReason.KILLED)); // get rid of cows
+                endEntities.forEach(Entity::kill); // get rid of unrelated entities
+            }
+            return success
+                && endEntities.isEmpty();
+        });
+    }
+
+    /**
+     * Send 100 cows through the end portal
+     */
+    @GameTest
+    public static void endportalitems(GameTestHelper helper) {
+        ArmorStandEntity cowsCounter = helper.spawnEntity(5, 2, 1, EntityType.ARMOR_STAND);
+        cowsCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity expectedCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
+        expectedCounter.setCustomNameVisible(true);
+
+        ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 5, EntityType.ARMOR_STAND);
+        otherCounter.setCustomNameVisible(true);
+
+        MinecraftServer server = helper.gameTest.getWorld().getServer();
+        ServerWorld endDimension = server.getWorld(World.END); // ensure the end is actually running
+        endDimension.resetIdleTimeout();
+        Map<String, ItemEntity> entityByName = new HashMap<>();
+
+        helper.addAction(0, (gameTestHelper -> {
+            TeleportTarget endTeleportTarget = getEndTeleportTarget(helper.gameTest.getWorld(), endDimension);
+            if (endTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No end portal"));
+                return;
+            }
+            Box box = Box.from(endTeleportTarget.position).expand(6);
+            List<Entity> endEntities = endDimension.getEntitiesByClass(Entity.class, box,
+                    entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            endEntities.forEach(Entity::kill); // get rid of unrelated entities
+        }));
+
+        AtomicBoolean startChecking = new AtomicBoolean(false);
+        Random random = new Random();
+        long testPrefix = random.nextLong();
+
+        helper.addRepeatedAction((gameTestHelper, ticks) -> {
+            if (0 < ticks && ticks <= 100) {
+                ItemEntity itemEntity = helper.spawnEntity(3,4,4, EntityType.ITEM);
+                itemEntity.setStack(new ItemStack(Items.ARROW, 1));
+                itemEntity.setInvulnerable(true);
+                itemEntity.setCustomNameVisible(true);
+                itemEntity.setCustomName(Text.of("" + testPrefix + ":" + entityByName.size()));
+                entityByName.put(itemEntity.getCustomName().getString(), itemEntity);
+                expectedCounter.setCustomName(Text.of("Expected: " + entityByName.size()));
+            }
+            if (ticks > 100) {
+                startChecking.set(true);
+            }
+        });
+        helper.succeedWhen(() -> {
+            TeleportTarget endTeleportTarget = getEndTeleportTarget(helper.gameTest.getWorld(), endDimension);
+            if (endTeleportTarget == null) {
+                helper.gameTest.fail(new IllegalStateException("No end portal"));
+                return false;
+            }
+            Box box = Box.from(endTeleportTarget.position).expand(6);
+            List<ItemEntity> endItems = endDimension.getEntitiesByType(EntityType.ITEM, box,
+                    (Entity entity) -> entity.hasCustomName() && entityByName.get(entity.getCustomName().getString()) != null);
+            cowsCounter.setCustomName(Text.of("Items: " + totalItemCount(endItems)));
+            List<Entity> endEntities = endDimension.getEntitiesByClass(Entity.class, box,
+                    entity -> !entity.hasCustomName() || entityByName.get(entity.getCustomName().getString()) == null);
+            otherCounter.setCustomName(Text.of("Other: " + endEntities.size()));
+            boolean success = startChecking.get()
+                    && totalItemCount(endItems) == totalItemCount(entityByName.values());
+            if (success) {
+                endItems.forEach(Entity::kill); // get rid of test entities
+                endEntities.forEach(Entity::kill); // get rid of unrelated entities
+            }
+            return success
+                    && endEntities.isEmpty();
         });
     }
 }

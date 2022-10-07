@@ -49,7 +49,7 @@ amount of multithreading that retains stability and divide the problem into thre
 ## Boosted Stage One
 
 Stage one concerns itself with the most basic form of multithreading that is still
-useful or end users while simultaneously being easy to implement and maintain
+useful for end users while simultaneously being easy to implement and maintain
 stability.
 
 For this reason, we are going to begin with the least useful form of minecraft server
@@ -108,6 +108,7 @@ that touches path finding to be rewritten.
 * Mojang changes the codebase and any stage of Boosted needs to be completely rewritten or becomes completely impossible
 * The mod may be incompatible with every other mod
 * Despite extreme care, subtle bugs will still occur (ordering, duping, delays, deadlock)
+* Minecraft testing frameworks are very underdeveloped.
 
 # Which of these Roadblocks do you think is potentially the most disruptive?
 
