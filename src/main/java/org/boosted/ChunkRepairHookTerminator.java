@@ -1,7 +1,6 @@
 package org.boosted;
 
 import com.mojang.datafixers.util.Either;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
@@ -15,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.boosted.config.GeneralConfig;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,8 +35,6 @@ import net.minecraft.world.biome.provider.SingleBiomeProviderSettings;
 public class ChunkRepairHookTerminator {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static boolean bypassLoadTarget = false;
-
     public static class BrokenChunkLocator {
         long chunkPos;
         CompletableFuture<?> maincf;
@@ -57,23 +53,12 @@ public class ChunkRepairHookTerminator {
 
     public static List<BrokenChunkLocator> breaks = new ArrayList<>();
 
-    public static boolean isBypassLoadTarget() {
-        return bypassLoadTarget;
-    }
-
     public static AtomicBoolean mainThreadChunkLoad = new AtomicBoolean();
     public static AtomicLong mainThreadChunkLoadCount = new AtomicLong();
     public static String mainThread = "Server thread";
 
     public static void chunkLoadDrive(ServerChunkManager.MainThreadExecutor executor, BooleanSupplier isDone, ServerChunkManager scp,
                                       CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> completableFuture, long chunkpos) {
-		/*
-		if (!GeneralConfig.enableChunkTimeout) {
-			bypassLoadTarget = false;
-			executor.driveUntil(isDone);
-			return;
-		}
-		*/
         int failcount = 0;
         if (isMainThread()) {
             mainThreadChunkLoadCount.set(0);
@@ -96,22 +81,21 @@ public class ChunkRepairHookTerminator {
                     LockSupport.parkNanos("THE END IS ~~NEVER~~ LOADING", 100000L);
                 } else {
                     LOGGER.error("", new TimeoutException("Error fetching chunk " + chunkpos));
-                    bypassLoadTarget = true;
                     if (GeneralConfig.enableTimeoutRegen || GeneralConfig.enableBlankReturn) {
 
                         if (GeneralConfig.enableBlankReturn) {
 							Chunk blankChunk = new WorldChunk(scp.getWorld(), new ChunkPos(chunkpos));
 							completableFuture.complete(Either.left(blankChunk));
                         } else {
-                            try {
-                                NbtCompound cnbt = scp.threadedAnvilChunkStorage.getNbt(new ChunkPos(chunkpos));
-                                if (cnbt != null) {
-                                    ProtoChunk cp = ChunkSerializer.deserialize((ServerWorld) scp.getWorld(), scp.threadedAnvilChunkStorage.pointOfInterestStorage, new ChunkPos(chunkpos), cnbt);
-                                    completableFuture.complete(Either.left(new WorldChunk((ServerWorld) scp.getWorld(), cp, null)));
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            scp.threadedAnvilChunkStorage.getNbt(new ChunkPos(chunkpos))
+                                .thenAccept((ocnbt) -> {
+                                    ocnbt.ifPresent((cnbt) -> {
+                                        ProtoChunk cp = ChunkSerializer.deserialize((ServerWorld) scp.getWorld(),
+                                                scp.threadedAnvilChunkStorage.pointOfInterestStorage, new ChunkPos(chunkpos), cnbt);
+                                        completableFuture.complete(Either.left(new WorldChunk((ServerWorld) scp.getWorld(), cp, null)));
+                                    });
+                                });
+
                             completableFuture.complete(ChunkHolder.UNLOADED_CHUNK);
                         }
                     } else {

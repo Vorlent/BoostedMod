@@ -13,4 +13,4 @@ accessible method net/minecraft/server/command/TeleportCommand teleport (Lnet/mi
 accessible field net/minecraft/server/command/TeleportCommand INVALID_POSITION_EXCEPTION Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;
 accessible class net/minecraft/test/StructureTestListener
 accessible method net/minecraft/test/StructureTestUtil loadSnbt (Ljava/nio/file/Path;)Lnet/minecraft/nbt/NbtCompound;
-accessible method net/minecraft/test/StructureTestUtil createStructure (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/Structure;
+accessible method net/minecraft/test/StructureTestUtil createStructureTemplate (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/StructureTemplate;

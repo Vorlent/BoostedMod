@@ -91,7 +91,7 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    public Vec3d getTrackedPosition() {
+    public TrackedPosition getTrackedPosition() {
         throw unsupportedOperation();
     }
 
@@ -911,7 +911,7 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    public void onKilledOther(ServerWorld world, LivingEntity other) {
+    public boolean onKilledOther(ServerWorld world, LivingEntity other) {
         throw unsupportedOperation();
     }
 
@@ -1146,10 +1146,11 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    @Override
+    //@Override
     public void sendSystemMessage(Text message, UUID sender) {
         throw unsupportedOperation();
     }
+    //TODO replace this...
 
     public World getEntityWorld() {
         throw unsupportedOperation();

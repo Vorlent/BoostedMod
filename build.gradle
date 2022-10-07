@@ -30,7 +30,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// For portal testing
-	modImplementation 'com.github.2No2Name:McTester:v0.2.4'
+	modImplementation 'com.github.2No2Name:McTester:v0.3.1'
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

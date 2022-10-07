@@ -4,7 +4,7 @@ import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureManager;
+import net.minecraft.structure.StructureTemplateManager;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
@@ -46,10 +46,10 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 	private ExecutorService executor;
 
 	public ParallelServerChunkManager(ServerWorld world, LevelStorage.Session session, DataFixer dataFixer,
-							  StructureManager structureManager, Executor workerExecutor, ChunkGenerator chunkGenerator, int viewDistance,
-							  int simulationDistance, boolean dsync, WorldGenerationProgressListener worldGenerationProgressListener,
-							  ChunkStatusChangeListener chunkStatusChangeListener, Supplier<PersistentStateManager> persistentStateManagerFactory) {
-		super(world, session, dataFixer, structureManager, workerExecutor, chunkGenerator,
+									  StructureTemplateManager structureTemplateManager, Executor workerExecutor, ChunkGenerator chunkGenerator, int viewDistance,
+									  int simulationDistance, boolean dsync, WorldGenerationProgressListener worldGenerationProgressListener,
+									  ChunkStatusChangeListener chunkStatusChangeListener, Supplier<PersistentStateManager> persistentStateManagerFactory) {
+		super(world, session, dataFixer, structureTemplateManager, workerExecutor, chunkGenerator,
 				viewDistance, simulationDistance, dsync, worldGenerationProgressListener,
 				chunkStatusChangeListener, persistentStateManagerFactory);
 		cacheThread = new Thread(this::chunkCacheCleanup, "Chunk Cache Cleaner " + world.getRegistryKey().getValue());

@@ -25,7 +25,7 @@ public abstract class EntityMoveToWorldMixin {
 	}
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;moveToWorld(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/entity/Entity;"),
-			method = "tickNetherPortal ()V")
+			method = "tickPortal ()V")
 	public Entity moveToWorldNetherworldPortal(Entity instance, ServerWorld destination) {
 		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
 			instance.moveToWorld(destination)

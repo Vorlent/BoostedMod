@@ -13,7 +13,6 @@ public class BoostedWorldContext {
      * There should be exactly one BoostedWorldContext for every world.
      * @param world The world for which this BoostedWorldContext was created.
      */
-
     public BoostedWorldContext(World world) {
         this.world = world;
         preTick = new BoostedThreadExecutor();

@@ -816,7 +816,7 @@ public class Portal {
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 1) {
                 ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
-                    ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "" + testPrefix + ".overworld." + overworldEntityByName.size()));
+                    ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "" + testPrefix + ".overworld." + overworldEntityByName.size()), null);
                     fakeOverworldPlayer.setPosition(gameTestPos.getX() + 3, gameTestPos.getY() + 2, gameTestPos.getZ() + 4.5);
                     FakePlayerClientConnection clientConnection = new FakePlayerClientConnection(NetworkSide.SERVERBOUND);
                     server.getPlayerManager().onPlayerConnect(clientConnection, fakeOverworldPlayer);
