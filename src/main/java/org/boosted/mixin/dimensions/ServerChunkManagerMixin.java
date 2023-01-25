@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.dimensions;
 
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.util.math.ChunkPos;

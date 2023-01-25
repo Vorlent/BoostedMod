@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.teleport;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;

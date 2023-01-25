@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.dimensions;
 
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.WorldGenerationProgressListener;

@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.portal;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;

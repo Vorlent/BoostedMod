@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.dimensions;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;

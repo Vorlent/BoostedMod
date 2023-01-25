@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.dimensions;
 
 import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.fabricmc.fabric.impl.dimension.FabricDimensionInternals;

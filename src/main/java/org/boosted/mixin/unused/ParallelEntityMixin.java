@@ -1,4 +1,4 @@
-package org.boosted.mixin;
+package org.boosted.mixin.unused;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
