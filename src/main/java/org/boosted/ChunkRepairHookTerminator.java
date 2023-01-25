@@ -14,8 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.boosted.config.GeneralConfig;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,9 +22,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 
-/* 1.15.2 code; AKA the only thing that changed
-import net.minecraft.world.biome.provider.SingleBiomeProviderSettings;
-/* */
 /**
  * Handles chunk forcing in scenarios where world corruption has occurred
  *
@@ -35,27 +31,9 @@ import net.minecraft.world.biome.provider.SingleBiomeProviderSettings;
 public class ChunkRepairHookTerminator {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static class BrokenChunkLocator {
-        long chunkPos;
-        CompletableFuture<?> maincf;
-        CompletableFuture<?> brokecf;
-        public BrokenChunkLocator(long chunkPos, CompletableFuture<?> maincf, CompletableFuture<?> brokecf) {
-            super();
-            this.chunkPos = chunkPos;
-            this.maincf = maincf;
-            this.brokecf = brokecf;
-        }
-        public long getChunkPos() {
-            return chunkPos;
-        }
-
-    }
-
-    public static List<BrokenChunkLocator> breaks = new ArrayList<>();
-
-    public static AtomicBoolean mainThreadChunkLoad = new AtomicBoolean();
-    public static AtomicLong mainThreadChunkLoadCount = new AtomicLong();
-    public static String mainThread = "Server thread";
+    public static final AtomicBoolean mainThreadChunkLoad = new AtomicBoolean();
+    public static final AtomicLong mainThreadChunkLoadCount = new AtomicLong();
+    public static final String mainThread = "Server thread";
 
     public static void chunkLoadDrive(ServerChunkManager.MainThreadExecutor executor, BooleanSupplier isDone, ServerChunkManager scp,
                                       CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> completableFuture, long chunkpos) {
@@ -99,21 +77,20 @@ public class ChunkRepairHookTerminator {
                             completableFuture.complete(ChunkHolder.UNLOADED_CHUNK);
                         }
                     } else {
-                        System.err.println(completableFuture.toString());
-                        ChunkHolder chunkholder = scp.getChunkHolder(chunkpos);
+                        System.err.println(completableFuture);
+                        ChunkHolder chunkholder = Objects.requireNonNull(scp.getChunkHolder(chunkpos));
                         CompletableFuture<?> firstBroke = null;
                         for (ChunkStatus cs : ChunkStatus.createOrderedList()) {
                             CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> cf = chunkholder.getFutureFor(cs);
                             if (cf == ChunkHolder.UNLOADED_CHUNK_FUTURE) {
-                                System.out.println("Status: " + cs.toString() + " is not yet loaded");
+                                System.out.println("Status: " + cs + " is not yet loaded");
                             } else {
-                                System.out.println("Status: " + cs.toString() + " is " + cf.toString());
+                                System.out.println("Status: " + cs + " is " + cf.toString());
                                 if (firstBroke == null && !cf.toString().contains("Completed normally")) {
                                     firstBroke = cf;
                                 }
                             }
                         }
-                        breaks.add(new BrokenChunkLocator(chunkpos, completableFuture, firstBroke));
                         completableFuture.complete(Either.right(new ChunkHolder.Unloaded() {
                             @Override
                             public String toString() {

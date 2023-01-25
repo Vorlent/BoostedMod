@@ -2,6 +2,7 @@ package org.boosted;
 
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ThreadCoordinator {
 
     private final Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<>();
+    @Nullable
     private Phaser phaser;
+    @Nullable
     private ExecutorService executorService;
     private final Set<String> currentTasks = ConcurrentHashMap.newKeySet();
 
@@ -30,6 +33,7 @@ public class ThreadCoordinator {
 
     private final AtomicBoolean isTicking = new AtomicBoolean();
 
+    @Nullable
     private BoostedGlobalContext boostedContext;
 
     private final HashMap<World, BoostedWorldContext> boostedContextMapping = new HashMap<>();
@@ -95,14 +99,16 @@ public class ThreadCoordinator {
         executorService = new ForkJoinPool(parallelism, fjpf,null, false);
     }
 
+    @Nullable
     public Phaser getPhaser() {
         return phaser;
     }
 
-    public void setPhaser(Phaser phaser) {
+    public void setPhaser(@Nullable Phaser phaser) {
         this.phaser = phaser;
     }
 
+    @Nullable
     public ExecutorService getExecutorService() {
         return executorService;
     }

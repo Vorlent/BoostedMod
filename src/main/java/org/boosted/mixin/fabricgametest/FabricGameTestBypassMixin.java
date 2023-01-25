@@ -46,10 +46,6 @@ public abstract class FabricGameTestBypassMixin {
 	}
 
 	private static StructureTemplate createStructureTemplateFix(String templateId, ServerWorld world) {
-
-		Identifier baseId = new Identifier(templateId);
-		Identifier structureIdFabric = new Identifier(baseId.getNamespace(), GAMETEST_STRUCTURE_PATH + baseId.getPath() + ".snbt");
-
 		try {
 			return StructureTestUtil.createStructureTemplate(templateId, world); // this uses fabric logic
 		} catch (RuntimeException e) {
@@ -59,8 +55,7 @@ public abstract class FabricGameTestBypassMixin {
 				return optional.get();
 			}
 
-			String string = templateId + ".snbt";
-			Path path = Paths.get(testStructuresDirectoryName, string);
+			Path path = Paths.get(testStructuresDirectoryName, templateId + ".snbt");
 			NbtCompound nbtCompound = StructureTestUtil.loadSnbt(path);
 			if (nbtCompound == null) {
 				throw new RuntimeException("Fabric: Could not find structure file " + path + ", and the structure is not available in the world structures either." +

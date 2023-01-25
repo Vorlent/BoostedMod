@@ -9,31 +9,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.StructureBlockBlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.passive.CowEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.entity.vehicle.ChestMinecartEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.test.GameTestState;
 import net.minecraft.test.PositionedException;
-import net.minecraft.test.StructureTestUtil;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -47,18 +29,20 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
 import org.boosted.ThreadCoordinator;
 import org.boosted.util.FakePlayerClientConnection;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class Redstone {
 
-    private static BlockPos getNetherTeleportTarget(BlockPos pos, ServerWorld origin, ServerWorld destination) {
+    private static Optional<BlockPos> getNetherTeleportTarget(BlockPos pos, ServerWorld origin, ServerWorld destination) {
         boolean destIsNether = destination.getRegistryKey() == World.NETHER;
         WorldBorder worldBorder = destination.getWorldBorder();
         double d = DimensionType.getCoordinateScaleFactor(origin.getDimension(), destination.getDimension());
         BlockPos blockPos2 = worldBorder.clamp(pos.getX() * d, pos.getY(), pos.getZ() * d);
-        return destination.getPortalForcer().getPortalRect(blockPos2, destIsNether, worldBorder).map(rect -> rect.lowerLeft).orElse(null);
+        return destination.getPortalForcer().getPortalRect(blockPos2, destIsNether, worldBorder).map(rect -> rect.lowerLeft);
     }
 
     public static void clearNetherPortal(BlockPos portalPos, World nether) {
@@ -88,14 +72,14 @@ public class Redstone {
     public static void nether(GameTestHelper helper) {
         MinecraftServer server = helper.gameTest.getWorld().getServer();
         ServerWorld overworld = server.getOverworld();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld nether = Objects.requireNonNull(server.getWorld(World.NETHER));
         BlockPos gameTestPos = helper.gameTest.getPos();
 
         ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "redstone.nether.1"), null);
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
 
-            if (0 < ticks && ticks <= 1) {
+            if (ticks == 1) {
                 // start redstone clock
                 helper.pressButton(3,3,2);
 
@@ -110,8 +94,8 @@ public class Redstone {
                     fakeOverworldPlayer.networkHandler.onPlayerMove(new PlayerMoveC2SPacket.PositionAndOnGround(fakeOverworldPlayer.getX(), fakeOverworldPlayer.getY(), fakeOverworldPlayer.getZ() + 1, true));
                 });
 
-                BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
-                if (netherTeleportTarget == null) {
+                Optional<BlockPos> netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+                if (netherTeleportTarget.isEmpty()) {
                     helper.gameTest.fail(new IllegalStateException("No nether portal"));
                     return;
                 }
@@ -128,11 +112,12 @@ public class Redstone {
         helper.succeedWhen(() -> {
             System.out.println("Overworld " + gameTestPos);
 
-            BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
-            if (netherTeleportTarget == null) {
+            Optional<BlockPos> netherTeleportTargetOptional = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
+            if (netherTeleportTargetOptional.isEmpty()) {
                 helper.gameTest.fail(new IllegalStateException("No nether portal"));
                 return false;
             }
+            BlockPos netherTeleportTarget = netherTeleportTargetOptional.get();
             System.out.println("Portal: " + netherTeleportTarget);
 
             if (!netherStructureBlockSetUp[0]) {
@@ -173,6 +158,7 @@ public class Redstone {
         }
     }
 
+    @Nullable
     private static TeleportTarget getEndTeleportTarget(ServerWorld origin, ServerWorld destination) {
         boolean bl = origin.getRegistryKey() == World.END && destination.getRegistryKey() == World.OVERWORLD;
         boolean bl2 = destination.getRegistryKey() == World.END;

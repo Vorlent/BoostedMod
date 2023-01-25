@@ -1,7 +1,5 @@
 package org.boosted.config;
 
-import java.util.List;
-import java.util.Set;
 //import org.jmt.mcmt.Constants;
 
 public class GeneralConfig {
@@ -18,7 +16,6 @@ public class GeneralConfig {
 
     // World
     public static boolean disableWorld = false;
-    public static boolean disableWorldPostTick = true;
 
     //WorldChunk
     public static boolean disableMultiChunk = false;
@@ -51,22 +48,18 @@ public class GeneralConfig {
     ///////////////////////////////
 
     public static int getParallelism() {
-        switch (GeneralConfig.paraMaxMode) {
-            case Standard:
-                return GeneralConfig.paraMax <= 1 ?
-                        Runtime.getRuntime().availableProcessors() :
-                        Math.max(2, Math.min(Runtime.getRuntime().availableProcessors(), GeneralConfig.paraMax));
-            case Override:
-                return GeneralConfig.paraMax <= 1 ?
-                        Runtime.getRuntime().availableProcessors() :
-                        Math.max(2, GeneralConfig.paraMax);
-            case Reduction:
-                return Math.max(
-                        Runtime.getRuntime().availableProcessors() - Math.max(0, GeneralConfig.paraMax),
-                        2);
-        }
+        return switch (GeneralConfig.paraMaxMode) {
+            case Standard -> GeneralConfig.paraMax <= 1 ?
+                    Runtime.getRuntime().availableProcessors() :
+                    Math.max(2, Math.min(Runtime.getRuntime().availableProcessors(), GeneralConfig.paraMax));
+            case Override -> GeneralConfig.paraMax <= 1 ?
+                    Runtime.getRuntime().availableProcessors() :
+                    Math.max(2, GeneralConfig.paraMax);
+            case Reduction -> Math.max(
+                    Runtime.getRuntime().availableProcessors() - Math.max(0, GeneralConfig.paraMax),
+                    2);
+        };
         // Unsure quite how this is "Reachable code" but ok I guess
-        return Runtime.getRuntime().availableProcessors();
     }
 
 }

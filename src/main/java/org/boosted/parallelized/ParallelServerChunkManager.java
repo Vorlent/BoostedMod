@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-//import org.jmt.mcmt.asmdest.ASMHookTerminator;
 import org.boosted.ThreadCoordinator;
 import org.boosted.config.GeneralConfig;
 
@@ -29,21 +28,18 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class ParallelServerChunkManager extends ServerChunkManager {
 
-	protected Map<ChunkCacheAddress, ChunkCacheLine> chunkCache = new ConcurrentHashMap<>();
-	protected AtomicInteger access = new AtomicInteger(Integer.MIN_VALUE);
+	protected final Map<ChunkCacheAddress, ChunkCacheLine> chunkCache = new ConcurrentHashMap<>();
+	protected final AtomicInteger access = new AtomicInteger(Integer.MIN_VALUE);
 	protected static final int CACHE_SIZE = 512;
-	protected Thread cacheThread;
-	protected ChunkLock loadingChunkLock = new ChunkLock();
-	Logger log = LogManager.getLogger();
-	Marker chunkCleaner = MarkerManager.getMarker("ChunkCleaner");
-
-	private ExecutorService executor;
+	protected final Thread cacheThread;
+	protected final ChunkLock loadingChunkLock = new ChunkLock();
+	private static final Logger log = LogManager.getLogger();
+	private final Marker chunkCleaner = MarkerManager.getMarker("ChunkCleaner");
 
 	public ParallelServerChunkManager(ServerWorld world, LevelStorage.Session session, DataFixer dataFixer,
 									  StructureTemplateManager structureTemplateManager, Executor workerExecutor, ChunkGenerator chunkGenerator, int viewDistance,
@@ -111,6 +107,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		}
 		long i = ChunkPos.toLong(chunkX, chunkZ);
 
+		@Nullable
 		Chunk c = lookupChunk(i, ChunkStatus.FULL, false);
 		if (c != null) {
 			return c instanceof WorldChunk ? (WorldChunk)c : null; //TODO
@@ -123,6 +120,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		return cl;
 	}
 
+	@Nullable
 	public Chunk lookupChunk(long chunkPos, ChunkStatus status, boolean compute) {
 		int oldaccess = access.getAndIncrement();
 		if (access.get() < oldaccess) {
@@ -137,7 +135,6 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 			return ccl.getChunk();
 		}
 		return null;
-		
 	}
 
 	public void cacheChunk(long chunkPos, Chunk chunk, ChunkStatus status) {
@@ -180,7 +177,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 					.orElse(Integer.MIN_VALUE);
 			long cutoff = minAccess + (long) ((maxAccess - minAccess) / ((float) size / ((float) CACHE_SIZE)));
 			for (Entry<ChunkCacheAddress, ChunkCacheLine> l : chunkCache.entrySet()) {
-				if (l.getValue().getLastAccess() < cutoff | l.getValue().getChunk() == null) {
+				if (l.getValue().getLastAccess() < cutoff || l.getValue().getChunk() == null) {
 					chunkCache.remove(l.getKey());
 				}
 			}
@@ -226,6 +223,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 			this.lastAccess = lastAccess;
 		}
 
+		@Nullable
 		public Chunk getChunk() {
 			return chunk.get();
 		}

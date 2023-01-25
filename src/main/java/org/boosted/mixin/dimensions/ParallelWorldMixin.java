@@ -44,7 +44,7 @@ public class ParallelWorldMixin {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 		//LOGGER.info("injectPreTick start");
 
-		if(threadCoordinator.getExecutorService() == null) {
+		if (threadCoordinator.getExecutorService() == null) {
 			threadCoordinator.setupThreadpool(Runtime.getRuntime().availableProcessors());
 			LOGGER.info("setupThreadpool");
 		}

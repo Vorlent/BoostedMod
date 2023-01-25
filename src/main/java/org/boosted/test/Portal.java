@@ -36,11 +36,14 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
 import org.boosted.ThreadCoordinator;
 import org.boosted.util.FakePlayerClientConnection;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Portal {
+
+    private static final Random RANDOM = new Random();
 
     private static BlockPos getNetherTeleportTarget(BlockPos pos, ServerWorld origin, ServerWorld destination) {
         boolean destIsNether = destination.getRegistryKey() == World.NETHER;
@@ -144,8 +147,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long cowPrefix = random.nextLong();
+        long cowPrefix = RANDOM.nextLong();
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
@@ -217,8 +219,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextInt(0, 10000);
+        long testPrefix = RANDOM.nextInt(0, 10000);
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
@@ -288,8 +289,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextInt(0, 10000);
+        long testPrefix = RANDOM.nextInt(0, 10000);
         final int[] colorIndex = {0};
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
@@ -359,8 +359,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextInt(0, 10000);
+        long testPrefix = RANDOM.nextInt(0, 10000);
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
                 ArrowEntity arrowEntity = helper.spawnEntity(3,3,3, EntityType.ARROW);
@@ -433,8 +432,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextInt(0, 10000);
+        long testPrefix = RANDOM.nextInt(0, 10000);
         final int[] colorIndex = {0};
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
@@ -528,8 +526,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long cowPrefix = random.nextLong();
+        long cowPrefix = RANDOM.nextLong();
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
@@ -670,8 +667,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long cowPrefix = random.nextLong();
+        long cowPrefix = RANDOM.nextLong();
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
@@ -810,8 +806,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextLong(0, 1000);
+        long testPrefix = RANDOM.nextLong(0, 1000);
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 1) {
@@ -897,6 +892,7 @@ public class Portal {
         });
     }
 
+    @Nullable
     private static TeleportTarget getEndTeleportTarget(ServerWorld origin, ServerWorld destination) {
         boolean bl = origin.getRegistryKey() == World.END && destination.getRegistryKey() == World.OVERWORLD;
         boolean bl2 = destination.getRegistryKey() == World.END;
@@ -925,7 +921,6 @@ public class Portal {
         MinecraftServer server = helper.gameTest.getWorld().getServer();
         ServerWorld endDimension = server.getWorld(World.END); // ensure the end is actually running
         endDimension.resetIdleTimeout();
-        BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, Entity> entityByName = new HashMap<>();
 
         helper.addAction(0, (gameTestHelper -> {
@@ -941,8 +936,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long cowPrefix = random.nextLong();
+        long cowPrefix = RANDOM.nextLong();
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
@@ -1012,8 +1006,7 @@ public class Portal {
         }));
 
         AtomicBoolean startChecking = new AtomicBoolean(false);
-        Random random = new Random();
-        long testPrefix = random.nextLong();
+        long testPrefix = RANDOM.nextLong();
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {

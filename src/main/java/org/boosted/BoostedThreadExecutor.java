@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.util.profiler.SampleType;
 import net.minecraft.util.profiler.Sampler;
 import net.minecraft.util.thread.ThreadExecutor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -16,11 +17,12 @@ import java.util.List;
  * and then empty out the current queue
  */
 public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
+    @Nullable
     private Thread serverThread;
     BoostedThreadExecutor() {
         this(null);
     }
-    BoostedThreadExecutor(Thread serverThread) {
+    BoostedThreadExecutor(@Nullable Thread serverThread) {
         super("Boosted Thread executor");
         this.serverThread = serverThread;
     }
@@ -50,6 +52,7 @@ public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
     }
 
     @Override
+    @Nullable
     protected Thread getThread() {
         return serverThread;
     }
