@@ -3,6 +3,7 @@ package org.boosted;
 import mctester.annotation.TestRegistryHelper;
 import net.fabricmc.api.ModInitializer;
 import org.boosted.test.Portal;
+import org.boosted.test.Redstone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,5 +21,6 @@ public class BoostedMod implements ModInitializer {
 
 		TestRegistryHelper.shouldWarnOnMissingStructureFile = false;
 		TestRegistryHelper.createTestsFromClass(Portal.class);
+		TestRegistryHelper.createTestsFromClass(Redstone.class);
 	}
 }
