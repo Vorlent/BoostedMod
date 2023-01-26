@@ -136,16 +136,17 @@ public class Redstone {
                 // start nether clock
                 pressButton(helper, nether, netherTeleportTarget.getX() + 4, netherTeleportTarget.getY() + 2, netherTeleportTarget.getZ() + 3);
 
-
                 netherStructureBlockSetUp[0] = true;
             }
 
             Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(10);
-            return false;
-        });
 
-        // TODO stop redstone clock
-        // TODO count sand blocks
+            // check if the sand piles have disappeared
+            System.out.println("LEFT " + helper.getBlockState(6, 4, 2).getBlock());
+            System.out.println("RIGHT " + helper.getBlockState(0, 4, 2).getBlock());
+            return Objects.equals(helper.getBlockState(6, 4, 2).getBlock(), Blocks.AIR)
+                    && Objects.equals(helper.getBlockState(0, 4, 2).getBlock(), Blocks.AIR);
+        });
     }
 
     public static void pressButton(GameTestHelper helper, World world, int x, int y, int z) {

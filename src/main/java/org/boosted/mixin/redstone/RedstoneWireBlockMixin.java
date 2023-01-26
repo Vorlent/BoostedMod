@@ -22,14 +22,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * The dreaded Mojang API mistake strikes again.
  * Blocks.redstoneWireBlock contains a static reference to wiresGivePower which is a private variable
  * that is used to disable redstone wire signals when calling getReceivedRedstonePower to prevent infinite recursion
- * Sure, it's an efficient way to do it but passing it via a parameter would be better.
  *
  * The hacky solution that stays true to the original is to use a thread local variable.
  */
 @Mixin(RedstoneWireBlock.class)
 public abstract class RedstoneWireBlockMixin {
 
-	private static final ThreadLocal<Boolean> wiresGivePowerThreadLocal = new ThreadLocal<>();
+	private final ThreadLocal<Boolean> wiresGivePowerThreadLocal = ThreadLocal.withInitial(() -> true);
 
 	@Redirect(method = "getStrongRedstonePower(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)I",
 		at = @At(value = "FIELD", target = "net/minecraft/block/RedstoneWireBlock.wiresGivePower:Z", opcode = Opcodes.GETFIELD))
@@ -43,17 +42,23 @@ public abstract class RedstoneWireBlockMixin {
 		return wiresGivePowerThreadLocal.get();
 	}
 
+	@Redirect(method = "emitsRedstonePower(Lnet/minecraft/block/BlockState;)Z",
+			at = @At(value = "FIELD", target = "net/minecraft/block/RedstoneWireBlock.wiresGivePower:Z", opcode = Opcodes.GETFIELD))
+	public boolean emitsRedstonePowerTL(RedstoneWireBlock instance) {
+		return wiresGivePowerThreadLocal.get();
+	}
+
 	@Inject(method = "getReceivedRedstonePower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I",
 		at = @At(value = "INVOKE", target = "net/minecraft/world/World.getReceivedRedstonePower(Lnet/minecraft/util/math/BlockPos;)I",
 		shift = At.Shift.BEFORE))
 	public void setWireGivesPowerThreadTrue(World world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		wiresGivePowerThreadLocal.set(true);
+		wiresGivePowerThreadLocal.set(false);
 	}
 
 	@Inject(method = "getReceivedRedstonePower(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)I",
 		at = @At(value = "INVOKE", target = "net/minecraft/world/World.getReceivedRedstonePower(Lnet/minecraft/util/math/BlockPos;)I",
 		shift = At.Shift.AFTER))
 	public void setWireGivesPowerThreadFalse(World world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-		wiresGivePowerThreadLocal.set(false);
+		wiresGivePowerThreadLocal.set(true);
 	}
 }
