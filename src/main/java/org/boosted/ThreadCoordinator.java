@@ -46,6 +46,7 @@ public class ThreadCoordinator {
         return instance;
     }
 
+    @Nullable
     public BoostedWorldContext getBoostedContext(World world) {
         return boostedContextMapping.get(world);
     }
@@ -67,6 +68,7 @@ public class ThreadCoordinator {
         unreachableWorlds.forEach(boostedContextMapping::remove);
     }
 
+    @Nullable
     public BoostedGlobalContext getBoostedContext() {
         return boostedContext;
     }
@@ -83,16 +85,12 @@ public class ThreadCoordinator {
         return mcThreadTracker.containsKey(poolName) && mcThreadTracker.get(poolName).contains(t);
     }
 
-    private void regThread(String poolName, Thread thread) {
-        mcThreadTracker.computeIfAbsent(poolName, s -> ConcurrentHashMap.newKeySet()).add(thread);
-    }
-
     public void setupThreadpool(int parallelism) {
         final ClassLoader cl = BoostedMod.class.getClassLoader();
         ForkJoinPool.ForkJoinWorkerThreadFactory fjpf = p -> {
             ForkJoinWorkerThread fjwt = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
             fjwt.setName("Boosted-Pool-Thread-" + threadID.getAndIncrement());
-            regThread("Boosted", fjwt);
+            mcThreadTracker.computeIfAbsent("Boosted", s -> ConcurrentHashMap.newKeySet()).add(fjwt);
             fjwt.setContextClassLoader(cl);
             return fjwt;
         };

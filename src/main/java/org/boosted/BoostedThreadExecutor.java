@@ -70,10 +70,10 @@ public class BoostedThreadExecutor extends ThreadExecutor<Runnable> {
 
     @Override
     public void executeTask(Runnable task) {
-        if(serverThread == null) {
+        if (serverThread == null) {
             throw new IllegalStateException("no thread to execute on available");
         }
-        if(!isOnThread()) {
+        if (!isOnThread()) {
             throw new IllegalStateException("runTask must be executed on thread " + serverThread.getName());
         }
         super.executeTask(task);

@@ -13,6 +13,8 @@ import net.minecraft.world.chunk.WorldChunk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.boosted.config.GeneralConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -79,6 +81,7 @@ public class ChunkRepairHookTerminator {
                     } else {
                         System.err.println(completableFuture);
                         ChunkHolder chunkholder = Objects.requireNonNull(scp.getChunkHolder(chunkpos));
+                        @Nullable
                         CompletableFuture<?> firstBroke = null;
                         for (ChunkStatus cs : ChunkStatus.createOrderedList()) {
                             CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> cf = chunkholder.getFutureFor(cs);

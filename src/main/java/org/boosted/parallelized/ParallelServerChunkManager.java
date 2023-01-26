@@ -58,9 +58,8 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
 
 		if (threadCoordinator.isThreadPooled("Main", Thread.currentThread())) {
-			return CompletableFuture.supplyAsync(() -> {
-				return this.getChunk(chunkX, chunkZ, requiredStatus, load);
-			}, this.mainThreadExecutor).join();
+			return CompletableFuture.supplyAsync(() -> this.getChunk(chunkX, chunkZ, requiredStatus, load),
+					this.mainThreadExecutor).join();
 		}
 		if (GeneralConfig.disabled || GeneralConfig.disableChunkProvider) {
 			return super.getChunk(chunkX, chunkZ, requiredStatus, load);
@@ -68,13 +67,15 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		
 		long i = ChunkPos.toLong(chunkX, chunkZ);
 
+		@Nullable
 		Chunk c = lookupChunk(i, requiredStatus, false);
 		if (c != null) {
 			return c;
 		}
 		
 		//log.debug("Missed chunk " + i + " on status "  + requiredStatus.toString());
-		
+
+		@Nullable
 		Chunk cl;
 		if (threadCoordinator.shouldThreadChunks()) {
 			// Multithread but still limit to 1 load op per chunk
@@ -115,6 +116,7 @@ public class ParallelServerChunkManager extends ServerChunkManager {
 		
 		//log.debug("Missed chunk " + i + " now");
 
+		@Nullable
 		WorldChunk cl = super.getWorldChunk(chunkX, chunkZ);
 		cacheChunk(i, cl, ChunkStatus.FULL);
 		return cl;

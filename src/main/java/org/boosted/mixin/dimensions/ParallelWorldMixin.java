@@ -51,7 +51,6 @@ public class ParallelWorldMixin {
 
 		if (threadCoordinator.getPhaser() != null) {
 			LOGGER.warn("Multiple servers?");
-			return;
 		} else {
 			tickStart = System.nanoTime();
 			threadCoordinator.getIsTicking().set(true);
@@ -59,7 +58,7 @@ public class ParallelWorldMixin {
 			threadCoordinator.getPhaser().register();
 			mcs = (MinecraftServer) (Object) this;
 			//StatsCommand.setServer(mcs);
-			if(threadCoordinator.getBoostedContext() == null) {
+			if (threadCoordinator.getBoostedContext() == null) {
 				threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
 			}
 			for(World world : mcs.getWorlds()) {
@@ -100,7 +99,6 @@ public class ParallelWorldMixin {
 			GeneralConfig.disabled = true;
 			serverWorld.tick(shouldKeepTicking);
 			//net.minecraftforge.fml.hooks.BasicEventHooks.onPostWorldTick(serverWorld);
-			return;
 		} else {
 			String taskName = null;
 			if (GeneralConfig.opsTracing) {
@@ -142,7 +140,6 @@ public class ParallelWorldMixin {
 		//LOGGER.info("injectPostTick");
 		if (mcs != (Object) this) {
 			LOGGER.warn("Multiple servers?");
-			return;
 		} else {
 			// wait until all worlds have finished
 			threadCoordinator.getPhaser().arriveAndAwaitAdvance();

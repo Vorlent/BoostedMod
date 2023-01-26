@@ -273,11 +273,13 @@ public class Portal {
         otherCounter.setCustomNameVisible(true);
 
         MinecraftServer server = helper.gameTest.getWorld().getServer();
+        @Nullable
         ServerWorld nether = server.getWorld(World.NETHER);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ItemEntity> entityByName = new HashMap<>();
 
         helper.addAction(0, (gameTestHelper -> {
+            @Nullable
             BlockPos netherTeleportTarget = getNetherTeleportTarget(gameTestPos, helper.gameTest.getWorld(), nether);
             if (netherTeleportTarget == null) {
                 helper.gameTest.fail(new IllegalStateException("No nether portal"));
@@ -343,6 +345,7 @@ public class Portal {
         otherCounter.setCustomNameVisible(true);
 
         MinecraftServer server = helper.gameTest.getWorld().getServer();
+        @Nullable
         ServerWorld nether = server.getWorld(World.NETHER);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ArrowEntity> entityByName = new HashMap<>();
@@ -809,7 +812,7 @@ public class Portal {
         long testPrefix = RANDOM.nextLong(0, 1000);
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
-            if (0 < ticks && ticks <= 1) {
+            if (ticks == 1) {
                 ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
                     ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "" + testPrefix + ".overworld." + overworldEntityByName.size()), null);
                     fakeOverworldPlayer.setPosition(gameTestPos.getX() + 3, gameTestPos.getY() + 2, gameTestPos.getZ() + 4.5);
