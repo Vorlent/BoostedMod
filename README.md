@@ -121,7 +121,7 @@ which is actually pretty good for this mod but when you teleport from the overwo
 the overworld thread will obtain an instance of the nether entity
 and the returned entity is e.g. used to merge transferred item entities in the nether.
 If the overworld and nether are on separate threads then running nether code in the overworld thread
-is obviously a no go.
+is obviously a no-go.
 
 Invisible undocumented changes via fabric X-api mod can also ruin your week.
 
