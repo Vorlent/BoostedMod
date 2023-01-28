@@ -34,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Redstone {
 
@@ -80,8 +81,8 @@ public class Redstone {
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
 
             if (ticks == 1) {
-                // start redstone clock
-                helper.pressButton(3,3,2);
+                // start redstone clock by destroying the lever
+                helper.setBlockState(1, 2, 0, Blocks.AIR.getDefaultState());
 
                 ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
                     fakeOverworldPlayer.setPosition(gameTestPos.getX() + 3, gameTestPos.getY() + 2, gameTestPos.getZ() + 4.5);
@@ -108,6 +109,7 @@ public class Redstone {
         });
 
         final boolean[] netherStructureBlockSetUp = {false};
+        AtomicInteger emptyTicks = new AtomicInteger();
 
         helper.succeedWhen(() -> {
             System.out.println("Overworld " + gameTestPos);
@@ -117,7 +119,7 @@ public class Redstone {
                 helper.gameTest.fail(new IllegalStateException("No nether portal"));
                 return false;
             }
-            BlockPos netherTeleportTarget = netherTeleportTargetOptional.get();
+            BlockPos netherTeleportTarget = netherTeleportTargetOptional.get().add(0,10,0);
             System.out.println("Portal: " + netherTeleportTarget);
 
             if (!netherStructureBlockSetUp[0]) {
@@ -133,8 +135,8 @@ public class Redstone {
 
                 //nether.setBlockState(netherTeleportTarget.add(4, 2, 3), Blocks.IRON_BLOCK.getDefaultState());
 
-                // start nether clock
-                pressButton(helper, nether, netherTeleportTarget.getX() + 4, netherTeleportTarget.getY() + 2, netherTeleportTarget.getZ() + 3);
+                // start nether clock by destroying the lever
+                nether.setBlockState(netherTeleportTarget.add(2,1,1), Blocks.IRON_BLOCK.getDefaultState());
 
                 netherStructureBlockSetUp[0] = true;
             }
@@ -142,10 +144,13 @@ public class Redstone {
             Box box = Box.from(Vec3d.ofCenter(netherTeleportTarget)).expand(10);
 
             // check if the sand piles have disappeared
-            System.out.println("LEFT " + helper.getBlockState(6, 4, 2).getBlock());
-            System.out.println("RIGHT " + helper.getBlockState(0, 4, 2).getBlock());
-            return Objects.equals(helper.getBlockState(6, 4, 2).getBlock(), Blocks.AIR)
-                    && Objects.equals(helper.getBlockState(0, 4, 2).getBlock(), Blocks.AIR);
+            System.out.println("SAND " + helper.getBlockState(3, 4, 2).getBlock());
+            if (Objects.equals(helper.getBlockState(3, 4, 2).getBlock(), Blocks.AIR)) {
+                emptyTicks.getAndIncrement();
+            } else {
+                emptyTicks.set(0);
+            }
+            return emptyTicks.get() > 20;
         });
     }
 
