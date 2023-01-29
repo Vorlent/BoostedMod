@@ -84,7 +84,7 @@ public class Redstone {
                 // start redstone clock by destroying the lever
                 helper.setBlockState(1, 2, 0, Blocks.AIR.getDefaultState());
 
-                ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
+                overworld.getBoostedWorldContext().postTick().executeTask(() -> {
                     fakeOverworldPlayer.setPosition(gameTestPos.getX() + 3, gameTestPos.getY() + 2, gameTestPos.getZ() + 4.5);
                     FakePlayerClientConnection clientConnection = new FakePlayerClientConnection(NetworkSide.SERVERBOUND);
                     server.getPlayerManager().onPlayerConnect(clientConnection, fakeOverworldPlayer);

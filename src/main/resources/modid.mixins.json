@@ -6,6 +6,7 @@
   "mixins": [
   ],
   "client": [
+    "context.WorldMixin",
     "redstone.RedstoneWireBlockMixin",
     "dimensions.ParallelWorldMixin",
     "dimensions.ServerChunkManagerMixin",

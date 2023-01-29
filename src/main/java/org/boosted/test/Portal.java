@@ -533,7 +533,7 @@ public class Portal {
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
-                ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
+                overworld.getBoostedWorldContext().postTick().executeTask(() -> {
                     CowEntity cowEntity = helper.spawnWithNoFreeWill(EntityType.COW, 3, 2, 4);
                     cowEntity.setInvulnerable(true);
                     cowEntity.setCustomNameVisible(true);
@@ -547,7 +547,7 @@ public class Portal {
                     helper.gameTest.fail(new IllegalStateException("No nether portal"));
                     return;
                 }
-                ThreadCoordinator.getInstance().getBoostedContext(nether).postTick().executeTask(() -> {
+                nether.getBoostedWorldContext().postTick().executeTask(() -> {
                     CowEntity netherCow = EntityType.COW.create(nether);
                     netherCow.setPosition(netherTeleportTarget.getX(), netherTeleportTarget.getY() + 1,
                             netherTeleportTarget.getZ());
@@ -674,7 +674,7 @@ public class Portal {
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (0 < ticks && ticks <= 100) {
-                ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
+                overworld.getBoostedWorldContext().postTick().executeTask(() -> {
                     ItemEntity overworldEntity = helper.spawnEntity(3, 3, 3, EntityType.ITEM);
                     overworldEntity.setVelocity(0.0,0.0,0.1);
                     overworldEntity.setStack(new ItemStack(Items.ARROW, 1));
@@ -690,7 +690,7 @@ public class Portal {
                     helper.gameTest.fail(new IllegalStateException("No nether portal"));
                     return;
                 }
-                ThreadCoordinator.getInstance().getBoostedContext(nether).postTick().executeTask(() -> {
+                nether.getBoostedWorldContext().postTick().executeTask(() -> {
                     ItemEntity netherEntity = EntityType.ITEM.create(nether);
                     netherEntity.setStack(new ItemStack(Items.ARROW, 1));
                     netherEntity.setPosition(netherTeleportTarget.getX() + 1, netherTeleportTarget.getY() + 1, netherTeleportTarget.getZ() + 2);
@@ -813,7 +813,7 @@ public class Portal {
 
         helper.addRepeatedAction((gameTestHelper, ticks) -> {
             if (ticks == 1) {
-                ThreadCoordinator.getInstance().getBoostedContext(overworld).postTick().executeTask(() -> {
+                overworld.getBoostedWorldContext().postTick().executeTask(() -> {
                     ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "" + testPrefix + ".overworld." + overworldEntityByName.size()), null);
                     fakeOverworldPlayer.setPosition(gameTestPos.getX() + 3, gameTestPos.getY() + 2, gameTestPos.getZ() + 4.5);
                     FakePlayerClientConnection clientConnection = new FakePlayerClientConnection(NetworkSide.SERVERBOUND);

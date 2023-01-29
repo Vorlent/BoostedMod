@@ -61,10 +61,9 @@ public class ParallelWorldMixin {
 			if (threadCoordinator.getBoostedContext() == null) {
 				threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
 			}
-			for(World world : mcs.getWorlds()) {
-				if (threadCoordinator.getBoostedContext(world) == null) {
-					threadCoordinator.setBoostedContext(world, new BoostedWorldContext(world));
-				}
+			// warm up boosted world context before the tick starts
+			for (World world : mcs.getWorlds()) {
+				System.out.println(world.getBoostedWorldContext());
 			}
 			threadCoordinator.getBoostedContext().preTick().runTasks();
 		}
@@ -108,7 +107,7 @@ public class ParallelWorldMixin {
 			String finalTaskName = taskName;
 			threadCoordinator.getPhaser().register();
 			threadCoordinator.getExecutorService().execute(() -> {
-				BoostedWorldContext boostedWorldContext = threadCoordinator.getBoostedContext(serverWorld);
+				BoostedWorldContext boostedWorldContext = serverWorld.getBoostedWorldContext();
 				try {
 					threadCoordinator.getCurrentWorlds().incrementAndGet();
 					boostedWorldContext.setThread(Thread.currentThread());
@@ -148,11 +147,10 @@ public class ParallelWorldMixin {
 
 			// Go back to main thread
 			for (World world : mcs.getWorlds()) {
-				threadCoordinator.getBoostedContext(world).setThread(Thread.currentThread());
+				world.getBoostedWorldContext().setThread(Thread.currentThread());
 			}
 
 			threadCoordinator.getBoostedContext().postTick().runTasks();
-			threadCoordinator.garbageCollectBoostedWorldContexts(mcs.getWorlds());
 
 			lastTickTime[lastTickTimePos] = System.nanoTime() - tickStart;
 			//LOGGER.info("Tick time " + lastTickTime[lastTickTimePos] / 1000000 + "ms");
