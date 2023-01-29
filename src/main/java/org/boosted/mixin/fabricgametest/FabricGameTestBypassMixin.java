@@ -48,7 +48,7 @@ public abstract class FabricGameTestBypassMixin {
 	private static StructureTemplate createStructureTemplateFix(String templateId, ServerWorld world) {
 		try {
 			return StructureTestUtil.createStructureTemplate(templateId, world); // this uses fabric logic
-		} catch (RuntimeException e) {
+		} catch (RuntimeException e) { // this uses vanilla logic
 			StructureTemplateManager structureManager = world.getStructureTemplateManager();
 			Optional<StructureTemplate> optional = structureManager.getTemplate(new Identifier(templateId));
 			if (optional.isPresent()) {

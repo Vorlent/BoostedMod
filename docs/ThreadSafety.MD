@@ -70,9 +70,18 @@ ServerWorld.getMapState(String id)
 ServerWorld.putMapState(String id, MapState state)
 ServerWorld.getNextMapId()
 
+Always reference the Overworld.
+
 ServerWorld.worldProperties is also unsafe.
 
-Always reference the Overworld.
+ServerWorld.tickTime()
+ServerWorld.tickWeather()
+ServerWorld.resetWeather()
+
+ServerWorld.setTime()
+ServerWorld.setSpawnPos()
+
+are unsafe.
 
 # StructureTemplateManager
 
