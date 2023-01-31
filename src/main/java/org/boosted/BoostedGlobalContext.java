@@ -29,4 +29,13 @@ public class BoostedGlobalContext {
     public BoostedThreadExecutor postTick() {
         return postTick;
     }
+
+    /**
+     * The main thread can change over time
+     * @param thread the thread that is supposed to execute this world
+     */
+    public void setThread(Thread thread) {
+        preTick.setServerThread(thread);
+        postTick.setServerThread(thread);
+    }
 }

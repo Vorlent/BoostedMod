@@ -62,6 +62,8 @@ public class ParallelWorldMixin {
 			//StatsCommand.setServer(mcs);
 			if (threadCoordinator.getBoostedContext() == null) {
 				threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
+			} else {
+				threadCoordinator.getBoostedContext().setThread(Thread.currentThread());
 			}
 			// warm up boosted world context before the tick starts
 			for (World world : mcs.getWorlds()) {
