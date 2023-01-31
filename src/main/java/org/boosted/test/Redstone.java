@@ -154,16 +154,6 @@ public class Redstone {
         });
     }
 
-    public static void pressButton(GameTestHelper helper, World world, int x, int y, int z) {
-        BlockPos blockPos = new BlockPos(x, y, z);
-        BlockState blockState = world.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof AbstractButtonBlock) {
-            blockState.onUse(world, null, null, new BlockHitResult(new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Direction.DOWN, blockPos, false));
-        } else {
-            throw new PositionedException("No pushable button found.", GameTestUtil.transformRelativeToAbsolutePos(helper.gameTest, new BlockPos(x, y, z)), new BlockPos(x, y, z), helper.currTick);
-        }
-    }
-
     @Nullable
     private static TeleportTarget getEndTeleportTarget(ServerWorld origin, ServerWorld destination) {
         boolean bl = origin.getRegistryKey() == World.END && destination.getRegistryKey() == World.OVERWORLD;

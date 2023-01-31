@@ -7,6 +7,7 @@ import org.boosted.BoostedGlobalContext;
 import org.boosted.BoostedWorldContext;
 import org.boosted.ThreadCoordinator;
 import org.boosted.config.GeneralConfig;
+import org.boosted.util.WorldTickBarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,6 +33,8 @@ public class ParallelWorldMixin {
 	private static int lastTickTimePos = 0;
 	private static int lastTickTimeFill = 0;
 
+	private final WorldTickBarrier barrier = new WorldTickBarrier();
+
 	//original mod also hooked BasicEventHooks.onPostWorldTick(serverworld);
 
 	/**
@@ -54,8 +57,7 @@ public class ParallelWorldMixin {
 		} else {
 			tickStart = System.nanoTime();
 			threadCoordinator.getIsTicking().set(true);
-			threadCoordinator.setPhaser(new Phaser());
-			threadCoordinator.getPhaser().register();
+			barrier.reset();
 			mcs = (MinecraftServer) (Object) this;
 			//StatsCommand.setServer(mcs);
 			if (threadCoordinator.getBoostedContext() == null) {
@@ -63,7 +65,7 @@ public class ParallelWorldMixin {
 			}
 			// warm up boosted world context before the tick starts
 			for (World world : mcs.getWorlds()) {
-				System.out.println(world.getBoostedWorldContext());
+				world.getBoostedWorldContext();
 			}
 			threadCoordinator.getBoostedContext().preTick().runTasks();
 		}
@@ -105,19 +107,18 @@ public class ParallelWorldMixin {
 				threadCoordinator.getCurrentTasks().add(taskName);
 			}
 			String finalTaskName = taskName;
-			threadCoordinator.getPhaser().register();
+			barrier.registerWorld();
 			threadCoordinator.getExecutorService().execute(() -> {
+
 				BoostedWorldContext boostedWorldContext = serverWorld.getBoostedWorldContext();
 				try {
 					threadCoordinator.getCurrentWorlds().incrementAndGet();
 					boostedWorldContext.setThread(Thread.currentThread());
-					boostedWorldContext.preTick().runTasks();
 					serverWorld.tick(shouldKeepTicking);
 					boostedWorldContext.postTick().runTasks();
 				} finally {
-
 					boostedWorldContext.setThread(null);
-					threadCoordinator.getPhaser().arriveAndDeregister();
+					barrier.finishWorld();
 					//LOGGER.warn(threadCoordinator.getPhaser().toString());
 					threadCoordinator.getCurrentWorlds().decrementAndGet();
 					if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
@@ -141,9 +142,8 @@ public class ParallelWorldMixin {
 			LOGGER.warn("Multiple servers?");
 		} else {
 			// wait until all worlds have finished
-			threadCoordinator.getPhaser().arriveAndAwaitAdvance();
+			barrier.waitForAllWorlds();
 			threadCoordinator.getIsTicking().set(false);
-			threadCoordinator.setPhaser(null);
 
 			// Go back to main thread
 			for (World world : mcs.getWorlds()) {
