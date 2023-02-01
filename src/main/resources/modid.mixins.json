@@ -4,21 +4,21 @@
   "package": "org.boosted.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "weathertime.WorldMixin"
   ],
   "client": [
     "context.WorldMixin",
-    "redstone.RedstoneWireBlockMixin",
+    "dimensions.FabricDimensionsMixin",
     "dimensions.ParallelWorldMixin",
     "dimensions.ServerChunkManagerMixin",
-    "dimensions.ParallelWorldMixin",
-    "portal.EntityMoveToWorldMixin",
-    "portal.EndPortalBlockMixin",
-    "dimensions.FabricDimensionsMixin",
-    "teleport.ServerPlayNetworkHandlerMixin",
-    "teleport.ServerPlayerEntityMixin",
-    "teleport.TeleportCommandMixin",
+    "fabricgametest.FabricGameTestBypassMixin",
     "fabricgametest.FabricGameTestUncrasherMixin",
-    "fabricgametest.FabricGameTestBypassMixin"
+    "portal.EndPortalBlockMixin",
+    "portal.EntityMoveToWorldMixin",
+    "redstone.RedstoneWireBlockMixin",
+    "teleport.ServerPlayerEntityMixin",
+    "teleport.ServerPlayNetworkHandlerMixin",
+    "teleport.TeleportCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1

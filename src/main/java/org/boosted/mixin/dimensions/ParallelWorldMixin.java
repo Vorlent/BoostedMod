@@ -8,6 +8,7 @@ import org.boosted.BoostedWorldContext;
 import org.boosted.ThreadCoordinator;
 import org.boosted.config.GeneralConfig;
 import org.boosted.util.WorldTickBarrier;
+import org.boosted.util.WorldWeatherTimeBarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +35,6 @@ public class ParallelWorldMixin {
 	private static int lastTickTimeFill = 0;
 
 	private final WorldTickBarrier barrier = new WorldTickBarrier();
-
 	//original mod also hooked BasicEventHooks.onPostWorldTick(serverworld);
 
 	/**
@@ -52,25 +52,26 @@ public class ParallelWorldMixin {
 			LOGGER.info("setupThreadpool");
 		}
 
-		if (threadCoordinator.getPhaser() != null) {
-			LOGGER.warn("Multiple servers?");
+		tickStart = System.nanoTime();
+		threadCoordinator.getIsTicking().set(true);
+		barrier.reset();
+		mcs = (MinecraftServer) (Object) this;
+
+		if (threadCoordinator.getBoostedContext() == null) {
+			threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
 		} else {
-			tickStart = System.nanoTime();
-			threadCoordinator.getIsTicking().set(true);
-			barrier.reset();
-			mcs = (MinecraftServer) (Object) this;
-			//StatsCommand.setServer(mcs);
-			if (threadCoordinator.getBoostedContext() == null) {
-				threadCoordinator.setBoostedContext(new BoostedGlobalContext(Thread.currentThread()));
-			} else {
-				threadCoordinator.getBoostedContext().setThread(Thread.currentThread());
-			}
-			// warm up boosted world context before the tick starts
-			for (World world : mcs.getWorlds()) {
-				world.getBoostedWorldContext();
-			}
-			threadCoordinator.getBoostedContext().preTick().runTasks();
+			threadCoordinator.getBoostedContext().setThread(Thread.currentThread());
 		}
+		threadCoordinator.getBoostedContext().getWeatherTimeBarrier().reset();
+
+		// warm up boosted world context before the tick starts
+		for (World world : mcs.getWorlds()) {
+			// TODO move this into a dedicated package
+			threadCoordinator.getBoostedContext().getWeatherTimeBarrier().definePhase(world);
+			world.getBoostedWorldContext();
+		}
+
+		threadCoordinator.getBoostedContext().preTick().runTasks();
 		//LOGGER.info("injectPreTick end");
 	}
 
