@@ -61,6 +61,27 @@ then all worlds must finish their tick simulation and only then does saving star
 
 The ChunkloadDrive may or may not be necessary. I don't know.
 
+# Weather and Time ticking in Server World.
+
+ServerWorld.worldProperties is also unsafe.
+
+ServerWorld.tickTime()
+ServerWorld.tickWeather()
+ServerWorld.resetWeather()
+
+ServerWorld.setTime()
+ServerWorld.setSpawnPos()
+
+all run in the multithreaded ServerWorld.tick() function.
+
+One way to approach this problem is to just execute it sequentially.
+Splitting split into two functions would do the trick.
+Just run weather and time logic sequentially and then run the rest of the tick function in paraallel.
+However, I did things the hard way and implemented an unecessarily complex barrier,
+so that each world represents a phase and therefore the xth world waits for the x-1 th world to finish to
+avoid copying mojang code.
+
+
 # ServerWorld
 
 ServerWorld.server has been found to be problematic in context with the ScoreBoard.
@@ -71,15 +92,6 @@ ServerWorld.putMapState(String id, MapState state)
 ServerWorld.getNextMapId()
 
 Always reference the Overworld.
-
-ServerWorld.worldProperties is also unsafe.
-
-ServerWorld.tickTime()
-ServerWorld.tickWeather()
-ServerWorld.resetWeather()
-
-ServerWorld.setTime()
-ServerWorld.setSpawnPos()
 
 are unsafe.
 
