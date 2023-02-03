@@ -35,6 +35,7 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.*;
+import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -66,31 +67,51 @@ import java.util.function.Consumer;
  */
 public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
 
+    private static final ApiServices DUMMY_API_SERVICES = new ApiServices(null, null, null, null);
+    private static final SaveLoader DUMMY_SAVELOADER = new SaveLoader(null, null, null, null);
+
+
     private final MinecraftServer server;
 
     public UnmodifiableMinecraftServer(MinecraftServer server) {
         //TODO USE DUMMY VALUES
-        super(server.getThread(), server.session, server.getDataPackManager(), saveLoader, server.getProxy(),
-                server.getDataFixer(), apiServices, worldGenerationProgressListenerFactory);
+        // saveLoader needs dummy class
+        // session needs dummy class
+        super(null, server.session, null, DUMMY_SAVELOADER, null,
+                null, DUMMY_API_SERVICES, null);
         this.server = server;
 
         // TODO use reflection to delete state
-        this.registryManager = null;
-        this.saveProperties = null;
-        this.proxy = null;
-        this.dataPackManager = null;
-        this.resourceManagerHolder = null;
-        this.apiServices = null;
         this.networkIo = null;
-        this.worldGenerationProgressListenerFactory = null;
-        this.session = null;
-        this.saveHandler = null;
-        this.dataFixer = null;
         this.commandFunctionManager = null;
         this.structureTemplateManager = null;
-        this.serverThread = null;
         this.workerExecutor = null;
     }
+
+    /*
+        public MinecraftServer(Thread serverThread, LevelStorage.Session session, ResourcePackManager dataPackManager, SaveLoader saveLoader, Proxy proxy, DataFixer dataFixer, ApiServices apiServices, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory) {
+        super("Server");
+        this.registryManager = saveLoader.dynamicRegistryManager();
+        this.saveProperties = saveLoader.saveProperties();
+        if (!this.saveProperties.getGeneratorOptions().getDimensions().contains(DimensionOptions.OVERWORLD)) {
+            throw new IllegalStateException("Missing Overworld dimension data");
+        }
+        this.resourceManagerHolder = new ResourceManagerHolder(saveLoader.resourceManager(), saveLoader.dataPackContents());
+        this.apiServices = apiServices;
+        if (apiServices.userCache() != null) {
+            apiServices.userCache().setExecutor(this);
+        }
+        this.networkIo = new ServerNetworkIo(this);
+        this.worldGenerationProgressListenerFactory = worldGenerationProgressListenerFactory;
+        this.session = session;
+        this.saveHandler = session.createSaveHandler();
+        this.dataFixer = dataFixer;
+        this.commandFunctionManager = new CommandFunctionManager(this, this.resourceManagerHolder.dataPackContents.getFunctionLoader());
+        this.structureTemplateManager = new StructureTemplateManager(saveLoader.resourceManager(), session, dataFixer);
+        this.serverThread = serverThread;
+        this.workerExecutor = Util.getMainWorkerExecutor();
+    }
+     */
 
     @Override
     protected boolean setupServer() throws IOException {
@@ -192,7 +213,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
     }
 
     @Override
-    protected boolean canExecute(ServerTask serverTask) {
+    public boolean canExecute(ServerTask serverTask) {
         return server.canExecute(serverTask);
     }
 
@@ -262,7 +283,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
     }
 
     @Override
-    public final ServerWorld getOverworld() {
+    public ServerWorld getOverworld() {
         return server.getOverworld();
     }
 
@@ -878,6 +899,19 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
     @Override
     public MessageDecorator getMessageDecorator() {
         return server.getMessageDecorator();
+    }
+
+    public class DummySession extends LevelStorage.Session
+            implements AutoCloseable {
+
+        public DummySession(String directoryName) throws IOException {
+            super(directoryName);
+        }
+
+        @Override
+        public WorldSaveHandler createSaveHandler() {
+            return null;
+        }
     }
 }
 

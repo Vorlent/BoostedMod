@@ -14,3 +14,5 @@ accessible field net/minecraft/server/command/TeleportCommand INVALID_POSITION_E
 accessible class net/minecraft/test/StructureTestListener
 accessible method net/minecraft/test/StructureTestUtil loadSnbt (Ljava/nio/file/Path;)Lnet/minecraft/nbt/NbtCompound;
 accessible method net/minecraft/test/StructureTestUtil createStructureTemplate (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/StructureTemplate;
+extendable method net/minecraft/server/MinecraftServer getOverworld ()Lnet/minecraft/server/world/ServerWorld;
+accessible method net/minecraft/server/MinecraftServer canExecute (Lnet/minecraft/server/ServerTask;)Z
