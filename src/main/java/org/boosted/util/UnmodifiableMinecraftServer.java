@@ -77,15 +77,15 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         //TODO USE DUMMY VALUES
         // saveLoader needs dummy class
         // session needs dummy class
-        super(null, server.session, null, DUMMY_SAVELOADER, null,
+        super(null, null /*server.session*/, null, DUMMY_SAVELOADER, null,
                 null, DUMMY_API_SERVICES, null);
         this.server = server;
 
         // TODO use reflection to delete state
-        this.networkIo = null;
-        this.commandFunctionManager = null;
-        this.structureTemplateManager = null;
-        this.workerExecutor = null;
+        //this.networkIo = null;
+        //this.commandFunctionManager = null;
+        //this.structureTemplateManager = null;
+        //this.workerExecutor = null;
     }
 
     /*
@@ -223,7 +223,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
     }
 
     @Override
-    protected void executeTask(ServerTask serverTask) {
+    public void executeTask(ServerTask serverTask) {
         throw readOnlyException();
     }
 
@@ -901,7 +901,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getMessageDecorator();
     }
 
-    public class DummySession extends LevelStorage.Session
+    /*public class DummySession extends LevelStorage.Session
             implements AutoCloseable {
 
         public DummySession(String directoryName) throws IOException {
@@ -913,5 +913,6 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
             return null;
         }
     }
+    */
 }
 
