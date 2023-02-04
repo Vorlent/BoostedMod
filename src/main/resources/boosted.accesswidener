@@ -20,3 +20,16 @@ accessible field net/minecraft/world/level/storage/LevelStorage$Session director
 mutable field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
 accessible field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
 accessible method net/minecraft/world/level/LevelProperties <init> (Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/NbtCompound;ZIIIFJJIIIZIZZZLnet/minecraft/world/border/WorldBorder$Properties;IILjava/util/UUID;Ljava/util/Set;Lnet/minecraft/world/timer/Timer;Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/world/level/LevelInfo;Lnet/minecraft/world/gen/GeneratorOptions;Lcom/mojang/serialization/Lifecycle;)V
+
+accessible field net/minecraft/server/world/ServerWorld sleepManager Lnet/minecraft/server/world/SleepManager;
+accessible field net/minecraft/server/world/ServerWorld blockEventQueue Ljava/util/List;
+accessible field net/minecraft/server/world/ServerWorld syncedBlockEventQueue Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;
+accessible method net/minecraft/server/world/ServerWorld processBlockEvent (Lnet/minecraft/server/world/BlockEvent;)Z
+accessible method net/minecraft/server/world/ServerWorld shouldCancelSpawn (Lnet/minecraft/entity/Entity;)Z
+extendable method net/minecraft/server/world/ServerWorld shouldCancelSpawn (Lnet/minecraft/entity/Entity;)Z
+accessible method net/minecraft/server/world/ServerWorld processSyncedBlockEvents ()V
+extendable method net/minecraft/server/world/ServerWorld processSyncedBlockEvents ()V
+accessible method net/minecraft/server/world/ServerWorld saveLevel ()V
+extendable method net/minecraft/server/world/ServerWorld saveLevel ()V
+accessible method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
+extendable method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V

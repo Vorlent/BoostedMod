@@ -27,7 +27,7 @@ public class SynchronizedResource<T, U> {
         }
     }
 
-    public <R> R read(Function<U, R> consumer) {
+    public <R> R readExp(Function<U, R> consumer) {
         lock.readLock().lock();
         readOnly.set(readOnly.get() + 1);
         R result = null;
@@ -40,7 +40,7 @@ public class SynchronizedResource<T, U> {
         return result;
     }
 
-    public <R> R write(Function<T, R> consumer) {
+    public <R> R writeExp(Function<T, R> consumer) {
         if (readOnly.get() > 0) {
             throw new IllegalStateException("Cannot write while in read-only mode");
         }

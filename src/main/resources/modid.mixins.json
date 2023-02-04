@@ -4,8 +4,6 @@
   "package": "org.boosted.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "unmodifiable.UnmodifiableLevelStorageMixin",
-    "unmodifiable.UnmodifiableMinecraftServerMixin",
     "weathertime.MinecraftServerMixin",
     "weathertime.WeatherTimeBarrierMixin",
     "context.WorldMixin",
