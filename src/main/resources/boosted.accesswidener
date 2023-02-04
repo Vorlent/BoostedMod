@@ -19,3 +19,4 @@ accessible method net/minecraft/server/MinecraftServer canExecute (Lnet/minecraf
 accessible field net/minecraft/world/level/storage/LevelStorage$Session directory Lnet/minecraft/world/level/storage/LevelStorage$LevelSave;
 mutable field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
 accessible field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
+accessible method net/minecraft/world/level/LevelProperties <init> (Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/NbtCompound;ZIIIFJJIIIZIZZZLnet/minecraft/world/border/WorldBorder$Properties;IILjava/util/UUID;Ljava/util/Set;Lnet/minecraft/world/timer/Timer;Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/world/level/LevelInfo;Lnet/minecraft/world/gen/GeneratorOptions;Lcom/mojang/serialization/Lifecycle;)V

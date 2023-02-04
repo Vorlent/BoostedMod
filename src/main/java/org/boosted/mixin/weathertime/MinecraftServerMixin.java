@@ -2,8 +2,6 @@ package org.boosted.mixin.weathertime;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import org.boosted.BoostedGlobalContext;
-import org.boosted.ThreadCoordinator;
 import org.boosted.WeatherTimeBarrierGetter;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.WeatherTimeBarrier;
@@ -18,7 +16,7 @@ public class MinecraftServerMixin implements WeatherTimeBarrierGetter {
 	@Unique
 	private WeatherTimeBarrier boosted$weatherTimeBarrier;
 	@Unique
-	private MinecraftServer boosted$unmodifiableMinecraftServer;
+	private UnmodifiableMinecraftServer boosted$unmodifiableMinecraftServer;
 	public WeatherTimeBarrier getWeatherTimeBarrier() {
 		if (boosted$weatherTimeBarrier == null) {
 			boosted$weatherTimeBarrier = new WeatherTimeBarrier();

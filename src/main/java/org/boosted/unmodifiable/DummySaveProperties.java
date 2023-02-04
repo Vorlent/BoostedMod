@@ -3,6 +3,7 @@ package org.boosted.unmodifiable;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.resource.DataPackSettings;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
@@ -13,12 +14,37 @@ import net.minecraft.world.SaveProperties;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.level.LevelInfo;
+import net.minecraft.world.level.LevelProperties;
 import net.minecraft.world.level.ServerWorldProperties;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.UUID;
 
-public class DummySaveProperties implements SaveProperties {
+public class DummySaveProperties extends LevelProperties {
+    public DummySaveProperties() {
+        super(null, 0,
+                null,
+                false,
+                0,0,0,
+                0.0f,
+                0,0,
+                0,0,0,
+                false,
+                0,
+                false, false, false,
+                null,
+                0,0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new GeneratorOptions(0, false, false, new DummyRegistry()),
+                null);
+    }
+
     @Override
     public DataPackSettings getDataPackSettings() {
         throw new UnsupportedOperationException();
@@ -153,7 +179,8 @@ public class DummySaveProperties implements SaveProperties {
 
     @Override
     public GeneratorOptions getGeneratorOptions() {
-        return new GeneratorOptions(0, false, false, new DummyRegistry());
+        //return new GeneratorOptions(0, false, false, new DummyRegistry());
+        return super.getGeneratorOptions();
     }
 
     @Override
