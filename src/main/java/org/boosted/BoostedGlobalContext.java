@@ -1,12 +1,8 @@
 package org.boosted;
 
-import org.boosted.util.WorldWeatherTimeBarrier;
-
 public class BoostedGlobalContext {
     private final BoostedThreadExecutor preTick;
     private final BoostedThreadExecutor postTick;
-
-    private final WorldWeatherTimeBarrier weatherTimeBarrier = new WorldWeatherTimeBarrier();
 
     /**
      * The boosted global context is meant to be used for single threaded work between world simulations.
@@ -41,9 +37,5 @@ public class BoostedGlobalContext {
     public void setThread(Thread thread) {
         preTick.setServerThread(thread);
         postTick.setServerThread(thread);
-    }
-
-    public WorldWeatherTimeBarrier getWeatherTimeBarrier() {
-        return weatherTimeBarrier;
     }
 }

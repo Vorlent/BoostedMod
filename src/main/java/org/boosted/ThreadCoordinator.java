@@ -9,29 +9,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadCoordinator {
-
     private final Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<>();
     @Nullable
     private Phaser phaser;
     @Nullable
     private ExecutorService executorService;
     private final Set<String> currentTasks = ConcurrentHashMap.newKeySet();
-
     private final AtomicInteger currentEnts = new AtomicInteger();
-
     private final AtomicInteger currentEnvs = new AtomicInteger();
-
     private final AtomicInteger currentTEs = new AtomicInteger();
-
     private final AtomicInteger threadID = new AtomicInteger();
-
     private final AtomicInteger currentWorlds = new AtomicInteger();
-
     private final AtomicBoolean isTicking = new AtomicBoolean();
 
     @Nullable
     private BoostedGlobalContext boostedContext;
-
     private final static ThreadCoordinator instance;
     static {
         instance = new ThreadCoordinator();
@@ -106,5 +98,4 @@ public class ThreadCoordinator {
     public AtomicBoolean getIsTicking() {
         return isTicking;
     }
-
 }

@@ -14,8 +14,7 @@ import java.util.concurrent.CountDownLatch;
  * To maintain determinism, these parts of the other worlds are executed in order.s
  * To avoid copying and pasting mojang code, I have decided to use a more complicated way of synchronizing ServerWorld.tick()
  */
-public class WorldWeatherTimeBarrier {
-
+public class WeatherTimeBarrier {
     private final Map<World, Integer> worldToPhase = new ConcurrentHashMap<>();
     private int lastId = 0;
     private final List<CountDownLatch> latches = Collections.synchronizedList(new ArrayList<>());

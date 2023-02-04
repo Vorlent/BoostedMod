@@ -15,7 +15,6 @@ public class WorldMixin implements WorldContextGetter {
 	public BoostedWorldContext getBoostedWorldContext() {
 		if (boosted$WorldContext == null) {
 			boosted$WorldContext = new BoostedWorldContext(((World)(Object)this));
-			new UnmodifiableMinecraftServer(((World)(Object)this).getServer());
 		}
 		return boosted$WorldContext;
 	}

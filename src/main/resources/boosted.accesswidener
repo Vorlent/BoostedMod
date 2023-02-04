@@ -17,3 +17,5 @@ accessible method net/minecraft/test/StructureTestUtil createStructureTemplate (
 extendable method net/minecraft/server/MinecraftServer getOverworld ()Lnet/minecraft/server/world/ServerWorld;
 accessible method net/minecraft/server/MinecraftServer canExecute (Lnet/minecraft/server/ServerTask;)Z
 accessible field net/minecraft/world/level/storage/LevelStorage$Session directory Lnet/minecraft/world/level/storage/LevelStorage$LevelSave;
+mutable field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/server/function/CommandFunctionManager server Lnet/minecraft/server/MinecraftServer;
