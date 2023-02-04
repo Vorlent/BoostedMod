@@ -1,4 +1,4 @@
-package org.boosted.util;
+package org.boosted.unmodifiable;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -35,6 +35,7 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.*;
+import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,19 +66,16 @@ import java.util.function.Consumer;
  *
  * When attempting to write, the class will throw an exception and the caller must fix their code. (e.g. acquire the write lock)
  */
-public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
+public class UnmodifiableMinecraftServer extends MinecraftServer {
 
+    private static final SaveProperties DUMMY_SAVE_PROPERTIES = new DummySaveProperties();
     private static final ApiServices DUMMY_API_SERVICES = new ApiServices(null, null, null, null);
-    private static final SaveLoader DUMMY_SAVELOADER = new SaveLoader(null, null, null, null);
-
+    private static final SaveLoader DUMMY_SAVELOADER = new SaveLoader(null, null, null, DUMMY_SAVE_PROPERTIES);
 
     private final MinecraftServer server;
 
     public UnmodifiableMinecraftServer(MinecraftServer server) {
-        //TODO USE DUMMY VALUES
-        // saveLoader needs dummy class
-        // session needs dummy class
-        super(null, null /*server.session*/, null, DUMMY_SAVELOADER, null,
+        super(null, new UnmodifiableLevelStorage().createSession2("DUMMY"), null, DUMMY_SAVELOADER, null,
                 null, DUMMY_API_SERVICES, null);
         this.server = server;
 
@@ -133,6 +131,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable game mode
     public GameMode getDefaultGameMode() {
         return this.saveProperties.getGameMode();
     }
@@ -282,11 +281,13 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getFile(path);
     }
 
+    //TODO consider unmodifiable server world
     @Override
     public ServerWorld getOverworld() {
         return server.getOverworld();
     }
 
+    //TODO consider unmodifiable server world
     @Override
     public ServerWorld getWorld(RegistryKey<World> key) {
         return server.getWorld(key);
@@ -297,6 +298,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getWorldRegistryKeys();
     }
 
+    //TODO consider unmodifiable server world
     @Override
     public Iterable<ServerWorld> getWorlds() {
         return server.getWorlds();
@@ -362,6 +364,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable game profile
     @Override
     public GameProfile getHostProfile() {
         return server.getHostProfile();
@@ -412,6 +415,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable ServerResourcePackProperties
     @Override
     public Optional<net.minecraft.server.MinecraftServer.ServerResourcePackProperties> getResourcePackProperties() {
         return server.getResourcePackProperties();
@@ -511,6 +515,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.isStopped();
     }
 
+    //TODO consider unmodifiable PlayerManager
     @Override
     public PlayerManager getPlayerManager() {
         return server.getPlayerManager();
@@ -531,6 +536,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable ServerNetworkIo
     @Override
     public ServerNetworkIo getNetworkIo() {
         return server.getNetworkIo();
@@ -576,6 +582,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.hideOnlinePlayers();
     }
 
+    //TODO consider unmodifiable Proxy
     @Override
     public Proxy getProxy() {
         return server.getProxy();
@@ -591,26 +598,31 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable MinecraftSessionService
     @Override
     public MinecraftSessionService getSessionService() {
         return server.getSessionService();
     }
 
+    //TODO consider unmodifiable SignatureVerifier
     @Override
     public SignatureVerifier getServicesSignatureVerifier() {
         return server.getServicesSignatureVerifier();
     }
 
+    //TODO consider unmodifiable GameProfileRepository
     @Override
     public GameProfileRepository getGameProfileRepo() {
         return server.getGameProfileRepo();
     }
 
+    //TODO consider unmodifiable UserCache
     @Override
     public UserCache getUserCache() {
         return server.getUserCache();
     }
 
+    //TODO consider unmodifiable ServerMetadata
     @Override
     public ServerMetadata getServerMetadata() {
         return server.getServerMetadata();
@@ -656,6 +668,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getTimeReference();
     }
 
+    //TODO consider unmodifiable DataFixer
     @Override
     public DataFixer getDataFixer() {
         return server.getDataFixer();
@@ -666,11 +679,13 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getSpawnRadius(world);
     }
 
+    //TODO consider unmodifiable ServerAdvancementLoader
     @Override
     public ServerAdvancementLoader getAdvancementLoader() {
         return server.getAdvancementLoader();
     }
 
+    //TODO consider unmodifiable CommandFunctionManager
     @Override
     public CommandFunctionManager getCommandFunctionManager() {
         return server.getCommandFunctionManager();
@@ -686,16 +701,19 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable ResourcePackManager
     @Override
     public ResourcePackManager getDataPackManager() {
         return server.getDataPackManager();
     }
 
+    //TODO consider unmodifiable CommandManager
     @Override
     public CommandManager getCommandManager() {
         return server.getCommandManager();
     }
 
+    //TODO consider unmodifiable ServerCommandSource
     @Override
     public ServerCommandSource getCommandSource() {
         return server.getCommandSource();
@@ -716,41 +734,49 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.shouldBroadcastConsoleToOps();
     }
 
+    //TODO consider unmodifiable RecipeManager
     @Override
     public RecipeManager getRecipeManager() {
         return server.getRecipeManager();
     }
 
+    //TODO consider unmodifiable ServerScoreboard
     @Override
     public ServerScoreboard getScoreboard() {
         return server.getScoreboard();
     }
 
+    //TODO consider unmodifiable DataCommandStorage
     @Override
     public DataCommandStorage getDataCommandStorage() {
         return server.getDataCommandStorage();
     }
 
+    //TODO consider unmodifiable LootManager
     @Override
     public LootManager getLootManager() {
         return server.getLootManager();
     }
 
+    //TODO consider unmodifiable LootConditionManager
     @Override
     public LootConditionManager getPredicateManager() {
         return server.getPredicateManager();
     }
 
+    //TODO consider unmodifiable LootFunctionManager
     @Override
     public LootFunctionManager getItemModifierManager() {
         return server.getItemModifierManager();
     }
 
+    //TODO consider unmodifiable GameRules
     @Override
     public GameRules getGameRules() {
         return server.getGameRules();
     }
 
+    //TODO consider unmodifiable BossBarManager
     @Override
     public BossBarManager getBossBarManager() {
         return server.getBossBarManager();
@@ -776,11 +802,13 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getPermissionLevel(profile);
     }
 
+    //TODO consider unmodifiable MetricsData
     @Override
     public MetricsData getMetricsData() {
         return server.getMetricsData();
     }
 
+    //TODO consider unmodifiable Profiler
     @Override
     public Profiler getProfiler() {
         return server.getProfiler();
@@ -831,11 +859,13 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.syncChunkWrites();
     }
 
+    //TODO consider unmodifiable StructureTemplateManager
     @Override
     public StructureTemplateManager getStructureTemplateManager() {
         return server.getStructureTemplateManager();
     }
 
+    //TODO consider unmodifiable SaveProperties
     @Override
     public SaveProperties getSaveProperties() {
         return server.getSaveProperties();
@@ -846,21 +876,25 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         return server.getRegistryManager();
     }
 
+    //TODO consider unmodifiable TextStream
     @Override
     public TextStream createFilterer(ServerPlayerEntity player) {
         return server.createFilterer(player);
     }
 
+    //TODO consider unmodifiable ServerPlayerInteractionManager
     @Override
     public ServerPlayerInteractionManager getPlayerInteractionManager(ServerPlayerEntity player) {
         return server.getPlayerInteractionManager(player);
     }
 
+    //TODO consider unmodifiable GameMode
     @Override
     public GameMode getForcedGameMode() {
         return server.getForcedGameMode();
     }
 
+    //TODO consider unmodifiable ResourceManager
     @Override
     public ResourceManager getResourceManager() {
         return server.getResourceManager();
@@ -881,6 +915,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable ProfileResult
     @Override
     public ProfileResult stopDebug() {
         throw readOnlyException();
@@ -896,6 +931,7 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         throw readOnlyException();
     }
 
+    //TODO consider unmodifiable MessageDecorator
     @Override
     public MessageDecorator getMessageDecorator() {
         return server.getMessageDecorator();
@@ -912,7 +948,6 @@ public abstract class UnmodifiableMinecraftServer extends MinecraftServer {
         public WorldSaveHandler createSaveHandler() {
             return null;
         }
-    }
-    */
+    }*/
 }
 

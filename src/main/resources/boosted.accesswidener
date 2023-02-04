@@ -16,3 +16,4 @@ accessible method net/minecraft/test/StructureTestUtil loadSnbt (Ljava/nio/file/
 accessible method net/minecraft/test/StructureTestUtil createStructureTemplate (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/StructureTemplate;
 extendable method net/minecraft/server/MinecraftServer getOverworld ()Lnet/minecraft/server/world/ServerWorld;
 accessible method net/minecraft/server/MinecraftServer canExecute (Lnet/minecraft/server/ServerTask;)Z
+accessible field net/minecraft/world/level/storage/LevelStorage$Session directory Lnet/minecraft/world/level/storage/LevelStorage$LevelSave;
