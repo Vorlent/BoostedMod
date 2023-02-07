@@ -3,7 +3,6 @@ package org.boosted.mixin.weathertime;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import org.boosted.WeatherTimeBarrierGetter;
-import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.WeatherTimeBarrier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -15,12 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MinecraftServerMixin implements WeatherTimeBarrierGetter {
 	@Unique
 	private WeatherTimeBarrier boosted$weatherTimeBarrier;
-	@Unique
-	private UnmodifiableMinecraftServer boosted$unmodifiableMinecraftServer;
 	public WeatherTimeBarrier getWeatherTimeBarrier() {
 		if (boosted$weatherTimeBarrier == null) {
 			boosted$weatherTimeBarrier = new WeatherTimeBarrier();
-			boosted$unmodifiableMinecraftServer = new UnmodifiableMinecraftServer(((MinecraftServer)(Object)this));
 		}
 		return boosted$weatherTimeBarrier;
 	}

@@ -4,20 +4,21 @@
   "package": "org.boosted.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "weathertime.MinecraftServerMixin",
-    "weathertime.WeatherTimeBarrierMixin",
     "context.WorldMixin",
     "dimensions.FabricDimensionsMixin",
     "dimensions.ParallelWorldMixin",
     "dimensions.ServerChunkManagerMixin",
     "fabricgametest.FabricGameTestBypassMixin",
     "fabricgametest.FabricGameTestUncrasherMixin",
+    "getServer.ServerWorldMixin",
     "portal.EndPortalBlockMixin",
     "portal.EntityMoveToWorldMixin",
     "redstone.RedstoneWireBlockMixin",
     "teleport.ServerPlayerEntityMixin",
     "teleport.ServerPlayNetworkHandlerMixin",
-    "teleport.TeleportCommandMixin"
+    "teleport.TeleportCommandMixin",
+    "weathertime.MinecraftServerMixin",
+    "weathertime.WeatherTimeBarrierMixin"
   ],
   "injectors": {
     "defaultRequire": 1

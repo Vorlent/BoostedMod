@@ -99,3 +99,9 @@ are unsafe.
 
 
 # PlayerManager, DedicatedPlayerManager, IntegratedPlayerManager
+
+# ServerCommandSource
+
+ServerCommandSource lets server references escape
+
+# CommandBlock and commands

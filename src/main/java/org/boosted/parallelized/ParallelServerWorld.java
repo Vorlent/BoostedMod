@@ -39,7 +39,7 @@ import net.minecraft.world.poi.PointOfInterestType;
 import net.minecraft.world.poi.PointOfInterestTypes;
 import net.minecraft.world.spawner.Spawner;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
-import org.boosted.util.SynchronizedResource;
+import org.boosted.util.RWLockSynchronizedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,13 +50,15 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 public class ParallelServerWorld extends ServerWorld {
-    private SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
+    private final RWLockSynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
+    private final MinecraftServer unsynchronizedServer; // try to never use this!
 
     public ParallelServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime) {
         super(null, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime);
 
         // TODO share synchronized resource with server
-        synchronizedServer = new SynchronizedResource<>(server, new UnmodifiableMinecraftServer(server));
+        synchronizedServer = new RWLockSynchronizedResource<>(server, new UnmodifiableMinecraftServer(server));
+        unsynchronizedServer = server;
     }
 
     /**
@@ -170,6 +172,10 @@ public class ParallelServerWorld extends ServerWorld {
         throw new UnsupportedOperationException();
     }
 
+    public MinecraftServer getUnsynchronizedServer() {
+        return unsynchronizedServer;
+    }
+
     @Override
     public StructureTemplateManager getStructureTemplateManager() {
         throw new UnsupportedOperationException();
@@ -212,9 +218,6 @@ public class ParallelServerWorld extends ServerWorld {
         return synchronizedServer.readExp(server -> server.getSaveProperties().getGeneratorOptions().getSeed());
     }
 
-    /*
-    getServer()
-     */
     @Override
     public void sendSleepingStatus() {
         if (!this.isSleepingEnabled()) {
@@ -236,14 +239,14 @@ public class ParallelServerWorld extends ServerWorld {
     public MapState getMapState(String id) {
         // TODO verify if this can be read only
         return synchronizedServer.readExp(server ->
-            this.getServer().getOverworld().getPersistentStateManager().get(MapState::fromNbt, id)
+            server.getOverworld().getPersistentStateManager().get(MapState::fromNbt, id)
         );
     }
 
     @Override
     public void putMapState(String id, MapState state) {
         synchronizedServer.write(server ->
-            this.getServer().getOverworld().getPersistentStateManager().set(id, state)
+            server.getOverworld().getPersistentStateManager().set(id, state)
         );
     }
 
@@ -261,7 +264,7 @@ public class ParallelServerWorld extends ServerWorld {
         this.getChunkManager().removeTicket(ChunkTicketType.START, chunkPos, 11, Unit.INSTANCE);
         this.getChunkManager().addTicket(ChunkTicketType.START, new ChunkPos(pos), 11, Unit.INSTANCE);
         synchronizedServer.write(server ->
-            this.getServer().getPlayerManager().sendToAll(new PlayerSpawnPositionS2CPacket(pos, angle))
+            server.getPlayerManager().sendToAll(new PlayerSpawnPositionS2CPacket(pos, angle))
         );
     }
 

@@ -12,19 +12,19 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
-import org.boosted.util.SynchronizedResource;
+import org.boosted.util.RWLockSynchronizedResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class ParallelServerScoreboard extends ServerScoreboard {
-    private SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
+    private RWLockSynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
     // TODO implement ServerScoreBoard synchronizationn
 
     public ParallelServerScoreboard(MinecraftServer server) {
         super(server);
         // TODO share synchronized resource with server
-        synchronizedServer = new SynchronizedResource<>(server, new UnmodifiableMinecraftServer(server));
+        synchronizedServer = new RWLockSynchronizedResource<>(server, new UnmodifiableMinecraftServer(server));
     }
 
     @Override
