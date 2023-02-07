@@ -24,7 +24,9 @@ public class AbstractBlockMixin {
 			return Collections.emptyList();
 		}
 		LootContext lootContext = builder.parameter(LootContextParameters.BLOCK_STATE, state).build(LootContextTypes.BLOCK);
-		return lootContext.getWorld().getSynchronizedServer().writeExp((server) -> {
+		// loot manager is mostly thread safe. Best option would be to make it and getLootManager() threadsafe
+		// and then skip the getServer() call
+		return lootContext.getWorld().getSynchronizedServer().readExp((server) -> {
 			LootTable lootTable = server.getLootManager().getTable(identifier);
 			return lootTable.generateLoot(lootContext);
 		});
