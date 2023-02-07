@@ -33,3 +33,5 @@ accessible method net/minecraft/server/world/ServerWorld saveLevel ()V
 extendable method net/minecraft/server/world/ServerWorld saveLevel ()V
 accessible method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
 extendable method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
+
+accessible field net/minecraft/scoreboard/ServerScoreboard objectives Ljava/util/Set;
