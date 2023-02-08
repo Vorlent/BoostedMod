@@ -20,7 +20,7 @@ import java.util.List;
 @Mixin(PiglinBrain.class)
 public class PiglinBrainMixin {
     @Inject(method = "getBarteredItem(Lnet/minecraft/entity/mob/PiglinEntity;)Ljava/util/List;",
-        at = @At("HEAD"))
+        at = @At("HEAD"), cancellable = true)
     private static void getBarteredItem(PiglinEntity piglin, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (piglin.world instanceof ServerWorld serverWorld) {
             ObjectArrayList<ItemStack> itemStacks = serverWorld.getSynchronizedServer().readExp(server -> {
