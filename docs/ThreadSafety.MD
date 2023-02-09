@@ -105,3 +105,7 @@ are unsafe.
 ServerCommandSource lets server references escape
 
 # CommandBlock and commands
+
+# ServerPlayer
+
+has a reference to server and must be fixed like ServerWorld.
