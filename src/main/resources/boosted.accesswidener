@@ -41,3 +41,7 @@ accessible field net/minecraft/entity/ai/brain/task/GiveGiftsToHeroTask GIFTS Lj
 
 accessible field net/minecraft/block/entity/LootableContainerBlockEntity lootTableId Lnet/minecraft/util/Identifier;
 accessible field net/minecraft/block/entity/LootableContainerBlockEntity lootTableSeed J
+
+accessible field net/minecraft/entity/Entity inNetherPortal Z
+accessible field net/minecraft/entity/Entity netherPortalTime I
+accessible method net/minecraft/entity/Entity tickPortalCooldown ()V
