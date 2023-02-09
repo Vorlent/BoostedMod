@@ -18,6 +18,10 @@ import java.util.List;
 @Mixin(AbstractBlock.class)
 public class AbstractBlockMixin {
 
+	/**
+	 * @author Vorlent
+	 * @reason Wrap getServer().getLootManager() for exclusive read access to MinecraftServer
+	 */
 	@Overwrite
 	public List<ItemStack> getDroppedStacks(BlockState state, LootContext.Builder builder) {
 		Identifier identifier = ((AbstractBlock)(Object)this).getLootTableId();
