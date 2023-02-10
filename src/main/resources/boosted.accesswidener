@@ -45,3 +45,6 @@ accessible field net/minecraft/block/entity/LootableContainerBlockEntity lootTab
 accessible field net/minecraft/entity/Entity inNetherPortal Z
 accessible field net/minecraft/entity/Entity netherPortalTime I
 accessible method net/minecraft/entity/Entity tickPortalCooldown ()V
+
+accessible class net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal
+accessible field net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal cat Lnet/minecraft/entity/passive/CatEntity;
