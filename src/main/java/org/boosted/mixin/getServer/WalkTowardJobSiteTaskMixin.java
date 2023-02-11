@@ -42,9 +42,10 @@ public class WalkTowardJobSiteTaskMixin {
                 if (pointOfInterestStorage.test(blockPos, registryEntry -> true)) {
                     pointOfInterestStorage.releaseTicket(blockPos);
                 }
+
+                DebugInfoSender.sendPointOfInterest(serverWorld, blockPos);
             });
             /* PATCH END */
-            DebugInfoSender.sendPointOfInterest(serverWorld, blockPos);
         });
         villagerEntity.getBrain().forget(MemoryModuleType.POTENTIAL_JOB_SITE);
     }
