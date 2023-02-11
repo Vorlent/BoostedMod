@@ -39,7 +39,7 @@
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/class_1937": ["org/boosted/WorldContextGetter"],
-      "net/minecraft/server/MinecraftServer": ["org/boosted/WeatherTimeBarrierGetter"],
+      "net/minecraft/server/MinecraftServer": ["org/boosted/WeatherTimeBarrierGetter", "org/boosted/SynchronizedServerGetter"],
       "net/minecraft/class_3218": ["org/boosted/SynchronizedServerGetter"]
     }
   }
