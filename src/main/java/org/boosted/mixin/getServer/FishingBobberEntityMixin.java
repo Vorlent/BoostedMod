@@ -48,7 +48,7 @@ public class FishingBobberEntityMixin {
             /* PATCH BEGIN */
             ServerWorld serverWorld = (ServerWorld) entity.world;
             ObjectArrayList<ItemStack> list = serverWorld.getSynchronizedServer().readExp(server -> {
-                LootTable lootTable = entity.world.getServer().getLootManager().getTable(LootTables.FISHING_GAMEPLAY);
+                LootTable lootTable = server.getLootManager().getTable(LootTables.FISHING_GAMEPLAY);
                 return lootTable.generateLoot(builder.build(LootContextTypes.FISHING));
             });
             /* PATCH END */

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class ForgetCompletedPointOfInterestTaskMixin {
     /**
      * @author Vorlent
-     * @reason This mixin needs exclusive read access to minecraft server,
+     * @reason This mixin needs exclusive write access to minecraft server,
      * it may also potentially hold cross world references.
      */
     @Overwrite
@@ -23,13 +23,17 @@ public class ForgetCompletedPointOfInterestTaskMixin {
         Brain<?> brain = entity.getBrain();
         GlobalPos globalPos = brain.getOptionalMemory(task.memoryModule).get();
         BlockPos blockPos = globalPos.getPos();
-        ServerWorld serverWorld = world.getServer().getWorld(globalPos.getDimension());
-        if (serverWorld == null || task.hasCompletedPointOfInterest(serverWorld, blockPos)) {
-            brain.forget(task.memoryModule);
-        } else if (task.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
-            brain.forget(task.memoryModule);
-            world.getPointOfInterestStorage().releaseTicket(blockPos);
-            DebugInfoSender.sendPointOfInterest(world, blockPos);
-        }
+        /* PATCH BEGIN */
+        world.getSynchronizedServer().write(server -> {
+            ServerWorld serverWorld = server.getWorld(globalPos.getDimension());
+            if (serverWorld == null || task.hasCompletedPointOfInterest(serverWorld, blockPos)) {
+                brain.forget(task.memoryModule);
+            } else if (task.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
+                brain.forget(task.memoryModule);
+                world.getPointOfInterestStorage().releaseTicket(blockPos);
+                DebugInfoSender.sendPointOfInterest(world, blockPos);
+            }
+        });
+        /* PATCH END */
     }
 }

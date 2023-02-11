@@ -34,7 +34,7 @@ public class WalkTowardJobSiteTaskMixin {
             /* PATCH BEGIN */
             serverWorld.getSynchronizedServer().write(server -> {
                 //TODO, warning there is a cross reference to another world
-                ServerWorld serverWorld2 = serverWorld.getServer().getWorld(pos.getDimension());
+                ServerWorld serverWorld2 = server.getWorld(pos.getDimension());
                 if (serverWorld2 == null) {
                     return;
                 }

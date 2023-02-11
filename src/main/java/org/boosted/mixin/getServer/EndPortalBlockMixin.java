@@ -33,7 +33,7 @@ public class EndPortalBlockMixin {
 			RegistryKey<World> registryKey = world.getRegistryKey() == World.END ? World.OVERWORLD : World.END;
             /* PATCH BEGIN */ // TODO using inject and return should simplify this mixin
             ((ServerWorld)world).getSynchronizedServer().write(server -> {
-                ServerWorld serverWorld = ((ServerWorld)world).getServer().getWorld(registryKey);
+                ServerWorld serverWorld = server.getWorld(registryKey);
                 if (serverWorld == null) {
                     return;
                 }

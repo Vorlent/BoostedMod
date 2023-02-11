@@ -27,11 +27,13 @@ public class LivingEntityMixin {
     protected void dropLoot(DamageSource source, boolean causedByPlayer, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (livingEntity.world instanceof ServerWorld serverWorld) {
-            Identifier identifier = livingEntity.getLootTable();
-            LootTable lootTable = livingEntity.world.getServer().getLootManager().getTable(identifier);
-            LootContext.Builder builder = livingEntity.getLootContextBuilder(causedByPlayer, source);
-            lootTable.generateLoot(builder.build(LootContextTypes.ENTITY), livingEntity::dropStack);
-            ci.cancel();
+            serverWorld.getSynchronizedServer().read(server -> {
+                Identifier identifier = livingEntity.getLootTable();
+                LootTable lootTable = server.getLootManager().getTable(identifier);
+                LootContext.Builder builder = livingEntity.getLootContextBuilder(causedByPlayer, source);
+                lootTable.generateLoot(builder.build(LootContextTypes.ENTITY), livingEntity::dropStack);
+                ci.cancel();
+            });
         }
     }
 }

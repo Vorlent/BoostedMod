@@ -29,7 +29,7 @@ public class LootableContainerBlockEntityMixin {
         World world = entity.getWorld();
         if (entity.lootTableId != null && world instanceof ServerWorld serverWorld) {
             serverWorld.getSynchronizedServer().write(server -> {
-                LootTable lootTable = world.getServer().getLootManager().getTable(entity.lootTableId);
+                LootTable lootTable = server.getLootManager().getTable(entity.lootTableId);
                 if (player instanceof ServerPlayerEntity) {
                     Criteria.PLAYER_GENERATES_CONTAINER_LOOT.trigger((ServerPlayerEntity)player, entity.lootTableId);
                 }

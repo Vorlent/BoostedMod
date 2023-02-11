@@ -24,7 +24,7 @@ public class PiglinBrainMixin {
     private static void getBarteredItem(PiglinEntity piglin, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (piglin.world instanceof ServerWorld serverWorld) {
             ObjectArrayList<ItemStack> itemStacks = serverWorld.getSynchronizedServer().readExp(server -> {
-                LootTable lootTable = piglin.world.getServer().getLootManager().getTable(LootTables.PIGLIN_BARTERING_GAMEPLAY);
+                LootTable lootTable = server.getLootManager().getTable(LootTables.PIGLIN_BARTERING_GAMEPLAY);
                 ObjectArrayList<ItemStack> list = lootTable.generateLoot(new LootContext.Builder((ServerWorld) piglin.world)
                     .parameter(LootContextParameters.THIS_ENTITY, piglin)
                     .random(piglin.world.random)
