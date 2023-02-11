@@ -44,7 +44,12 @@ public class FishingBobberEntityMixin {
             entity.world.sendEntityStatus(entity, EntityStatuses.PULL_HOOKED_ENTITY);
             i = entity.hookedEntity instanceof ItemEntity ? 3 : 5;
         } else if (entity.hookCountdown > 0) {
-            LootContext.Builder builder = new LootContext.Builder((ServerWorld)entity.world).parameter(LootContextParameters.ORIGIN, entity.getPos()).parameter(LootContextParameters.TOOL, usedItem).parameter(LootContextParameters.THIS_ENTITY, entity).random(entity.random).luck((float)entity.luckOfTheSeaLevel + playerEntity.getLuck());
+            LootContext.Builder builder = new LootContext.Builder((ServerWorld)entity.world)
+                .parameter(LootContextParameters.ORIGIN, entity.getPos())
+                .parameter(LootContextParameters.TOOL, usedItem)
+                .parameter(LootContextParameters.THIS_ENTITY, entity)
+                .random(entity.random)
+                .luck((float)entity.luckOfTheSeaLevel + playerEntity.getLuck());
             /* PATCH BEGIN */
             ServerWorld serverWorld = (ServerWorld) entity.world;
             ObjectArrayList<ItemStack> list = serverWorld.getSynchronizedServer().readExp(server -> {
@@ -61,7 +66,10 @@ public class FishingBobberEntityMixin {
                 double g = 0.1;
                 itemEntity.setVelocity(d * 0.1, e * 0.1 + Math.sqrt(Math.sqrt(d * d + e * e + f * f)) * 0.08, f * 0.1);
                 entity.world.spawnEntity(itemEntity);
-                playerEntity.world.spawnEntity(new ExperienceOrbEntity(playerEntity.world, playerEntity.getX(), playerEntity.getY() + 0.5, playerEntity.getZ() + 0.5, entity.random.nextInt(6) + 1));
+                playerEntity.world.spawnEntity(new ExperienceOrbEntity(
+                        playerEntity.world, playerEntity.getX(), playerEntity.getY() + 0.5,
+                        playerEntity.getZ() + 0.5,
+                        entity.random.nextInt(6) + 1));
                 if (!itemStack.isIn(ItemTags.FISHES)) continue;
                 playerEntity.increaseStat(Stats.FISH_CAUGHT, 1);
             }
