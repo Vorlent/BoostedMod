@@ -75,7 +75,7 @@ public class UnmodifiableMinecraftServer {
         this.server = server;
     }
 
-    //TODO consider unmodifiable game mode
+    // GameMode is immutable
     public GameMode getDefaultGameMode() {
         return server.getDefaultGameMode();
     }

@@ -106,6 +106,15 @@ ServerCommandSource lets server references escape
 
 # CommandBlock and commands
 
+MinecraftServer.getCommandManager() access should always be accompanied
+with MinecraftServer synchronization because
+X.getCommandSource() leaks unsynchronized references to MinecraftServer
+and it is incredibly time consuming to mixin into a hundred commands to fix it.
+
+MinecraftServer.getCommandManager() is generally accessed to execute commands.
+
 # ServerPlayer
 
 has a reference to server and must be fixed like ServerWorld.
+
+MinecraftServer.getServerWorld()

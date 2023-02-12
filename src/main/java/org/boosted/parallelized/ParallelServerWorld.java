@@ -40,6 +40,7 @@ import net.minecraft.world.poi.PointOfInterestTypes;
 import net.minecraft.world.spawner.Spawner;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.RWLockSynchronizedResource;
+import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,14 +51,13 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 public class ParallelServerWorld extends ServerWorld {
-    private final RWLockSynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
+    private final SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
     private final MinecraftServer unsynchronizedServer; // try to never use this!
 
     public ParallelServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime) {
         super(null, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime);
 
-        // TODO share synchronized resource with server
-        synchronizedServer = new RWLockSynchronizedResource<>(server, new UnmodifiableMinecraftServer(server));
+        synchronizedServer = server.getSynchronizedServer();
         unsynchronizedServer = server;
     }
 
