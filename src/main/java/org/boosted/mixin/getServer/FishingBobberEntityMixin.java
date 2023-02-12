@@ -2,6 +2,7 @@ package org.boosted.mixin.getServer;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
@@ -17,6 +18,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.tag.ItemTags;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,7 +27,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collections;
 
 @Mixin(FishingBobberEntity.class)
-public class FishingBobberEntityMixin {
+public abstract class FishingBobberEntityMixin {
+
+    @Shadow public abstract @Nullable PlayerEntity getPlayerOwner();
+
+    @Shadow public abstract boolean removeIfInvalid(PlayerEntity player);
+
+    @Shadow @Nullable public Entity hookedEntity;
+
+    @Shadow public abstract void pullHookedEntity(Entity entity);
+
+    @Shadow public int hookCountdown;
+
+    @Shadow @Final public int luckOfTheSeaLevel;
 
     /**
      * @author Vorlent
@@ -33,23 +48,23 @@ public class FishingBobberEntityMixin {
     @Overwrite
     public int use(ItemStack usedItem) {
         FishingBobberEntity entity = (FishingBobberEntity)(Object)this;
-        PlayerEntity playerEntity = entity.getPlayerOwner();
-        if (entity.world.isClient || playerEntity == null || entity.removeIfInvalid(playerEntity)) {
+        PlayerEntity playerEntity = this.getPlayerOwner();
+        if (entity.world.isClient || playerEntity == null || this.removeIfInvalid(playerEntity)) {
             return 0;
         }
         int i = 0;
-        if (entity.hookedEntity != null) {
-            entity.pullHookedEntity(entity.hookedEntity);
+        if (this.hookedEntity != null) {
+            this.pullHookedEntity(this.hookedEntity);
             Criteria.FISHING_ROD_HOOKED.trigger((ServerPlayerEntity)playerEntity, usedItem, entity, Collections.emptyList());
             entity.world.sendEntityStatus(entity, EntityStatuses.PULL_HOOKED_ENTITY);
-            i = entity.hookedEntity instanceof ItemEntity ? 3 : 5;
-        } else if (entity.hookCountdown > 0) {
+            i = this.hookedEntity instanceof ItemEntity ? 3 : 5;
+        } else if (this.hookCountdown > 0) {
             LootContext.Builder builder = new LootContext.Builder((ServerWorld)entity.world)
                 .parameter(LootContextParameters.ORIGIN, entity.getPos())
                 .parameter(LootContextParameters.TOOL, usedItem)
                 .parameter(LootContextParameters.THIS_ENTITY, entity)
                 .random(entity.random)
-                .luck((float)entity.luckOfTheSeaLevel + playerEntity.getLuck());
+                .luck((float)this.luckOfTheSeaLevel + playerEntity.getLuck());
             /* PATCH BEGIN */
             ServerWorld serverWorld = (ServerWorld) entity.world;
             ObjectArrayList<ItemStack> list = serverWorld.getSynchronizedServer().readExp(server -> {

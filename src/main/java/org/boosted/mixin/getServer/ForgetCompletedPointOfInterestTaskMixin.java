@@ -2,16 +2,25 @@ package org.boosted.mixin.getServer;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.Brain;
+import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.ForgetCompletedPointOfInterestTask;
 import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ForgetCompletedPointOfInterestTask.class)
-public class ForgetCompletedPointOfInterestTaskMixin {
+public abstract class ForgetCompletedPointOfInterestTaskMixin {
+    @Shadow @Final public MemoryModuleType<GlobalPos> memoryModule;
+
+    @Shadow public abstract boolean hasCompletedPointOfInterest(ServerWorld world, BlockPos pos);
+
+    @Shadow public abstract boolean isBedOccupiedByOthers(ServerWorld world, BlockPos pos, LivingEntity entity);
+
     /**
      * @author Vorlent
      * @reason This mixin needs exclusive write access to minecraft server,
@@ -19,17 +28,17 @@ public class ForgetCompletedPointOfInterestTaskMixin {
      */
     @Overwrite
     protected void run(ServerWorld world, LivingEntity entity, long time) {
-        ForgetCompletedPointOfInterestTask task = (ForgetCompletedPointOfInterestTask)(Object)this;
+        //ForgetCompletedPointOfInterestTask task = (ForgetCompletedPointOfInterestTask)(Object)this;
         Brain<?> brain = entity.getBrain();
-        GlobalPos globalPos = brain.getOptionalMemory(task.memoryModule).get();
+        GlobalPos globalPos = brain.getOptionalMemory(this.memoryModule).get();
         BlockPos blockPos = globalPos.getPos();
         /* PATCH BEGIN */
         world.getSynchronizedServer().write(server -> {
             ServerWorld serverWorld = server.getWorld(globalPos.getDimension());
-            if (serverWorld == null || task.hasCompletedPointOfInterest(serverWorld, blockPos)) {
-                brain.forget(task.memoryModule);
-            } else if (task.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
-                brain.forget(task.memoryModule);
+            if (serverWorld == null || this.hasCompletedPointOfInterest(serverWorld, blockPos)) {
+                brain.forget(this.memoryModule);
+            } else if (this.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
+                brain.forget(this.memoryModule);
                 world.getPointOfInterestStorage().releaseTicket(blockPos);
                 DebugInfoSender.sendPointOfInterest(world, blockPos);
             }

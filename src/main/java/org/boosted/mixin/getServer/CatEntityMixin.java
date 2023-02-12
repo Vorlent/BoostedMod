@@ -13,12 +13,16 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(targets = "net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal")
 public class CatEntityMixin {
 
+
+    @Shadow @Final public CatEntity cat;
 
     /**
      * @author Vorlent
@@ -26,8 +30,9 @@ public class CatEntityMixin {
      */
     @Overwrite
     private void dropMorningGifts() {
+
         CatEntity.SleepWithOwnerGoal goal = (CatEntity.SleepWithOwnerGoal)(Object)this;
-        CatEntity cat = goal.cat;
+        CatEntity cat = this.cat;
         Random random = cat.getRandom();
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         mutable.set(cat.getBlockPos());

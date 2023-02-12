@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -15,12 +16,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
-public class EntityMixin {
+public abstract class EntityMixin {
 
-    /*
-        INVOKEVIRTUAL
-        INVOKEVIRTUAL
-     */
+    @Shadow public int netherPortalTime;
+
+    @Shadow public abstract void resetPortalCooldown();
+
+    @Shadow public abstract @Nullable Entity moveToWorld(ServerWorld destination);
+
+    @Shadow public abstract World getWorld();
+
+    @Shadow public abstract int getMaxNetherPortalTime();
+
+    @Shadow public abstract boolean hasVehicle();
+
     @Redirect(method = "tickPortal()V",
             at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.getServer ()Lnet/minecraft/server/MinecraftServer;"))
     public MinecraftServer skipGetServer(ServerWorld instance) {
@@ -36,17 +45,16 @@ public class EntityMixin {
     @Inject(method = "tickPortal()V",
         at = @At(value = "FIELD", target = "net/minecraft/entity/Entity.inNetherPortal : Z", ordinal = 1, shift = At.Shift.BEFORE))
     public void injectTickPortal(CallbackInfo ci) {
-        Entity entity = (Entity) (Object) this;
-        ServerWorld serverWorld = (ServerWorld)entity.world;
+        ServerWorld serverWorld = (ServerWorld)this.getWorld();
         serverWorld.getSynchronizedServer().write(minecraftServer -> {
-            int i = entity.getMaxNetherPortalTime();
-            ServerWorld serverWorld2 = minecraftServer.getWorld(entity.world.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER);
-            if (serverWorld2 != null && minecraftServer.isNetherAllowed() && !entity.hasVehicle() && entity.netherPortalTime++ >= i) {
-                entity.world.getProfiler().push("portal");
-                entity.netherPortalTime = i;
-                entity.resetPortalCooldown();
-                entity.moveToWorld(serverWorld2);
-                entity.world.getProfiler().pop();
+            int i = this.getMaxNetherPortalTime();
+            ServerWorld serverWorld2 = minecraftServer.getWorld(serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER);
+            if (serverWorld2 != null && minecraftServer.isNetherAllowed() && !this.hasVehicle() && this.netherPortalTime++ >= i) {
+                serverWorld.getProfiler().push("portal");
+                this.netherPortalTime = i;
+                this.resetPortalCooldown();
+                this.moveToWorld(serverWorld2);
+                serverWorld.getProfiler().pop();
             }
         });
     }
@@ -57,8 +65,6 @@ public class EntityMixin {
         // TODO mixins for Entity.getServer()
         throw new UnsupportedOperationException();
     }
-
-
 
     /** unfixable
     public ServerCommandSource getCommandSource() {

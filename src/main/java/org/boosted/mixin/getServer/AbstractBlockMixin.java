@@ -11,12 +11,15 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collections;
 import java.util.List;
 
 @Mixin(AbstractBlock.class)
-public class AbstractBlockMixin {
+public abstract class AbstractBlockMixin {
+
+	@Shadow public abstract Identifier getLootTableId();
 
 	/**
 	 * @author Vorlent
@@ -24,7 +27,7 @@ public class AbstractBlockMixin {
 	 */
 	@Overwrite
 	public List<ItemStack> getDroppedStacks(BlockState state, LootContext.Builder builder) {
-		Identifier identifier = ((AbstractBlock)(Object)this).getLootTableId();
+		Identifier identifier = getLootTableId();
 		if (identifier == LootTables.EMPTY) {
 			return Collections.emptyList();
 		}

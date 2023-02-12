@@ -36,37 +36,14 @@ extendable method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
 
 accessible field net/minecraft/scoreboard/ServerScoreboard objectives Ljava/util/Set;
 
-accessible field net/minecraft/loot/provider/nbt/StorageLootNbtProvider source Lnet/minecraft/util/Identifier;
 accessible field net/minecraft/entity/ai/brain/task/GiveGiftsToHeroTask GIFTS Ljava/util/Map;
 
-accessible field net/minecraft/block/entity/LootableContainerBlockEntity lootTableId Lnet/minecraft/util/Identifier;
-accessible field net/minecraft/block/entity/LootableContainerBlockEntity lootTableSeed J
-
-accessible field net/minecraft/entity/Entity inNetherPortal Z
-accessible field net/minecraft/entity/Entity netherPortalTime I
 accessible field net/minecraft/entity/Entity random Lnet/minecraft/util/math/random/Random;
-accessible method net/minecraft/entity/Entity tickPortalCooldown ()V
+accessible field net/minecraft/entity/Entity netherPortalTime I
 
 accessible class net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal
-accessible field net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal cat Lnet/minecraft/entity/passive/CatEntity;
-
-accessible method net/minecraft/entity/projectile/FishingBobberEntity removeIfInvalid (Lnet/minecraft/entity/player/PlayerEntity;)Z
-accessible method net/minecraft/entity/projectile/FishingBobberEntity pullHookedEntity (Lnet/minecraft/entity/Entity;)V
-accessible field net/minecraft/entity/projectile/FishingBobberEntity hookedEntity Lnet/minecraft/entity/Entity;
-accessible field net/minecraft/entity/projectile/FishingBobberEntity hookCountdown I
-accessible field net/minecraft/entity/projectile/FishingBobberEntity luckOfTheSeaLevel I
-
-accessible field net/minecraft/entity/ai/brain/task/ForgetCompletedPointOfInterestTask memoryModule Lnet/minecraft/entity/ai/brain/MemoryModuleType;
-accessible method net/minecraft/entity/ai/brain/task/ForgetCompletedPointOfInterestTask hasCompletedPointOfInterest (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;)Z
-accessible method net/minecraft/entity/ai/brain/task/ForgetCompletedPointOfInterestTask isBedOccupiedByOthers (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/LivingEntity;)Z
 
 accessible class net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker
-accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker entity Lnet/minecraft/entity/Entity;
-
-accessible field net/minecraft/loot/context/LootContext$Builder parameters Ljava/util/Map;
-accessible field net/minecraft/loot/context/LootContext$Builder drops Ljava/util/Map;
-accessible field net/minecraft/loot/context/LootContext$Builder random Lnet/minecraft/util/math/random/Random;
-accessible field net/minecraft/loot/context/LootContext$Builder luck F
 
 accessible method net/minecraft/loot/context/LootContext <init> (Lnet/minecraft/util/math/random/Random;FLnet/minecraft/server/world/ServerWorld;Ljava/util/function/Function;Ljava/util/function/Function;Ljava/util/Map;Ljava/util/Map;)V
 
