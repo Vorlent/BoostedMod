@@ -38,8 +38,8 @@ import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.poi.PointOfInterestType;
 import net.minecraft.world.poi.PointOfInterestTypes;
 import net.minecraft.world.spawner.Spawner;
+import org.boosted.mixin.getServer.SetServerAccessor;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
-import org.boosted.util.RWLockSynchronizedResource;
 import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,8 +55,9 @@ public class ParallelServerWorld extends ServerWorld {
     private final MinecraftServer unsynchronizedServer; // try to never use this!
 
     public ParallelServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime) {
-        super(null, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime);
+        super(server, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime);
 
+        ((SetServerAccessor) this).setServer(null);
         synchronizedServer = server.getSynchronizedServer();
         unsynchronizedServer = server;
     }
