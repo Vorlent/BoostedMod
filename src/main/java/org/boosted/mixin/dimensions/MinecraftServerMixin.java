@@ -22,7 +22,7 @@ public abstract class MinecraftServerMixin {
      */
 
     @Redirect(method = "createWorlds(Lnet/minecraft/server/WorldGenerationProgressListener;)V",
-            at = @At(value = "NEW", target = "net/minecraft/server/world/ServerWorld.<init> (Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorage$Session;Lnet/minecraft/world/level/ServerWorldProperties;Lnet/minecraft/util/registry/RegistryKey;Lnet/minecraft/world/dimension/DimensionOptions;Lnet/minecraft/server/WorldGenerationProgressListener;ZJLjava/util/List;Z)V"))
+            at = @At(value = "NEW", target = "net/minecraft/server/world/ServerWorld"))
     private ServerWorld redirectServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session,
                                             ServerWorldProperties properties, RegistryKey worldKey, DimensionOptions dimensionOptions,
                                             WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld,
