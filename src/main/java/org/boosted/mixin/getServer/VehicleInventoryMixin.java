@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(VehicleInventory.class)
 public class VehicleInventoryMixin {
+    // TODO WARNING MIXIN COULD "getServer.VehicleInventoryMixin", could not be loaded
 
     @Inject(method = "generateInventoryLoot(Lnet/minecraft/entity/player/PlayerEntity;)V", cancellable = true, at = @At("HEAD"))
     public void generateInventoryLoot(PlayerEntity player, CallbackInfo ci) {

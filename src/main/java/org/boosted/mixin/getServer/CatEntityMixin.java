@@ -30,8 +30,6 @@ public class CatEntityMixin {
      */
     @Overwrite
     private void dropMorningGifts() {
-
-        CatEntity.SleepWithOwnerGoal goal = (CatEntity.SleepWithOwnerGoal)(Object)this;
         CatEntity cat = this.cat;
         Random random = cat.getRandom();
         BlockPos.Mutable mutable = new BlockPos.Mutable();
