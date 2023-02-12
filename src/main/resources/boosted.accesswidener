@@ -75,3 +75,5 @@ accessible method net/minecraft/entity/LivingEntity getLootContextBuilder (ZLnet
 accessible field net/minecraft/world/gen/feature/util/FeatureDebugLogger FEATURES Lcom/google/common/cache/LoadingCache;
 accessible class net/minecraft/world/gen/feature/util/FeatureDebugLogger$Features
 accessible class net/minecraft/world/gen/feature/util/FeatureDebugLogger$FeatureData
+
+accessible class net/minecraft/predicate/entity/PlayerPredicate$AdvancementPredicate
