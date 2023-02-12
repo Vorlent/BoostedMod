@@ -9,6 +9,9 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public class EntityMixin {
@@ -54,12 +57,14 @@ public class EntityMixin {
         entity.tickPortalCooldown();
     }
 
-    /**
-    @Nullable
-    TODO GET RID OF THIS
-    public MinecraftServer getServer() {
-        return this.world.getServer();
-    }*/
+    @Inject(method = "getServer()Lnet/minecraft/server/MinecraftServer;",
+        at = @At(value = "HEAD"))
+    public void blockGetServer(CallbackInfoReturnable<MinecraftServer> cir) {
+        // TODO mixins for Entity.getServer()
+        throw new UnsupportedOperationException();
+    }
+
+
 
     /** unfixable
     public ServerCommandSource getCommandSource() {
