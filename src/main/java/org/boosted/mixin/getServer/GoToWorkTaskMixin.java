@@ -32,7 +32,7 @@ public class GoToWorkTaskMixin {
      * @reason this function needs exclusive write access to MinecraftServer
      */
     @Overwrite
-    protected void run(ServerWorld serverWorld, VillagerEntity villagerEntity, long l) {
+    public void run(ServerWorld serverWorld, VillagerEntity villagerEntity, long l) {
         GlobalPos globalPos = villagerEntity.getBrain().getOptionalMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
         villagerEntity.getBrain().forget(MemoryModuleType.POTENTIAL_JOB_SITE);
         villagerEntity.getBrain().remember(MemoryModuleType.JOB_SITE, globalPos);

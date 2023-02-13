@@ -27,7 +27,7 @@ public class WalkTowardJobSiteTaskMixin {
      * @reason this function needs exclusive write access to MinecraftServer
      */
     @Overwrite
-    protected void finishRunning(ServerWorld serverWorld, VillagerEntity villagerEntity, long l) {
+    public void finishRunning(ServerWorld serverWorld, VillagerEntity villagerEntity, long l) {
         Optional<GlobalPos> optional = villagerEntity.getBrain().getOptionalMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
         optional.ifPresent(pos -> {
             BlockPos blockPos = pos.getPos();

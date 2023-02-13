@@ -24,6 +24,7 @@ accessible method net/minecraft/world/level/LevelProperties <init> (Lcom/mojang/
 accessible field net/minecraft/server/world/ServerWorld sleepManager Lnet/minecraft/server/world/SleepManager;
 accessible field net/minecraft/server/world/ServerWorld blockEventQueue Ljava/util/List;
 accessible field net/minecraft/server/world/ServerWorld syncedBlockEventQueue Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;
+accessible field net/minecraft/server/world/ServerWorld structureLocator Lnet/minecraft/world/StructureLocator;
 accessible method net/minecraft/server/world/ServerWorld processBlockEvent (Lnet/minecraft/server/world/BlockEvent;)Z
 accessible method net/minecraft/server/world/ServerWorld shouldCancelSpawn (Lnet/minecraft/entity/Entity;)Z
 extendable method net/minecraft/server/world/ServerWorld shouldCancelSpawn (Lnet/minecraft/entity/Entity;)Z
@@ -33,6 +34,7 @@ accessible method net/minecraft/server/world/ServerWorld saveLevel ()V
 extendable method net/minecraft/server/world/ServerWorld saveLevel ()V
 accessible method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
 extendable method net/minecraft/server/world/ServerWorld sendSleepingStatus ()V
+
 
 accessible field net/minecraft/scoreboard/ServerScoreboard objectives Ljava/util/Set;
 
@@ -54,3 +56,5 @@ accessible class net/minecraft/world/gen/feature/util/FeatureDebugLogger$Feature
 accessible class net/minecraft/world/gen/feature/util/FeatureDebugLogger$FeatureData
 
 accessible class net/minecraft/predicate/entity/PlayerPredicate$AdvancementPredicate
+
+mutable field net/minecraft/server/world/ServerWorld server Lnet/minecraft/server/MinecraftServer;

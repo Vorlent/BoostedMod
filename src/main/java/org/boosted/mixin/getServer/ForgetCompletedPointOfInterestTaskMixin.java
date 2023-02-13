@@ -27,7 +27,7 @@ public abstract class ForgetCompletedPointOfInterestTaskMixin {
      * it may also potentially hold cross world references.
      */
     @Overwrite
-    protected void run(ServerWorld world, LivingEntity entity, long time) {
+    public void run(ServerWorld world, LivingEntity entity, long time) {
         //ForgetCompletedPointOfInterestTask task = (ForgetCompletedPointOfInterestTask)(Object)this;
         Brain<?> brain = entity.getBrain();
         GlobalPos globalPos = brain.getOptionalMemory(this.memoryModule).get();
