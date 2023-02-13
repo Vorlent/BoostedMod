@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(LivingEntity.class)
@@ -32,13 +33,18 @@ public abstract class LivingEntityMixin {
     protected void dropLoot(DamageSource source, boolean causedByPlayer, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (livingEntity.world instanceof ServerWorld serverWorld) {
+            List<ItemStack> droppedItems = new ArrayList<>();
             serverWorld.getSynchronizedServer().read(server -> {
                 Identifier identifier = this.getLootTable();
                 LootTable lootTable = server.getLootManager().getTable(identifier);
                 LootContext.Builder builder = this.getLootContextBuilder(causedByPlayer, source);
-                lootTable.generateLoot(builder.build(LootContextTypes.ENTITY), livingEntity::dropStack);
+                lootTable.generateLoot(builder.build(LootContextTypes.ENTITY), (itemStack -> droppedItems.add(itemStack)));
                 ci.cancel();
             });
+            for (ItemStack itemStack : droppedItems) {
+                livingEntity.dropStack(itemStack);
+            }
         }
+
     }
 }
