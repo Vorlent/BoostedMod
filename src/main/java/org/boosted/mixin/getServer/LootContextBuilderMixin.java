@@ -30,11 +30,12 @@ public abstract class LootContextBuilderMixin {
      at = @At(value = "FIELD", target = "net/minecraft/loot/context/LootContext$Builder.world : Lnet/minecraft/server/world/ServerWorld;", ordinal = 0))
     public void build(LootContextType type, CallbackInfoReturnable<LootContext> cir) {
         Random random = this.random == null ? Random.create() : this.random;
-        LootContext returnValue = getWorld().getSynchronizedServer().writeExp(minecraftServer -> {
-            // TODO this is indirectly leaking references to getServer by passing in
+        LootContext returnValue = getWorld().getSynchronizedServer().readExp(minecraftServer -> {
+            // TODO this is indirectly leaking references to getServer
+            //  by passing in getLootManager() and getPredicateManager()
             LootContext lootContext = new LootContext(random, this.luck, this.getWorld(),
-                    minecraftServer.getLootManager()::getTable, minecraftServer.getPredicateManager()::get,
-                    this.parameters, this.drops);
+                minecraftServer.getLootManager()::getTable, minecraftServer.getPredicateManager()::get,
+                this.parameters, this.drops);
             return lootContext;
         });
         cir.setReturnValue(returnValue);
