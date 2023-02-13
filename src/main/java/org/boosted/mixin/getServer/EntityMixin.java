@@ -2,7 +2,11 @@ package org.boosted.mixin.getServer;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +33,16 @@ public abstract class EntityMixin {
     @Shadow public abstract int getMaxNetherPortalTime();
 
     @Shadow public abstract boolean hasVehicle();
+
+    @Shadow public abstract Vec3d getPos();
+
+    @Shadow public abstract Vec2f getRotationClient();
+
+    @Shadow protected abstract int getPermissionLevel();
+
+    @Shadow public abstract Text getName();
+
+    @Shadow public abstract Text getDisplayName();
 
     @Redirect(method = "tickPortal()V",
             at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.getServer ()Lnet/minecraft/server/MinecraftServer;"))
@@ -66,8 +80,17 @@ public abstract class EntityMixin {
         throw new UnsupportedOperationException();
     }
 
-    /** unfixable
+    /**
+     * @author Vorlent
+     * @reason I could @Redirect getServer() instead
+     */
+    @Overwrite
     public ServerCommandSource getCommandSource() {
-        return new ServerCommandSource(this, this.getPos(), this.getRotationClient(), this.world instanceof ServerWorld ? (ServerWorld)this.world : null, this.getPermissionLevel(), this.getName().getString(), this.getDisplayName(), this.world.getServer(), this);
-    }*/
+        return new ServerCommandSource((Entity)(Object)this, this.getPos(), this.getRotationClient(),
+                this.getWorld() instanceof ServerWorld ? (ServerWorld)this.getWorld() : null,
+                this.getPermissionLevel(), this.getName().getString(),
+                this.getDisplayName(),
+                this.getWorld() instanceof ServerWorld ? ((ServerWorld)this.getWorld()).getUnsynchronizedServer() : null,
+                (Entity)(Object)this);
+    }
 }

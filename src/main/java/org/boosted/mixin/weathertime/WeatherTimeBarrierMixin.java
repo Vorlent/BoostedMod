@@ -14,17 +14,17 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(ServerWorld.class)
 public abstract class WeatherTimeBarrierMixin {
-	@Shadow @NotNull
-	public abstract MinecraftServer getServer();
 
 	@Inject(at = @At("HEAD"), method = "tick(Ljava/util/function/BooleanSupplier;)V")
 	private void preWeatherTime(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		this.getServer().getWeatherTimeBarrier().startPhase((World)(Object)this);
+		ServerWorld world = (ServerWorld) (Object) this;
+		world.getUnsynchronizedServer().getWeatherTimeBarrier().startPhase(world);
 	}
 
 	@Inject(at = @At(value ="INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickTime()V", shift = At.Shift.AFTER),
 		method = "tick(Ljava/util/function/BooleanSupplier;)V")
 	private void postWeatherTime(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		this.getServer().getWeatherTimeBarrier().endPhase((World)(Object)this);
+		ServerWorld world = (ServerWorld) (Object) this;
+		world.getUnsynchronizedServer().getWeatherTimeBarrier().endPhase(world);
 	}
 }

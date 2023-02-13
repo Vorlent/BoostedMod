@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 public class ServerWorldMixin implements SynchronizedServerGetter {
 	@Unique
 	private SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> boosted$unsynchronizedResource;
+	@Override
 	public SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> getSynchronizedServer() {
 		if (boosted$unsynchronizedResource == null) {
 			MinecraftServer server = ((SynchronizedServerGetter) (Object) this).getUnsynchronizedServer();
@@ -25,6 +26,7 @@ public class ServerWorldMixin implements SynchronizedServerGetter {
 	/**
 	 * Only evil people use this :(
 	 */
+	@Override
 	public MinecraftServer getUnsynchronizedServer() {
 		return ((ServerWorld) (Object) this).getServer();
 	}

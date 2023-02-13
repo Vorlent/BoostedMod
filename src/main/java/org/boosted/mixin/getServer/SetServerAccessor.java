@@ -10,4 +10,7 @@ public interface SetServerAccessor {
 
     @Accessor
     void setServer(MinecraftServer server);
+
+    @Accessor("server")
+    MinecraftServer getServerField();
 }
