@@ -76,7 +76,6 @@ public abstract class EntityMixin {
     @Inject(method = "getServer()Lnet/minecraft/server/MinecraftServer;",
         at = @At(value = "HEAD"))
     public void blockGetServer(CallbackInfoReturnable<MinecraftServer> cir) {
-        // TODO mixins for Entity.getServer()
         throw new UnsupportedOperationException();
     }
 

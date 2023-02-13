@@ -99,7 +99,7 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
     @Override
     public boolean canPlayerModifyAt(PlayerEntity player, BlockPos pos) {
         return this.getWorldBorder().contains(pos)
-               && getSynchronizedServer().readExp(server -> server.isSpawnProtected(this, pos, player));
+               && getSynchronizedServer().readExp(server -> !server.isSpawnProtected(this, pos, player));
     }
 
     @Override

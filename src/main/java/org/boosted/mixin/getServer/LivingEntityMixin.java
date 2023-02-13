@@ -33,17 +33,16 @@ public abstract class LivingEntityMixin {
     protected void dropLoot(DamageSource source, boolean causedByPlayer, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (livingEntity.world instanceof ServerWorld serverWorld) {
-            List<ItemStack> droppedItems = new ArrayList<>();
-            serverWorld.getSynchronizedServer().read(server -> {
+            List<ItemStack> droppedItems = serverWorld.getSynchronizedServer().readExp(server -> {
                 Identifier identifier = this.getLootTable();
                 LootTable lootTable = server.getLootManager().getTable(identifier);
                 LootContext.Builder builder = this.getLootContextBuilder(causedByPlayer, source);
-                lootTable.generateLoot(builder.build(LootContextTypes.ENTITY), (itemStack -> droppedItems.add(itemStack)));
-                ci.cancel();
+                return lootTable.generateLoot(builder.build(LootContextTypes.ENTITY));
             });
             for (ItemStack itemStack : droppedItems) {
                 livingEntity.dropStack(itemStack);
             }
+            ci.cancel();
         }
 
     }
