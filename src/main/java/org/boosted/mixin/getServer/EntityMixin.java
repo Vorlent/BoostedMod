@@ -62,6 +62,7 @@ public abstract class EntityMixin {
         ServerWorld serverWorld = (ServerWorld)this.getWorld();
         serverWorld.getSynchronizedServer().write(minecraftServer -> {
             int i = this.getMaxNetherPortalTime();
+            //TODO getWorld leaks references to other worlds
             ServerWorld serverWorld2 = minecraftServer.getWorld(serverWorld.getRegistryKey() == World.NETHER ? World.OVERWORLD : World.NETHER);
             if (serverWorld2 != null && minecraftServer.isNetherAllowed() && !this.hasVehicle() && this.netherPortalTime++ >= i) {
                 serverWorld.getProfiler().push("portal");

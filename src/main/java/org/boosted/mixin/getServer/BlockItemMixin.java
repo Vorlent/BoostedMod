@@ -1,8 +1,10 @@
 package org.boosted.mixin.getServer;
 
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -24,7 +26,7 @@ public class BlockItemMixin {
             if (serverWorld.getSynchronizedServer().readExp(server -> server == null)) {
                 cir.setReturnValue(false);
             }
-        } else {
+        } else { // skip ClientWorld
             cir.setReturnValue(false);
         }
     }

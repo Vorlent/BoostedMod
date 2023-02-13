@@ -41,7 +41,10 @@ public class GiveGiftsToHeroTaskMixin {
             ServerWorld serverWorld = (ServerWorld)villager.world;
             return serverWorld.getSynchronizedServer().readExp(server -> {
                 LootTable lootTable = server.getLootManager().getTable(GIFTS.get(villagerProfession));
-                LootContext.Builder builder = new LootContext.Builder((ServerWorld)villager.world).parameter(LootContextParameters.ORIGIN, villager.getPos()).parameter(LootContextParameters.THIS_ENTITY, villager).random(villager.getRandom());
+                LootContext.Builder builder = new LootContext.Builder((ServerWorld)villager.world)
+                        .parameter(LootContextParameters.ORIGIN, villager.getPos())
+                        .parameter(LootContextParameters.THIS_ENTITY, villager)
+                        .random(villager.getRandom());
                 return lootTable.generateLoot(builder.build(LootContextTypes.GIFT));
             });
             /* PATCH END */
