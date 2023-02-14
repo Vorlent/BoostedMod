@@ -9,6 +9,7 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.boosted.ThreadCoordinator;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -68,7 +69,9 @@ public abstract class EntityMixin {
                 serverWorld.getProfiler().push("portal");
                 this.netherPortalTime = i;
                 this.resetPortalCooldown();
-                this.moveToWorld(serverWorld2);
+                ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
+                    this.moveToWorld(serverWorld2)
+                );
                 serverWorld.getProfiler().pop();
             }
         });
