@@ -8,9 +8,11 @@ import org.boosted.util.SynchronizedResource;
 import org.boosted.util.UnsynchronizedResource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ServerWorld.class)
-public class ServerWorldMixin implements SynchronizedServerGetter {
+public abstract class ServerWorldMixin implements SynchronizedServerGetter {
 	@Unique
 	private SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> boosted$unsynchronizedResource;
 	@Override
@@ -21,6 +23,12 @@ public class ServerWorldMixin implements SynchronizedServerGetter {
 				new UnmodifiableMinecraftServer(server));
 		}
 		return boosted$unsynchronizedResource;
+	}
+
+	@Redirect(method = "tickWeather()V",
+		at = @At(value = "FIELD", target = "net/minecraft/server/world/ServerWorld.server : Lnet/minecraft/server/MinecraftServer;"))
+	private MinecraftServer getServerInTickWeather(ServerWorld instance) {
+		return getUnsynchronizedServer(); // tickWeather is already synchronized
 	}
 
 	/**
