@@ -84,8 +84,8 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
 
     @Override
     public ServerScoreboard getScoreboard() {
-        //throw new UnsupportedOperationException();
-        return this.getUnsynchronizedServer().getScoreboard();
+        throw new UnsupportedOperationException();
+        //return this.getUnsynchronizedServer().getScoreboard();
     }
 
     /**
@@ -208,7 +208,9 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
         if (optional.isEmpty()) {
             return null;
         }
-        Pair<BlockPos, RegistryEntry<Structure>> pair = this.getChunkManager().getChunkGenerator().locateStructure(this, (RegistryEntryList<Structure>)optional.get(), pos, radius, skipReferencedStructures);
+        Pair<BlockPos, RegistryEntry<Structure>> pair = this.getChunkManager()
+            .getChunkGenerator()
+            .locateStructure(this, (RegistryEntryList<Structure>)optional.get(), pos, radius, skipReferencedStructures);
         return pair != null ? pair.getFirst() : null;
     }
 

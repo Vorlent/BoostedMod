@@ -58,3 +58,5 @@ accessible class net/minecraft/world/gen/feature/util/FeatureDebugLogger$Feature
 accessible class net/minecraft/predicate/entity/PlayerPredicate$AdvancementPredicate
 
 mutable field net/minecraft/server/world/ServerWorld server Lnet/minecraft/server/MinecraftServer;
+
+extendable method net/minecraft/scoreboard/Scoreboard forEachScore (Lnet/minecraft/scoreboard/ScoreboardCriterion;Ljava/lang/String;Ljava/util/function/Consumer;)V
