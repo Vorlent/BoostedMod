@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
+import org.boosted.ThreadCoordinator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -37,9 +38,7 @@ public class EndPortalBlockMixin {
                 if (serverWorld == null) {
                     return;
                 }
-                // TODO verify
-                world.getBoostedWorldContext()
-                    .postTick().executeTask(() -> entity.moveToWorld(serverWorld));
+                ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> entity.moveToWorld(serverWorld));
             });
             /* PATCH END */
 		}
