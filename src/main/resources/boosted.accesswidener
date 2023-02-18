@@ -60,3 +60,16 @@ accessible class net/minecraft/predicate/entity/PlayerPredicate$AdvancementPredi
 mutable field net/minecraft/server/world/ServerWorld server Lnet/minecraft/server/MinecraftServer;
 
 extendable method net/minecraft/scoreboard/Scoreboard forEachScore (Lnet/minecraft/scoreboard/ScoreboardCriterion;Ljava/lang/String;Ljava/util/function/Consumer;)V
+accessible field net/minecraft/scoreboard/Scoreboard teams Ljava/util/Map;
+accessible field net/minecraft/scoreboard/Scoreboard objectiveSlots [Lnet/minecraft/scoreboard/ScoreboardObjective;
+accessible field net/minecraft/scoreboard/Scoreboard teamsByPlayer Ljava/util/Map;
+
+
+accessible field net/minecraft/scoreboard/Team displayName Lnet/minecraft/text/Text;
+accessible field net/minecraft/scoreboard/Team prefix Lnet/minecraft/text/Text;
+accessible field net/minecraft/scoreboard/Team suffix Lnet/minecraft/text/Text;
+accessible field net/minecraft/scoreboard/Team friendlyFire Z
+accessible field net/minecraft/scoreboard/Team showFriendlyInvisibles Z
+accessible field net/minecraft/scoreboard/Team nameTagVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
+accessible field net/minecraft/scoreboard/Team deathMessageVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
+accessible field net/minecraft/scoreboard/Team collisionRule Lnet/minecraft/scoreboard/AbstractTeam$CollisionRule;
