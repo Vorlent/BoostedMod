@@ -5,11 +5,20 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.Packet;
+import net.minecraft.network.packet.s2c.play.ScoreboardDisplayS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScoreboardObjectiveUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScoreboardPlayerUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.TeamS2CPacket;
 import net.minecraft.scoreboard.*;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
+import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,16 +26,18 @@ import java.util.function.Consumer;
 
 /**
  * The goal of this class is to provide a simplified implementation nof ServerScoreboard.
- * The simplication primarily involves removing updateListener calls, so that external callers can decide when to trigger
- * update listeners.
+ * The simplication primarily involves delaying sending packets and updateListener calls,
+ * so that external callers can decide when to trigger update listeners, etc.
  * The class is meant to be exhaustive, so any functions that hasn't been changed must be documented.
  */
 public class SimplifiedServerScoreboard extends ServerScoreboard {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private final SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
+    private final ThreadLocal<List<Consumer<MinecraftServer>>> delayedAction = ThreadLocal.withInitial(() -> new ArrayList<>());
 
-    public SimplifiedServerScoreboard() {
+    public SimplifiedServerScoreboard(MinecraftServer server) {
         super(null);
+        synchronizedServer = server.getSynchronizedServer();
     }
 
     /** Does not call updateListeners */
@@ -117,7 +128,27 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Does call updateListeners and sends packets */
     @Override
     public void setObjectiveSlot(int slot, @Nullable ScoreboardObjective objective) {
-        super.setObjectiveSlot(slot, objective);
+        ScoreboardObjective scoreboardObjective = this.getObjectiveForSlot(slot);
+        this.objectiveSlots[slot] = objective;
+        if (scoreboardObjective != objective && scoreboardObjective != null) {
+            if (this.getSlot(scoreboardObjective) > 0) {
+                delayAction(server -> {
+                    server.getPlayerManager().sendToAll(new ScoreboardDisplayS2CPacket(slot, objective));
+                });
+            } else {
+                this.removeScoreboardObjective(scoreboardObjective);
+            }
+        }
+        if (objective != null) {
+            if (this.objectives.contains(objective)) {
+                delayAction(server -> {
+                    server.getPlayerManager().sendToAll(new ScoreboardDisplayS2CPacket(slot, objective));
+                });
+            } else {
+                this.addScoreboardObjective(objective);
+            }
+        }
+        this.runUpdateListeners();
     }
 
     /** Does not call updateListeners */
@@ -146,10 +177,28 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
         super.removeTeam(team);
     }
 
+    /**
+     * Taken from Scoreboard.addPlayerToTeam
+     */
+    private boolean addPlayerToTeamFromScoreboard(String playerName, Team team) {
+        if (this.getPlayerTeam(playerName) != null) {
+            this.clearPlayerTeam(playerName);
+        }
+        this.teamsByPlayer.put(playerName, team);
+        return team.getPlayerList().add(playerName);
+    }
+
     /** Does call updateListeners and sends packets */
     @Override
     public boolean addPlayerToTeam(String playerName, Team team) {
-        return super.addPlayerToTeam(playerName, team);
+        if (addPlayerToTeamFromScoreboard(playerName, team)) {
+            delayAction(server -> {
+                server.getPlayerManager().sendToAll(TeamS2CPacket.changePlayerTeam(team, playerName, TeamS2CPacket.Operation.ADD));
+            });
+            this.runUpdateListeners();
+            return true;
+        }
+        return false;
     }
 
     /** Does call updateListeners indirectly */
@@ -158,10 +207,25 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
         return super.clearPlayerTeam(playerName);
     }
 
+    /**
+     * Taken from Scoreboard.removePlayerFromTeam
+     */
+    private void removePlayerFromTeamFromScoreboard(String playerName, Team team) {
+        if (this.getPlayerTeam(playerName) != team) {
+            throw new IllegalStateException("Player is either on another team or not on any team. Cannot remove from team '" + team.getName() + "'.");
+        }
+        this.teamsByPlayer.remove(playerName);
+        team.getPlayerList().remove(playerName);
+    }
+
     /** Does call updateListeners and sends packets */
     @Override
     public void removePlayerFromTeam(String playerName, Team team) {
-        super.removePlayerFromTeam(playerName, team);
+        removePlayerFromTeamFromScoreboard(playerName, team);
+        delayAction(server -> {
+            server.getPlayerManager().sendToAll(TeamS2CPacket.changePlayerTeam(team, playerName, TeamS2CPacket.Operation.REMOVE));
+        });
+        this.runUpdateListeners();
     }
 
     /** Does not call updateListeners */
@@ -204,22 +268,35 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Does call updateListeners and sends packets */
     @Override
     public void updateScore(ScoreboardPlayerScore score) {
-        super.updateScore(score);
+        if (this.objectives.contains(score.getObjective())) {
+            delayAction(server -> {
+                server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(UpdateMode.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScore()));
+            });
+        }
+        this.runUpdateListeners();
     }
 
     /** Does call updateListeners and sends packets */
     @Override
     public void updatePlayerScore(String playerName) {
-        super.updatePlayerScore(playerName);
+        delayAction(server -> {
+            server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(UpdateMode.REMOVE, null, playerName, 0));
+        });
+        this.runUpdateListeners();
     }
 
     /** Does call updateListeners and sends packets */
     @Override
     public void updatePlayerScore(String playerName, ScoreboardObjective objective) {
-        super.updatePlayerScore(playerName, objective);
+        if (this.objectives.contains(objective)) {
+            delayAction(server -> {
+                server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(UpdateMode.REMOVE, objective.getName(), playerName, 0));
+            });
+        }
+        this.runUpdateListeners();
     }
 
-    /** Does call updateListeners, maybe sends packets */
+    /** Does call updateListeners, maybe sends packets (doesn't send packets) */
     @Override
     public void updateObjective(ScoreboardObjective objective) {
         super.updateObjective(objective);
@@ -228,7 +305,12 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Does call updateListeners and sends packets */
     @Override
     public void updateExistingObjective(ScoreboardObjective objective) {
-        super.updateExistingObjective(objective);
+        if (this.objectives.contains(objective)) {
+            delayAction(server -> {
+                server.getPlayerManager().sendToAll(new ScoreboardObjectiveUpdateS2CPacket(objective, ScoreboardObjectiveUpdateS2CPacket.UPDATE_MODE));
+            });
+        }
+        this.runUpdateListeners();
     }
 
     /** Does call updateListeners */
@@ -240,19 +322,28 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Does call updateListeners and sends packets */
     @Override
     public void updateScoreboardTeamAndPlayers(Team team) {
-        super.updateScoreboardTeamAndPlayers(team);
+        delayAction(server -> {
+            server.getPlayerManager().sendToAll(TeamS2CPacket.updateTeam(team, true));
+        });
+        this.runUpdateListeners();
     }
 
     /** Does call updateListeners and sends packets */
     @Override
     public void updateScoreboardTeam(Team team) {
-        super.updateScoreboardTeam(team);
+        delayAction(server -> {
+            server.getPlayerManager().sendToAll(TeamS2CPacket.updateTeam(team, false));
+        });
+        this.runUpdateListeners();
     }
 
     /** Does call updateListeners and sends packets */
     @Override
     public void updateRemovedTeam(Team team) {
-        super.updateRemovedTeam(team);
+        delayAction(server -> {
+            server.getPlayerManager().sendToAll(TeamS2CPacket.updateRemovedTeam(team));
+        });
+        this.runUpdateListeners();
     }
 
     /** Modifies updateListeners */
@@ -261,15 +352,13 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
         super.addUpdateListener(listener);
     }
 
-    /** Directly calls runUpdateListeners */
+    /** Directly calls runUpdateListeners.
+     * runUpdateListeners now delays. */
     @Override
     protected void runUpdateListeners() {
-        throw new UnsupportedOperationException("SimplifiedServerScoreboard should not call runUpdateListeners. SynchronizedServerScoreboard should call it");
-    }
-
-    /** Allows SynchronnizedServerScoreboard to call the updateListeners without synchronization */
-    protected void runUnsynchronizedUpdateListeners() {
-        super.runUpdateListeners();
+        delayAction(server -> {
+            super.runUpdateListeners();
+        });
     }
 
     /** Does not call updateListeners, and creates packets,
@@ -282,7 +371,15 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Sends network packets */
     @Override
     public void addScoreboardObjective(ScoreboardObjective objective) {
-        super.addScoreboardObjective(objective);
+        List<Packet<?>> list = this.createChangePackets(objective);
+        delayAction(server -> {
+            for (ServerPlayerEntity serverPlayerEntity : server.getPlayerManager().getPlayerList()) {
+                for (Packet<?> packet : list) {
+                    serverPlayerEntity.networkHandler.sendPacket(packet);
+                }
+            }
+        });
+        this.objectives.add(objective);
     }
 
     /** Does not call updateListeners, and creates packets,
@@ -295,7 +392,15 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Sends network packets */
     @Override
     public void removeScoreboardObjective(ScoreboardObjective objective) {
-        super.removeScoreboardObjective(objective);
+        List<Packet<?>> list = this.createRemovePackets(objective);
+        delayAction((server) -> {
+            for (ServerPlayerEntity serverPlayerEntity : server.getPlayerManager().getPlayerList()) {
+                for (Packet<?> packet : list) {
+                    serverPlayerEntity.networkHandler.sendPacket(packet);
+                }
+            }
+        });
+        this.objectives.remove(objective);
     }
 
     /** Does not call updateListeners */
@@ -313,6 +418,22 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     /** Does not call updateListeners */
     public ScoreboardState stateFromNbt(NbtCompound nbt) {
         return super.stateFromNbt(nbt);
+    }
+
+    private void delayAction(Consumer<MinecraftServer> consumer) {
+        delayedAction.get().add(consumer);
+    }
+
+    /**
+     * After calling any method, you must call runDelayedAction in SynchronizedServerScoreboard.
+     */
+    public void runDelayedAction() {
+        synchronizedServer.write(server -> {
+            for (Consumer<MinecraftServer> consumer : delayedAction.get()) {
+                consumer.accept(server);
+            }
+            delayedAction.get().clear();
+        });
     }
 
 }
