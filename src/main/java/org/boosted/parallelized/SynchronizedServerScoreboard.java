@@ -1,6 +1,5 @@
 package org.boosted.parallelized;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -8,7 +7,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.scoreboard.*;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -21,248 +19,414 @@ import java.util.function.Consumer;
  */
 public class SynchronizedServerScoreboard extends ServerScoreboard {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private final Object lock = new Object();
-    private final ServerScoreboard serverScoreboard;
+    private final SimplifiedServerScoreboard serverScoreboard;
 
-
-    public SynchronizedServerScoreboard(ServerScoreboard serverScoreboard) {
+    public SynchronizedServerScoreboard(SimplifiedServerScoreboard serverScoreboard) {
         super(null);
         this.serverScoreboard = serverScoreboard;
     }
 
     @Override
     public boolean containsObjective(String name) {
-        return serverScoreboard.containsObjective(name);
+        synchronized (lock) {
+            boolean containsObjective = serverScoreboard.containsObjective(name);
+            serverScoreboard.noDelayedAction();
+            return containsObjective;
+        }
     }
 
     @Override
     public ScoreboardObjective getObjective(String name) {
-        return serverScoreboard.getObjective(name);
+        synchronized (lock) {
+            ScoreboardObjective objective = serverScoreboard.getObjective(name);
+            serverScoreboard.noDelayedAction();
+            return objective;
+        }
     }
 
     @Nullable
     @Override
     public ScoreboardObjective getNullableObjective(@Nullable String name) {
-        return serverScoreboard.getObjective(name);
+        synchronized (lock) {
+            ScoreboardObjective objective = serverScoreboard.getObjective(name);
+            serverScoreboard.noDelayedAction();
+            return objective;
+        }
     }
 
     @Override
     public ScoreboardObjective addObjective(String name, ScoreboardCriterion criterion2, Text displayName, ScoreboardCriterion.RenderType renderType) {
-        return serverScoreboard.addObjective(name, criterion2, displayName, renderType);
+        ScoreboardObjective scoreboardObjective;
+        synchronized (lock) {
+            serverScoreboard.noDelayedAction();
+            scoreboardObjective = serverScoreboard.addObjective(name, criterion2, displayName, renderType);
+        }
+        serverScoreboard.runDelayedAction();
+        return  scoreboardObjective;
     }
 
     @Override
     public void forEachScore(ScoreboardCriterion criterion, String player, Consumer<ScoreboardPlayerScore> action) {
-        serverScoreboard.forEachScore(criterion, player, action);
+        synchronized (lock) {
+            serverScoreboard.forEachScore(criterion, player, action);
+            serverScoreboard.noDelayedAction();
+        }
     }
 
     @Override
     public boolean playerHasObjective(String playerName, ScoreboardObjective objective) {
-        return serverScoreboard.playerHasObjective(playerName, objective);
+        synchronized (lock) {
+            boolean playerHasObjective = serverScoreboard.playerHasObjective(playerName, objective);
+            serverScoreboard.noDelayedAction();
+            return playerHasObjective;
+        }
     }
 
     @Override
     public ScoreboardPlayerScore getPlayerScore(String playerName, ScoreboardObjective objective2) {
-        return serverScoreboard.getPlayerScore(playerName, objective2);
+        synchronized (lock) {
+            ScoreboardPlayerScore playerScore = serverScoreboard.getPlayerScore(playerName, objective2);
+            serverScoreboard.noDelayedAction();
+            return playerScore;
+        }
     }
 
     @Override
     public Collection<ScoreboardPlayerScore> getAllPlayerScores(ScoreboardObjective objective) {
-        return serverScoreboard.getAllPlayerScores(objective);
+        synchronized (lock) {
+            Collection<ScoreboardPlayerScore> allPlayerScores = serverScoreboard.getAllPlayerScores(objective);
+            serverScoreboard.noDelayedAction();
+            return allPlayerScores;
+        }
     }
 
     @Override
     public Collection<ScoreboardObjective> getObjectives() {
-        return serverScoreboard.getObjectives();
+        synchronized (lock) {
+            Collection<ScoreboardObjective> objectives1 = serverScoreboard.getObjectives();
+            serverScoreboard.noDelayedAction();
+            return objectives1;
+        }
     }
 
     @Override
     public Collection<String> getObjectiveNames() {
-        return serverScoreboard.getObjectiveNames();
+        synchronized (lock) {
+            Collection<String> objectiveNames = serverScoreboard.getObjectiveNames();
+            serverScoreboard.noDelayedAction();
+            return objectiveNames;
+        }
     }
 
     @Override
     public Collection<String> getKnownPlayers() {
-        return serverScoreboard.getKnownPlayers();
+        synchronized (lock) {
+            Collection<String> knownPlayers = serverScoreboard.getKnownPlayers();
+            serverScoreboard.noDelayedAction();
+            return knownPlayers;
+        }
     }
 
     @Override
     public void resetPlayerScore(String playerName, @Nullable ScoreboardObjective objective) {
-        serverScoreboard.resetPlayerScore(playerName, objective);
+        synchronized (lock) {
+            serverScoreboard.resetPlayerScore(playerName, objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public Map<ScoreboardObjective, ScoreboardPlayerScore> getPlayerObjectives(String playerName) {
-        return serverScoreboard.getPlayerObjectives(playerName);
+        synchronized (lock) {
+            Map<ScoreboardObjective, ScoreboardPlayerScore> playerObjectives = serverScoreboard.getPlayerObjectives(playerName);
+            serverScoreboard.noDelayedAction();
+            return playerObjectives;
+        }
     }
 
     @Override
     public void removeObjective(ScoreboardObjective objective) {
-        serverScoreboard.removeObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.removeObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void setObjectiveSlot(int slot, @Nullable ScoreboardObjective objective) {
-        serverScoreboard.setObjectiveSlot(slot, objective);
+        synchronized (lock) {
+            serverScoreboard.setObjectiveSlot(slot, objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Nullable
     @Override
     public ScoreboardObjective getObjectiveForSlot(int slot) {
-        return serverScoreboard.getObjectiveForSlot(slot);
+        synchronized (lock) {
+            @Nullable ScoreboardObjective objectiveForSlot = serverScoreboard.getObjectiveForSlot(slot);
+            serverScoreboard.noDelayedAction();
+            return objectiveForSlot;
+        }
     }
 
     @Nullable
     @Override
     public Team getTeam(String name) {
-        return serverScoreboard.getTeam(name);
+        synchronized (lock) {
+            @Nullable Team team = serverScoreboard.getTeam(name);
+            serverScoreboard.noDelayedAction();
+            return team;
+        }
     }
 
     @Override
     public Team addTeam(String name) {
-        return serverScoreboard.addTeam(name);
+        Team team;
+        synchronized (lock) {
+            team = serverScoreboard.addTeam(name);
+        }
+        serverScoreboard.runDelayedAction();
+        return team;
     }
 
     @Override
     public void removeTeam(Team team) {
-        serverScoreboard.removeTeam(team);
+        synchronized (lock) {
+            serverScoreboard.removeTeam(team);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public boolean addPlayerToTeam(String playerName, Team team) {
-        return serverScoreboard.addPlayerToTeam(playerName, team);
+        boolean addPlayerToTeam;
+        synchronized (lock) {
+            addPlayerToTeam = serverScoreboard.addPlayerToTeam(playerName, team);
+        }
+        serverScoreboard.runDelayedAction();
+        return addPlayerToTeam;
     }
 
     @Override
     public boolean clearPlayerTeam(String playerName) {
-        return serverScoreboard.clearPlayerTeam(playerName);
+        boolean clearPlayerTeam;
+        synchronized (lock) {
+            clearPlayerTeam = serverScoreboard.clearPlayerTeam(playerName);
+        }
+        serverScoreboard.runDelayedAction();
+        return clearPlayerTeam;
     }
 
     @Override
     public void removePlayerFromTeam(String playerName, Team team) {
-        serverScoreboard.removePlayerFromTeam(playerName, team);
+        synchronized (lock) {
+            serverScoreboard.removePlayerFromTeam(playerName, team);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public Collection<String> getTeamNames() {
-        return serverScoreboard.getTeamNames();
+        Collection<String> teamNames;
+        synchronized (lock) {
+            teamNames = serverScoreboard.getTeamNames();
+            serverScoreboard.noDelayedAction();
+        }
+        return teamNames;
     }
 
     @Override
     public Collection<Team> getTeams() {
-        return serverScoreboard.getTeams();
+        Collection<Team> scoreboardTeams;
+        synchronized (lock) {
+            scoreboardTeams = serverScoreboard.getTeams();
+            serverScoreboard.noDelayedAction();
+        }
+        return scoreboardTeams;
     }
 
     @Nullable
     @Override
     public Team getPlayerTeam(String playerName) {
-        return serverScoreboard.getPlayerTeam(playerName);
+        @Nullable Team playerTeam;
+        synchronized (lock) {
+            playerTeam = serverScoreboard.getPlayerTeam(playerName);
+            serverScoreboard.noDelayedAction();
+        }
+        return playerTeam;
     }
 
     @Override
     public void resetEntityScore(Entity entity) {
-        serverScoreboard.resetEntityScore(entity);
+        synchronized (lock) {
+            serverScoreboard.resetEntityScore(entity);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     protected NbtList toNbt() {
-        return serverScoreboard.toNbt();
+        NbtList nbtElements;
+        synchronized (lock) {
+            nbtElements = serverScoreboard.toNbt();
+            serverScoreboard.noDelayedAction();
+        }
+        return nbtElements;
     }
 
     @Override
     protected void readNbt(NbtList list) {
-        serverScoreboard.readNbt(list);
+        synchronized (lock) {
+            serverScoreboard.readNbt(list);
+        }
+        serverScoreboard.noDelayedAction();
     }
 
     @Override
     public void updateScore(ScoreboardPlayerScore score) {
-        serverScoreboard.updateScore(score);
+        synchronized (lock) {
+            serverScoreboard.updateScore(score);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updatePlayerScore(String playerName) {
-        serverScoreboard.updatePlayerScore(playerName);
+        synchronized (lock) {
+            serverScoreboard.updatePlayerScore(playerName);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updatePlayerScore(String playerName, ScoreboardObjective objective) {
-        serverScoreboard.updatePlayerScore(playerName, objective);
+        synchronized (lock) {
+            serverScoreboard.updatePlayerScore(playerName, objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateObjective(ScoreboardObjective objective) {
-        serverScoreboard.updateObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.updateObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateExistingObjective(ScoreboardObjective objective) {
-        serverScoreboard.updateExistingObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.updateExistingObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateRemovedObjective(ScoreboardObjective objective) {
-        serverScoreboard.updateRemovedObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.updateRemovedObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateScoreboardTeamAndPlayers(Team team) {
-        serverScoreboard.updateScoreboardTeamAndPlayers(team);
+        synchronized (lock) {
+            serverScoreboard.updateScoreboardTeamAndPlayers(team);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateScoreboardTeam(Team team) {
-        serverScoreboard.updateScoreboardTeam(team);
+        synchronized (lock) {
+            serverScoreboard.updateScoreboardTeam(team);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void updateRemovedTeam(Team team) {
-        serverScoreboard.updateRemovedTeam(team);
+        synchronized (lock) {
+            serverScoreboard.updateRemovedTeam(team);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public void addUpdateListener(Runnable listener) {
-        serverScoreboard.addUpdateListener(listener);
-    }
-
-    @Override
-    protected void runUpdateListeners() {
-        serverScoreboard.runUpdateListeners();
+        synchronized (lock) {
+            serverScoreboard.addUpdateListener(listener);
+            serverScoreboard.noDelayedAction();
+        }
     }
 
     @Override
     public List<Packet<?>> createChangePackets(ScoreboardObjective objective) {
-        return serverScoreboard.createChangePackets(objective);
+        List<Packet<?>> changePackets;
+        synchronized (lock) {
+            changePackets = serverScoreboard.createChangePackets(objective);
+            serverScoreboard.noDelayedAction();
+        }
+        return changePackets;
     }
 
     @Override
     public void addScoreboardObjective(ScoreboardObjective objective) {
-        serverScoreboard.addScoreboardObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.addScoreboardObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public List<Packet<?>> createRemovePackets(ScoreboardObjective objective) {
-        return serverScoreboard.createRemovePackets(objective);
+        List<Packet<?>> removePackets;
+        synchronized (lock) {
+            removePackets = serverScoreboard.createRemovePackets(objective);
+            serverScoreboard.noDelayedAction();
+        }
+        return removePackets;
     }
 
     @Override
     public void removeScoreboardObjective(ScoreboardObjective objective) {
-        serverScoreboard.removeScoreboardObjective(objective);
+        synchronized (lock) {
+            serverScoreboard.removeScoreboardObjective(objective);
+        }
+        serverScoreboard.runDelayedAction();
     }
 
     @Override
     public int getSlot(ScoreboardObjective objective) {
-        return serverScoreboard.getSlot(objective);
+        int slot = 0;
+        synchronized (lock) {
+            slot = serverScoreboard.getSlot(objective);
+            serverScoreboard.noDelayedAction();
+        }
+        return slot;
     }
 
     @Override
     public ScoreboardState createState() {
-        return serverScoreboard.createState();
+        ScoreboardState state;
+        synchronized (lock) {
+            state = serverScoreboard.createState();
+            serverScoreboard.noDelayedAction();
+        }
+        return state;
     }
 
     public ScoreboardState stateFromNbt(NbtCompound nbt) {
-        return serverScoreboard.stateFromNbt(nbt);
+        ScoreboardState scoreboardState;
+        synchronized (lock) {
+            scoreboardState = serverScoreboard.stateFromNbt(nbt);
+            serverScoreboard.noDelayedAction();
+        }
+        return scoreboardState;
     }
 
 }

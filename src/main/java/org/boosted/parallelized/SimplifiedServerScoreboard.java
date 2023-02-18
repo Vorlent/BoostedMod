@@ -1,6 +1,5 @@
 package org.boosted.parallelized;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -16,7 +15,6 @@ import net.minecraft.text.Text;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -436,4 +434,14 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
         });
     }
 
+    /**
+     * If a method has no delayed action, use this instead of runDelayedAction to confirm it.
+     * This method checks invariants to ensure bug free programming.
+     */
+    public void noDelayedAction() {
+        if (delayedAction.get().size() != 0) {
+            delayedAction.get().clear();
+            throw new IllegalStateException("delayedActions have been created but not executed");
+        }
+    }
 }
