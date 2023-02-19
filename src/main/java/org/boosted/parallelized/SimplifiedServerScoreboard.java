@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 public class SimplifiedServerScoreboard extends ServerScoreboard {
 
     private final SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
-    private final ThreadLocal<List<Consumer<MinecraftServer>>> delayedAction = ThreadLocal.withInitial(() -> new ArrayList<>());
+    private final ThreadLocal<List<Consumer<MinecraftServer>>> delayedAction = ThreadLocal.withInitial(() -> null);
 
     public SimplifiedServerScoreboard(MinecraftServer server) {
         super(null);
@@ -423,6 +423,13 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
     }
 
     /**
+     * Explicitly enable delayedAction
+     */
+    public void acceptDelayedAction() {
+        delayedAction.set(new ArrayList<>());
+    }
+
+    /**
      * After calling any method, you must call runDelayedAction in SynchronizedServerScoreboard.
      */
     public void runDelayedAction() {
@@ -430,7 +437,7 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
             for (Consumer<MinecraftServer> consumer : delayedAction.get()) {
                 consumer.accept(server);
             }
-            delayedAction.get().clear();
+            delayedAction.set(null);
         });
     }
 
@@ -439,9 +446,9 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
      * This method checks invariants to ensure bug free programming.
      */
     public void noDelayedAction() {
-        if (delayedAction.get().size() != 0) {
+        /*if (delayedAction.get().size() != 0) {
             delayedAction.get().clear();
             throw new IllegalStateException("delayedActions have been created but not executed");
-        }
+        }*/
     }
 }

@@ -84,8 +84,8 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
 
     @Override
     public ServerScoreboard getScoreboard() {
-        throw new UnsupportedOperationException();
-        //return this.getUnsynchronizedServer().getScoreboard();
+        // this is unsafe unless ServerScoreboard has been swapped with SynchronizedScoreboard
+        return this.getSynchronizedServer().readExp(server -> server.getScoreboard());
     }
 
     /**

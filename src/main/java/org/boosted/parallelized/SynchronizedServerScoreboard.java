@@ -16,6 +16,15 @@ import java.util.function.Consumer;
  * The reason why it delegates to another ServerScoreboard instance is that the wrapped instance
  * will use its own public API internally, which means it is not supposed to use these synchronized methods.
  *
+ * This SynchronizedServerScoreboard essentially acts like a SynchronizedResource<SimplifiedServerScoreboard>
+ * but with the interface of a ServerScoreboard.
+ *
+ * What this tells you is that the caller should always be responsible for synchronization,
+ * after all, if SimplifiedServerScoreboard was synchronized, it would call its own methods,
+ * synchronizing twice and thereby running into a deadlock. But if the caller ensures synchronization,
+ * then the resource itself can be carefree in calling its own functions.
+ * It also minimizes the need to write synchronized wrapper classes like this one.
+ * The downside is that changing the calling code in a minecraft mod requires a lot of mixins.
  */
 public class SynchronizedServerScoreboard extends ServerScoreboard {
 
@@ -58,6 +67,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Override
     public ScoreboardObjective addObjective(String name, ScoreboardCriterion criterion2, Text displayName, ScoreboardCriterion.RenderType renderType) {
         ScoreboardObjective scoreboardObjective;
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.noDelayedAction();
             scoreboardObjective = serverScoreboard.addObjective(name, criterion2, displayName, renderType);
@@ -70,6 +80,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     public void forEachScore(ScoreboardCriterion criterion, String player, Consumer<ScoreboardPlayerScore> action) {
         synchronized (lock) {
             serverScoreboard.forEachScore(criterion, player, action);
+            // TODO wrap every single score in SynchronizedScoreboardPlayerScore
             serverScoreboard.noDelayedAction();
         }
     }
@@ -85,11 +96,13 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public ScoreboardPlayerScore getPlayerScore(String playerName, ScoreboardObjective objective2) {
+        ScoreboardPlayerScore playerScore;
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
-            ScoreboardPlayerScore playerScore = serverScoreboard.getPlayerScore(playerName, objective2);
-            serverScoreboard.noDelayedAction();
-            return playerScore;
+            playerScore = serverScoreboard.getPlayerScore(playerName, objective2);
         }
+        serverScoreboard.runDelayedAction();
+        return synchronizedScoreboardPlayerScore(playerScore);
     }
 
     @Override
@@ -97,7 +110,11 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         synchronized (lock) {
             Collection<ScoreboardPlayerScore> allPlayerScores = serverScoreboard.getAllPlayerScores(objective);
             serverScoreboard.noDelayedAction();
-            return allPlayerScores;
+            List<ScoreboardPlayerScore> scores = new ArrayList<>();
+            for (ScoreboardPlayerScore score : allPlayerScores) {
+                scores.add(synchronizedScoreboardPlayerScore(score));
+            }
+            return scores;
         }
     }
 
@@ -128,8 +145,10 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         }
     }
 
+
     @Override
     public void resetPlayerScore(String playerName, @Nullable ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.resetPlayerScore(playerName, objective);
         }
@@ -147,6 +166,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void removeObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.removeObjective(objective);
         }
@@ -155,6 +175,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void setObjectiveSlot(int slot, @Nullable ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.setObjectiveSlot(slot, objective);
         }
@@ -184,6 +205,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Override
     public Team addTeam(String name) {
         Team team;
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             team = serverScoreboard.addTeam(name);
         }
@@ -193,6 +215,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void removeTeam(Team team) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.removeTeam(team);
         }
@@ -202,6 +225,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Override
     public boolean addPlayerToTeam(String playerName, Team team) {
         boolean addPlayerToTeam;
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             addPlayerToTeam = serverScoreboard.addPlayerToTeam(playerName, team);
         }
@@ -212,6 +236,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Override
     public boolean clearPlayerTeam(String playerName) {
         boolean clearPlayerTeam;
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             clearPlayerTeam = serverScoreboard.clearPlayerTeam(playerName);
         }
@@ -221,6 +246,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void removePlayerFromTeam(String playerName, Team team) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.removePlayerFromTeam(playerName, team);
         }
@@ -252,6 +278,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     public Team getPlayerTeam(String playerName) {
         @Nullable Team playerTeam;
         synchronized (lock) {
+            serverScoreboard.noDelayedAction();
             playerTeam = serverScoreboard.getPlayerTeam(playerName);
             serverScoreboard.noDelayedAction();
         }
@@ -260,6 +287,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void resetEntityScore(Entity entity) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.resetEntityScore(entity);
         }
@@ -286,6 +314,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScore(ScoreboardPlayerScore score) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateScore(score);
         }
@@ -294,6 +323,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updatePlayerScore(String playerName) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updatePlayerScore(playerName);
         }
@@ -302,6 +332,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updatePlayerScore(String playerName, ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updatePlayerScore(playerName, objective);
         }
@@ -310,6 +341,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateObjective(objective);
         }
@@ -318,6 +350,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateExistingObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateExistingObjective(objective);
         }
@@ -326,6 +359,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateRemovedObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateRemovedObjective(objective);
         }
@@ -334,6 +368,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScoreboardTeamAndPlayers(Team team) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateScoreboardTeamAndPlayers(team);
         }
@@ -342,6 +377,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScoreboardTeam(Team team) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateScoreboardTeam(team);
         }
@@ -350,6 +386,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateRemovedTeam(Team team) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.updateRemovedTeam(team);
         }
@@ -376,6 +413,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void addScoreboardObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.addScoreboardObjective(objective);
         }
@@ -394,6 +432,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
 
     @Override
     public void removeScoreboardObjective(ScoreboardObjective objective) {
+        serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
             serverScoreboard.removeScoreboardObjective(objective);
         }
@@ -420,13 +459,27 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         return state;
     }
 
+    @Override
     public ScoreboardState stateFromNbt(NbtCompound nbt) {
+        serverScoreboard.acceptDelayedAction();
         ScoreboardState scoreboardState;
         synchronized (lock) {
             scoreboardState = serverScoreboard.stateFromNbt(nbt);
-            serverScoreboard.noDelayedAction();
         }
+        serverScoreboard.runDelayedAction();
         return scoreboardState;
     }
 
+    /**
+     * SynchronizedScoreboardPlayerScore represetns the external interface of the scoreboard.
+     * @param scoreboardPlayerScore
+     * @return
+     */
+    private ScoreboardPlayerScore synchronizedScoreboardPlayerScore(ScoreboardPlayerScore scoreboardPlayerScore) {
+        if (scoreboardPlayerScore instanceof SimplifiedScoreboardPlayerScore score) {
+            return new SynchronizedScoreboardPlayerScore(this, score);
+        } else {
+            throw new UnsupportedOperationException("Can only synchronize ParallelScoreboardPlayerScore");
+        }
+    }
 }

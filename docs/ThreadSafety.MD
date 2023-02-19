@@ -13,6 +13,9 @@ Execute teleportation on the main thread.
 Entity.moveToWorld cannot be redirected on its own, we must redirect the calling code (tickPortal).
 EnforceBoosted is used to ensure that moveToWorld is only called inside a ThreadExecutor managed by Boosted.
 
+One problem that remains is that moving moveToWorld to a post tick executor,
+is that we still need to remove the entity from the world mid tick.
+
 ## Redstone:
 
 ### Problem:
@@ -118,3 +121,12 @@ MinecraftServer.getCommandManager() is generally accessed to execute commands.
 has a reference to server and must be fixed like ServerWorld.
 
 MinecraftServer.getServerWorld()
+
+# Scoreboard
+
+https://learn.microsoft.com/en-us/minecraft/creator/documents/scoreboardintroduction
+
+
+# Maps
+
+Minecraft Maps can show the state of chunks that are far away from the player.

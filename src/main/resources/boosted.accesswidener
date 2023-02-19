@@ -64,7 +64,6 @@ accessible field net/minecraft/scoreboard/Scoreboard teams Ljava/util/Map;
 accessible field net/minecraft/scoreboard/Scoreboard objectiveSlots [Lnet/minecraft/scoreboard/ScoreboardObjective;
 accessible field net/minecraft/scoreboard/Scoreboard teamsByPlayer Ljava/util/Map;
 
-
 accessible field net/minecraft/scoreboard/Team displayName Lnet/minecraft/text/Text;
 accessible field net/minecraft/scoreboard/Team prefix Lnet/minecraft/text/Text;
 accessible field net/minecraft/scoreboard/Team suffix Lnet/minecraft/text/Text;
@@ -73,3 +72,11 @@ accessible field net/minecraft/scoreboard/Team showFriendlyInvisibles Z
 accessible field net/minecraft/scoreboard/Team nameTagVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
 accessible field net/minecraft/scoreboard/Team deathMessageVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
 accessible field net/minecraft/scoreboard/Team collisionRule Lnet/minecraft/scoreboard/AbstractTeam$CollisionRule;
+
+accessible field net/minecraft/scoreboard/ScoreboardObjective displayName Lnet/minecraft/text/Text;
+accessible field net/minecraft/scoreboard/ScoreboardObjective bracketedDisplayName Lnet/minecraft/text/Text;
+accessible field net/minecraft/scoreboard/ScoreboardObjective renderType Lnet/minecraft/scoreboard/ScoreboardCriterion$RenderType;
+accessible method net/minecraft/scoreboard/ScoreboardObjective generateBracketedDisplayName ()Lnet/minecraft/text/Text;
+
+accessible field net/minecraft/scoreboard/ScoreboardPlayerScore score I
+accessible field net/minecraft/scoreboard/ScoreboardPlayerScore forceUpdate Z

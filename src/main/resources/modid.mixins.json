@@ -52,6 +52,7 @@
     "getServer.WalkTowardJobSiteTaskMixin",
     "portal.EntityMoveToWorldMixin",
     "redstone.RedstoneWireBlockMixin",
+    "scoreboard.ScoreboardMixin",
     "synchronization.MinecraftServerMixin",
     "teleport.ServerPlayerEntityMixin",
     "teleport.ServerPlayNetworkHandlerMixin",

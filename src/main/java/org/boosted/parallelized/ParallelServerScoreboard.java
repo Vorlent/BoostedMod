@@ -1,5 +1,6 @@
 package org.boosted.parallelized;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.Packet;
@@ -14,6 +15,7 @@ import net.minecraft.text.Text;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,20 +23,25 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class ParallelServerScoreboard extends ServerScoreboard {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private final SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
     // TODO implement ServerScoreBoard synchronizationn
     private final Object lock = new Object();
 
     public ParallelServerScoreboard(MinecraftServer server) {
         super(null);
-        // TODO share synchronized resource with server
         synchronizedServer = server.getSynchronizedServer();
     }
 
     @Override
     public void updateScore(ScoreboardPlayerScore score) {
-        super.updateScore(score);
-        if (this.objectives.contains(score.getObjective())) {
+        boolean contains = false;
+        synchronized (lock) {
+            contains = this.objectives.contains(score.getObjective());
+        }
+        if (contains) {
             synchronizedServer.write(server ->
                 server.getPlayerManager().sendToAll(
                     new ScoreboardPlayerUpdateS2CPacket(
@@ -47,7 +54,6 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updatePlayerScore(String playerName) {
-        super.updatePlayerScore(playerName);
         synchronizedServer.write(server ->
             server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(UpdateMode.REMOVE, null, playerName, 0))
         );
@@ -56,8 +62,11 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updatePlayerScore(String playerName, ScoreboardObjective objective) {
-        super.updatePlayerScore(playerName, objective);
-        if (this.objectives.contains(objective)) {
+        boolean contains = false;
+        synchronized (lock) {
+            contains = this.objectives.contains(objective);
+        }
+        if (contains) {
             synchronizedServer.write(server ->
                 server.getPlayerManager().sendToAll(new ScoreboardPlayerUpdateS2CPacket(UpdateMode.REMOVE, objective.getName(), playerName, 0))
             );
@@ -67,8 +76,10 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void setObjectiveSlot(int slot, @Nullable ScoreboardObjective objective) {
-        ScoreboardObjective scoreboardObjective = this.getObjectiveForSlot(slot);
-        super.setObjectiveSlot(slot, objective);
+        // TODO synchronization
+        ScoreboardObjective scoreboardObjective = this.objectiveSlots[slot];
+        this.objectiveSlots[slot] = objective;
+
         if (scoreboardObjective != objective && scoreboardObjective != null) {
             if (this.getSlot(scoreboardObjective) > 0) {
                 synchronizedServer.write(server ->
@@ -92,7 +103,13 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public boolean addPlayerToTeam(String playerName, Team team) {
-        if (super.addPlayerToTeam(playerName, team)) {
+        boolean addedPlayer = false;
+        synchronized (lock) {
+            this.teamsByPlayer.put(playerName, team);
+            addedPlayer = team.getPlayerList().add(playerName);
+        }
+
+        if (addedPlayer) {
             synchronizedServer.write(server ->
                 server.getPlayerManager().sendToAll(TeamS2CPacket.changePlayerTeam(team, playerName, TeamS2CPacket.Operation.ADD))
             );
@@ -104,7 +121,14 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void removePlayerFromTeam(String playerName, Team team) {
-        super.removePlayerFromTeam(playerName, team);
+        synchronized (lock) {
+            if (this.getPlayerTeam(playerName) != team) {
+                throw new IllegalStateException("Player is either on another team or not on any team. Cannot remove from team '" + team.getName() + "'.");
+            }
+            this.teamsByPlayer.remove(playerName);
+            team.getPlayerList().remove(playerName);
+        }
+
         synchronizedServer.write(server ->
             server.getPlayerManager().sendToAll(TeamS2CPacket.changePlayerTeam(team, playerName, TeamS2CPacket.Operation.REMOVE))
         );
@@ -113,14 +137,16 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateObjective(ScoreboardObjective objective) {
-        super.updateObjective(objective);
         this.runUpdateListeners();
     }
 
     @Override
     public void updateExistingObjective(ScoreboardObjective objective) {
-        super.updateExistingObjective(objective);
-        if (this.objectives.contains(objective)) {
+        boolean contains = false;
+        synchronized (lock) {
+            contains = this.objectives.contains(objective);
+        }
+        if (contains) {
             synchronizedServer.write(server ->
                 server.getPlayerManager().sendToAll(new ScoreboardObjectiveUpdateS2CPacket(objective, ScoreboardObjectiveUpdateS2CPacket.UPDATE_MODE))
             );
@@ -130,8 +156,11 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateRemovedObjective(ScoreboardObjective objective) {
-        super.updateRemovedObjective(objective);
-        if (this.objectives.contains(objective)) {
+        boolean contains = false;
+        synchronized (lock) {
+            contains = this.objectives.contains(objective);
+        }
+        if (contains) {
             this.removeScoreboardObjective(objective);
         }
         this.runUpdateListeners();
@@ -139,7 +168,6 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScoreboardTeamAndPlayers(Team team) {
-        super.updateScoreboardTeamAndPlayers(team);
         synchronizedServer.write(server ->
             server.getPlayerManager().sendToAll(TeamS2CPacket.updateTeam(team, true))
         );
@@ -148,7 +176,6 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScoreboardTeam(Team team) {
-        super.updateScoreboardTeam(team);
         synchronizedServer.write(server ->
             server.getPlayerManager().sendToAll(TeamS2CPacket.updateTeam(team, false))
         );
@@ -157,7 +184,6 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateRemovedTeam(Team team) {
-        super.updateRemovedTeam(team);
         synchronizedServer.write(server ->
             server.getPlayerManager().sendToAll(TeamS2CPacket.updateRemovedTeam(team))
         );
@@ -166,7 +192,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void addScoreboardObjective(ScoreboardObjective objective) {
-        List<Packet<?>> list = this.createChangePackets(objective);
+        List<Packet<?>> list = this.createChangePackets(objective); //TODO synchronize
         synchronizedServer.write(server -> {
             for (ServerPlayerEntity serverPlayerEntity : server.getPlayerManager().getPlayerList()) {
                 for (Packet<?> packet : list) {
@@ -174,12 +200,14 @@ public class ParallelServerScoreboard extends ServerScoreboard {
                 }
             }
         });
-        this.objectives.add(objective);
+        synchronized (lock) {
+            this.objectives.add(objective);
+        }
     }
 
     @Override
     public void removeScoreboardObjective(ScoreboardObjective objective) {
-        List<Packet<?>> list = this.createRemovePackets(objective);
+        List<Packet<?>> list = this.createRemovePackets(objective); //TODO synchronize
         synchronizedServer.write(server -> {
             for (ServerPlayerEntity serverPlayerEntity : server.getPlayerManager().getPlayerList()) {
                 for (Packet<?> packet : list) {
@@ -187,7 +215,10 @@ public class ParallelServerScoreboard extends ServerScoreboard {
                 }
             }
         });
-        this.objectives.remove(objective);
+
+        synchronized (lock) {
+            this.objectives.remove(objective);
+        }
     }
 
     /* straight from Scoreboard */
@@ -293,7 +324,15 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     public Team addTeam(String name) {
         synchronized (lock) {
-            return super.addTeam(name);
+            Team team = this.getTeam(name);
+            if (team != null) {
+                LOGGER.warn("Requested creation of existing team '{}'", (Object)name);
+                return team;
+            }
+            team = new ParallelTeam(this, name);
+            this.teams.put(name, team);
+            this.updateScoreboardTeamAndPlayers(team); // TODO avoid runinng update listeners inside synchronization
+            return team;
         }
     }
 
