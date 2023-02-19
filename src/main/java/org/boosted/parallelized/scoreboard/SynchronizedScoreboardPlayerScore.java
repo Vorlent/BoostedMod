@@ -1,4 +1,4 @@
-package org.boosted.parallelized;
+package org.boosted.parallelized.scoreboard;
 
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -54,7 +54,4 @@ public class SynchronizedScoreboardPlayerScore extends ScoreboardPlayerScore {
         }
     }
 
-    public SynchronizedScoreboardPlayerScore with(ServerScoreboard serverScoreboard) {
-        return new SynchronizedScoreboardPlayerScore(serverScoreboard, scoreboardPlayerScore);
-    }
 }

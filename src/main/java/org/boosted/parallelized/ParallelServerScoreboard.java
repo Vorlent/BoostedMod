@@ -12,6 +12,7 @@ import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.boosted.parallelized.scoreboard.ParallelTeam;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateScore(ScoreboardPlayerScore score) {
-        boolean contains = false;
+        boolean contains;
         synchronized (lock) {
             contains = this.objectives.contains(score.getObjective());
         }
@@ -62,7 +63,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updatePlayerScore(String playerName, ScoreboardObjective objective) {
-        boolean contains = false;
+        boolean contains;
         synchronized (lock) {
             contains = this.objectives.contains(objective);
         }
@@ -103,7 +104,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public boolean addPlayerToTeam(String playerName, Team team) {
-        boolean addedPlayer = false;
+        boolean addedPlayer;
         synchronized (lock) {
             this.teamsByPlayer.put(playerName, team);
             addedPlayer = team.getPlayerList().add(playerName);
@@ -142,7 +143,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateExistingObjective(ScoreboardObjective objective) {
-        boolean contains = false;
+        boolean contains;
         synchronized (lock) {
             contains = this.objectives.contains(objective);
         }
@@ -156,7 +157,7 @@ public class ParallelServerScoreboard extends ServerScoreboard {
 
     @Override
     public void updateRemovedObjective(ScoreboardObjective objective) {
-        boolean contains = false;
+        boolean contains;
         synchronized (lock) {
             contains = this.objectives.contains(objective);
         }

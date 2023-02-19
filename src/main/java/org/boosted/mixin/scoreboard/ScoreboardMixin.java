@@ -1,10 +1,13 @@
 package org.boosted.mixin.scoreboard;
 
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
-import org.boosted.parallelized.SimplifiedScoreboardPlayerScore;
-import org.boosted.parallelized.SimplifiedServerScoreboard;
+import net.minecraft.text.Text;
+import org.boosted.parallelized.scoreboard.SimplifiedScoreboardObjective;
+import org.boosted.parallelized.scoreboard.SimplifiedScoreboardPlayerScore;
+import org.boosted.parallelized.scoreboard.SimplifiedServerScoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -40,5 +43,13 @@ public abstract class ScoreboardMixin {
             instance.setScore(score);
         }
     }
-
+    @Redirect(method = "addObjective(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreboardCriterion;Lnet/minecraft/text/Text;Lnet/minecraft/scoreboard/ScoreboardCriterion$RenderType;)Lnet/minecraft/scoreboard/ScoreboardObjective;",
+            at = @At(value = "NEW", target = "net/minecraft/scoreboard/ScoreboardObjective"))
+    public ScoreboardObjective redirectScoreboardPlayerScore(Scoreboard scoreboard, String name, ScoreboardCriterion criterion,
+                                                            Text displayName, ScoreboardCriterion.RenderType renderType) {
+        if ((Object)this instanceof SimplifiedServerScoreboard) {
+            return new SimplifiedScoreboardObjective(scoreboard, name, criterion, displayName, renderType);
+        }
+        return new ScoreboardObjective(scoreboard, name, criterion, displayName, renderType);
+    }
 }

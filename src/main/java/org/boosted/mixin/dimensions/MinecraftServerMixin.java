@@ -8,10 +8,9 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
-import org.boosted.parallelized.ParallelServerScoreboard;
 import org.boosted.parallelized.ParallelServerWorld;
-import org.boosted.parallelized.SimplifiedServerScoreboard;
-import org.boosted.parallelized.SynchronizedServerScoreboard;
+import org.boosted.parallelized.scoreboard.SimplifiedServerScoreboard;
+import org.boosted.parallelized.scoreboard.SynchronizedServerScoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 

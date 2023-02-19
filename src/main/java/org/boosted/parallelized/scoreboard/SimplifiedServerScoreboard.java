@@ -1,4 +1,4 @@
-package org.boosted.parallelized;
+package org.boosted.parallelized.scoreboard;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
