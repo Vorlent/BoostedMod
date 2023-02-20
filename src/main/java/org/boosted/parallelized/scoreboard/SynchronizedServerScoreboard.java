@@ -1,5 +1,6 @@
 package org.boosted.parallelized.scoreboard;
 
+import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -79,8 +80,9 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Override
     public void forEachScore(ScoreboardCriterion criterion, String player, Consumer<ScoreboardPlayerScore> action) {
         synchronized (lock) {
-            serverScoreboard.forEachScore(criterion, player, action);
-            // TODO wrap every single score in SynchronizedScoreboardPlayerScore
+            serverScoreboard.forEachScore(criterion, player, (scoreboardPlayerScore) -> {
+                action.accept(synchronizedScoreboardPlayerScore(scoreboardPlayerScore));
+            });
             serverScoreboard.noDelayedAction();
         }
     }
@@ -168,7 +170,11 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         synchronized (lock) {
             Map<ScoreboardObjective, ScoreboardPlayerScore> playerObjectives = serverScoreboard.getPlayerObjectives(playerName);
             serverScoreboard.noDelayedAction();
-            return playerObjectives; // TODO return map with both synchronized
+            Map<ScoreboardObjective, ScoreboardPlayerScore> syncPlayerObjectives = Maps.newHashMap();
+            for (Map.Entry<ScoreboardObjective, ScoreboardPlayerScore> entry : playerObjectives.entrySet()) {
+                syncPlayerObjectives.put(synchronizedScoreboardObjective(entry.getKey()), synchronizedScoreboardPlayerScore(entry.getValue()));
+            }
+            return syncPlayerObjectives;
         }
     }
 
