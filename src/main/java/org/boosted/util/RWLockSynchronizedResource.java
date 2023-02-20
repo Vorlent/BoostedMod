@@ -9,7 +9,7 @@ public class RWLockSynchronizedResource<T, U> implements SynchronizedResource<T,
     private final T resource;
     private final U unmodifiableResource;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final ThreadLocal<Integer> readOnly = ThreadLocal.withInitial(() -> 0); // todo replace with ReentrantReadWriteLock.getReadHoldCount()
+    private final ThreadLocal<Integer> readOnly = ThreadLocal.withInitial(() -> 0);
 
     public RWLockSynchronizedResource(T resource, U unmodifiableResource) {
         this.resource = resource;

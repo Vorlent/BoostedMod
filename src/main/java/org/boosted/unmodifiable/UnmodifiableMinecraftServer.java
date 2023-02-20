@@ -12,7 +12,6 @@ import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.function.LootFunctionManager;
 import net.minecraft.network.encryption.SignatureVerifier;
 import net.minecraft.network.message.MessageDecorator;
-import net.minecraft.network.message.MessageType;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourcePackManager;
@@ -26,30 +25,25 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructureTemplateManager;
-import net.minecraft.text.Text;
-import net.minecraft.util.*;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.MetricsData;
+import net.minecraft.util.ModStatus;
+import net.minecraft.util.UserCache;
+import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.profiler.ProfileResult;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.*;
-import net.minecraft.world.dimension.DimensionOptions;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.world.GameMode;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.SaveProperties;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.Proxy;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * This UnmodifiableMinecraftServer is supposed to be a stepping stone,
@@ -67,7 +61,6 @@ import java.util.function.Consumer;
  * When attempting to write, the class will throw an exception and the caller must fix their code. (e.g. acquire the write lock)
  */
 public class UnmodifiableMinecraftServer {
-
 
     private final MinecraftServer server;
 
@@ -179,7 +172,7 @@ public class UnmodifiableMinecraftServer {
         return server.getServerPort();
     }
 
-    //TODO consider unmodifiable game profile
+    // game profile is unmodifiable
     public GameProfile getHostProfile() {
         return server.getHostProfile();
     }
@@ -300,10 +293,8 @@ public class UnmodifiableMinecraftServer {
         return server.hideOnlinePlayers();
     }
 
-    //TODO consider unmodifiable Proxy
-    public Proxy getProxy() {
-        return server.getProxy();
-    }
+    // never used
+    // public Proxy getProxy() { return server.getProxy(); }
 
     public int getPlayerIdleTimeout() {
         return server.getPlayerIdleTimeout();
@@ -496,7 +487,7 @@ public class UnmodifiableMinecraftServer {
         return server.getRegistryManager();
     }
 
-    //TODO consider unmodifiable TextStream
+    // TextStream is immutable
     public TextStream createFilterer(ServerPlayerEntity player) {
         return server.createFilterer(player);
     }
@@ -506,7 +497,7 @@ public class UnmodifiableMinecraftServer {
         return server.getPlayerInteractionManager(player);
     }
 
-    //TODO consider unmodifiable GameMode
+    // GameMode is immutable
     public GameMode getForcedGameMode() {
         return server.getForcedGameMode();
     }
@@ -528,7 +519,7 @@ public class UnmodifiableMinecraftServer {
         return server.getMaxChainedNeighborUpdates();
     }
 
-    //TODO consider unmodifiable MessageDecorator
+    // MessageDecorator is immutable
     public MessageDecorator getMessageDecorator() {
         return server.getMessageDecorator();
     }

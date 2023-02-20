@@ -71,30 +71,37 @@ public class UnsupportedEntity extends Entity {
         return new UnsupportedOperationException();
     }
 
+    @Override
     public boolean collidesWithStateAtPos(BlockPos pos, BlockState state) {
         throw unsupportedOperation();
     }
 
+    @Override
     public int getTeamColorValue() {
         throw unsupportedOperation();
     }
 
+    @Override
     public boolean isSpectator() {
         throw unsupportedOperation();
     }
 
+    @Override
     public void updateTrackedPosition(double x, double y, double z) {
         throw unsupportedOperation();
     }
+
 
     public void updateTrackedPosition(Vec3d pos) {
         throw unsupportedOperation();
     }
 
+    @Override
     public TrackedPosition getTrackedPosition() {
         throw unsupportedOperation();
     }
 
+    @Override
     public EntityType<?> getType() {
         throw unsupportedOperation();
     }
@@ -104,17 +111,22 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
+    @Override
     public void setId(int id) {
         throw unsupportedOperation();
     }
 
+    @Override
     public Set<String> getScoreboardTags() {
         throw unsupportedOperation();
     }
 
+    @Override
     public boolean addScoreboardTag(String tag) {
         throw unsupportedOperation();
     }
+
+    @Override
     public boolean removeScoreboardTag(String tag) {
         throw unsupportedOperation();
     }
@@ -1456,6 +1468,7 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
+    @Override
     public World getWorld() {
         throw unsupportedOperation();
     }

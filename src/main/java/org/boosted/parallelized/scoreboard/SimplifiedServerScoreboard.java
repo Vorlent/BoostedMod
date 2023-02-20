@@ -446,9 +446,5 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
      * This method checks invariants to ensure bug free programming.
      */
     public void noDelayedAction() {
-        /*if (delayedAction.get().size() != 0) {
-            delayedAction.get().clear();
-            throw new IllegalStateException("delayedActions have been created but not executed");
-        }*/
     }
 }
