@@ -1,6 +1,7 @@
 package org.boosted.mixin.getServer;
 
 import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.task.ForgetCompletedPointOfInterestTask;
@@ -19,6 +20,9 @@ import net.minecraft.util.math.GlobalPos;
 import net.minecraft.village.VillagerProfession;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -26,29 +30,21 @@ import static net.minecraft.entity.ai.brain.task.GiveGiftsToHeroTask.GIFTS;
 
 @Mixin(GiveGiftsToHeroTask.class)
 public class GiveGiftsToHeroTaskMixin {
-    /**
-     * @author Vorlent
-     * @reason getGifts needs exclusive read access to MinecraftServer
-     */
-    @Overwrite
-    private List<ItemStack> getGifts(VillagerEntity villager) {
-        if (villager.isBaby()) {
-            return ImmutableList.of(new ItemStack(Items.POPPY));
-        }
-        VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
-        if (GIFTS.containsKey(villagerProfession)) {
-            /* PATCH BEGIN */
-            ServerWorld serverWorld = (ServerWorld)villager.world;
-            return serverWorld.getSynchronizedServer().readExp(server -> {
-                LootTable lootTable = server.getLootManager().getTable(GIFTS.get(villagerProfession));
-                LootContext.Builder builder = new LootContext.Builder((ServerWorld)villager.world)
-                        .parameter(LootContextParameters.ORIGIN, villager.getPos())
-                        .parameter(LootContextParameters.THIS_ENTITY, villager)
-                        .random(villager.getRandom());
-                return lootTable.generateLoot(builder.build(LootContextTypes.GIFT));
-            });
-            /* PATCH END */
-        }
-        return ImmutableList.of(new ItemStack(Items.WHEAT_SEEDS));
+
+    @Inject(method = "getGifts(Lnet/minecraft/entity/passive/VillagerEntity;)Ljava/util/List;", cancellable = true,
+        at = @At(value = "FIELD", target = "net/minecraft/entity/passive/VillagerEntity.world : Lnet/minecraft/world/World;",
+        ordinal = 0, shift = At.Shift.BEFORE))
+    private void injectGetGifts(VillagerEntity villager, CallbackInfoReturnable<List<ItemStack>> cir) {
+        ServerWorld serverWorld = (ServerWorld)villager.world;
+        ObjectArrayList<ItemStack> itemStacks = serverWorld.getSynchronizedServer().readExp(server -> {
+            VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
+            LootTable lootTable = server.getLootManager().getTable(GIFTS.get(villagerProfession));
+            LootContext.Builder builder = new LootContext.Builder((ServerWorld) villager.world)
+                    .parameter(LootContextParameters.ORIGIN, villager.getPos())
+                    .parameter(LootContextParameters.THIS_ENTITY, villager)
+                    .random(villager.getRandom());
+            return lootTable.generateLoot(builder.build(LootContextTypes.GIFT));
+        });
+        cir.setReturnValue(itemStacks);
     }
 }
