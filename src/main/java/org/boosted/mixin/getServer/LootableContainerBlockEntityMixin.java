@@ -41,7 +41,7 @@ public class LootableContainerBlockEntityMixin {
                 this.lootTableId = null;
                 LootContext.Builder builder = new LootContext.Builder((ServerWorld) world)
                     .parameter(LootContextParameters.ORIGIN, Vec3d.ofCenter(entity.getPos()))
-                        .random(this.lootTableSeed);
+                    .random(this.lootTableSeed);
                 if (player != null) {
                     builder.luck(player.getLuck()).parameter(LootContextParameters.THIS_ENTITY, player);
                 }

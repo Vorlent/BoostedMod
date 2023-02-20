@@ -270,7 +270,7 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
 
     @Override
     public int getNextMapId() {
-        return getSynchronizedServer().readExp(server ->
+        return getSynchronizedServer().writeExp(server ->
             server.getOverworld().getPersistentStateManager().getOrCreate(IdCountsState::fromNbt, IdCountsState::new, "idcounts").getNextMapId()
         );
     }

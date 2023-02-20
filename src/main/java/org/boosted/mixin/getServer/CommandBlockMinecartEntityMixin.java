@@ -11,7 +11,10 @@ public class CommandBlockMinecartEntityMixin {
     // and that would require breaking all commands.
 	/*
     public ServerCommandSource getSource() {
-        return new ServerCommandSource(this, CommandBlockMinecartEntity.this.getPos(), CommandBlockMinecartEntity.this.getRotationClient(), this.getWorld(), 2, this.getCustomName().getString(), CommandBlockMinecartEntity.this.getDisplayName(), this.getWorld().getServer(), CommandBlockMinecartEntity.this);
+        return new ServerCommandSource(this, CommandBlockMinecartEntity.this.getPos(),
+            CommandBlockMinecartEntity.this.getRotationClient(), this.getWorld(), 2,
+            this.getCustomName().getString(), CommandBlockMinecartEntity.this.getDisplayName(),
+            this.getWorld().getServer(), CommandBlockMinecartEntity.this);
     }
     */
 }

@@ -25,12 +25,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(FossilFeature.class)
 public class FossilFeatureMixin {
 
-    private ServerWorld serverWorld = null; // ugly, TODO check if this is thread safe
+    private ThreadLocal<ServerWorld> serverWorld = new ThreadLocal<>();
 
     @Redirect(method = "generate(Lnet/minecraft/world/gen/feature/util/FeatureContext;)Z",
         at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.getServer ()Lnet/minecraft/server/MinecraftServer;"))
     public MinecraftServer skipGetServer(ServerWorld instance) {
-        serverWorld = instance;
+        serverWorld.set(instance);
         return null;
     }
 
@@ -43,8 +43,10 @@ public class FossilFeatureMixin {
     @Redirect(method = "generate(Lnet/minecraft/world/gen/feature/util/FeatureContext;)Z",
             at = @At(value = "INVOKE", target = "net/minecraft/structure/StructureTemplateManager.getTemplateOrBlank (Lnet/minecraft/util/Identifier;)Lnet/minecraft/structure/StructureTemplate;"))
     public StructureTemplate redirectGetTemplateOrBlank(StructureTemplateManager instance, Identifier id) {
-        return serverWorld.getSynchronizedServer().readExp(server ->
+        StructureTemplate structureTemplate = serverWorld.get().getSynchronizedServer().readExp(server ->
                 server.getStructureTemplateManager().getTemplateOrBlank(id)
         );
+        serverWorld.remove();
+        return structureTemplate;
     }
 }

@@ -11,7 +11,9 @@ public class CommandBlockBlockEntityMixin {
 	/*
         @Override
         public ServerCommandSource getSource() {
-            return new ServerCommandSource(this, Vec3d.ofCenter(CommandBlockBlockEntity.this.pos), Vec2f.ZERO, this.getWorld(), 2, this.getCustomName().getString(), this.getCustomName(), this.getWorld().getServer(), null);
+            return new ServerCommandSource(this, Vec3d.ofCenter(CommandBlockBlockEntity.this.pos), Vec2f.ZERO,
+                this.getWorld(), 2, this.getCustomName().getString(), this.getCustomName(),
+                this.getWorld().getServer(), null);
         }
 	*/
 }

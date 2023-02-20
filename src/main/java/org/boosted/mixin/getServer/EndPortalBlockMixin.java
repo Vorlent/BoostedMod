@@ -39,6 +39,7 @@ public class EndPortalBlockMixin {
                     return;
                 }
                 ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> entity.moveToWorld(serverWorld));
+                // TODO remove the teleported entities and put them in a queue that is emptied in a mid tick executor
             });
             /* PATCH END */
 		}

@@ -69,10 +69,13 @@ The ChunkloadDrive may or may not be necessary. I don't know.
 ServerWorld.worldProperties is also unsafe.
 
 ServerWorld.tickTime()
+
 ServerWorld.tickWeather()
+
 ServerWorld.resetWeather()
 
 ServerWorld.setTime()
+
 ServerWorld.setSpawnPos()
 
 all run in the multithreaded ServerWorld.tick() function.
@@ -91,7 +94,9 @@ ServerWorld.server has been found to be problematic in context with the ScoreBoa
 There may be other potential issues regarding this field.
 
 ServerWorld.getMapState(String id)
+
 ServerWorld.putMapState(String id, MapState state)
+
 ServerWorld.getNextMapId()
 
 Always reference the Overworld.
