@@ -72,6 +72,8 @@ accessible field net/minecraft/scoreboard/Team showFriendlyInvisibles Z
 accessible field net/minecraft/scoreboard/Team nameTagVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
 accessible field net/minecraft/scoreboard/Team deathMessageVisibilityRule Lnet/minecraft/scoreboard/AbstractTeam$VisibilityRule;
 accessible field net/minecraft/scoreboard/Team collisionRule Lnet/minecraft/scoreboard/AbstractTeam$CollisionRule;
+accessible field net/minecraft/scoreboard/Team color Lnet/minecraft/util/Formatting;
+
 
 accessible field net/minecraft/scoreboard/ScoreboardObjective displayName Lnet/minecraft/text/Text;
 accessible field net/minecraft/scoreboard/ScoreboardObjective bracketedDisplayName Lnet/minecraft/text/Text;

@@ -56,7 +56,7 @@ public class SynchronizedScoreboardObjective extends ScoreboardObjective {
     /**
         This should only ever be called by SynchronizedServerScoreboard
      */
-    public SimplifiedScoreboardObjective getSimplifiedServerScoreboard() {
+    public SimplifiedScoreboardObjective getSimplifiedScoreboardObjective() {
         return parallelScoreboardObjective;
     }
 }

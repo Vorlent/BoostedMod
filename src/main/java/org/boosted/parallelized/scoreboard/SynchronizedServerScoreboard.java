@@ -211,11 +211,12 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     @Nullable
     @Override
     public Team getTeam(String name) {
+        @Nullable Team team;
         synchronized (lock) {
-            @Nullable Team team = serverScoreboard.getTeam(name);
+            team = serverScoreboard.getTeam(name);
             serverScoreboard.noDelayedAction();
-            return team;
         }
+        return synchronizedTeam(team);
     }
 
     @Override
@@ -226,14 +227,15 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
             team = serverScoreboard.addTeam(name);
         }
         serverScoreboard.runDelayedAction();
-        return team;
+        return synchronizedTeam(team);
     }
 
     @Override
     public void removeTeam(Team team) {
         serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
-            serverScoreboard.removeTeam(team);
+            Team unsyncTeam = unsynchronizedTeam(team);
+            serverScoreboard.removeTeam(unsyncTeam);
         }
         serverScoreboard.runDelayedAction();
     }
@@ -243,7 +245,8 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         boolean addPlayerToTeam;
         serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
-            addPlayerToTeam = serverScoreboard.addPlayerToTeam(playerName, team);
+            Team unsyncTeam = unsynchronizedTeam(team);
+            addPlayerToTeam = serverScoreboard.addPlayerToTeam(playerName, unsyncTeam);
         }
         serverScoreboard.runDelayedAction();
         return addPlayerToTeam;
@@ -264,7 +267,8 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     public void removePlayerFromTeam(String playerName, Team team) {
         serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
-            serverScoreboard.removePlayerFromTeam(playerName, team);
+            Team unsyncTeam = unsynchronizedTeam(team);
+            serverScoreboard.removePlayerFromTeam(playerName, unsyncTeam);
         }
         serverScoreboard.runDelayedAction();
     }
@@ -298,7 +302,7 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
             playerTeam = serverScoreboard.getPlayerTeam(playerName);
             serverScoreboard.noDelayedAction();
         }
-        return playerTeam;
+        return synchronizedTeam(playerTeam);
     }
 
     @Override
@@ -332,7 +336,8 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     public void updateScore(ScoreboardPlayerScore score) {
         serverScoreboard.acceptDelayedAction();
         synchronized (lock) {
-            serverScoreboard.updateScore(score);
+            ScoreboardPlayerScore unsycScore = unsynchronizedScoreboardPlayerScore(score);
+            serverScoreboard.updateScore(unsycScore);
         }
         serverScoreboard.runDelayedAction();
     }
@@ -496,6 +501,31 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
     }
 
     /**
+     * SynchronizedTeam represents the external interface of the scoreboard.
+     */
+    private Team synchronizedTeam(Team team) {
+        if (team == null) {
+            return null;
+        }
+        if (team instanceof SimplifiedTeam simplifiedTeam) {
+            return new SynchronizedTeam(this, simplifiedTeam);
+        } else {
+            throw new UnsupportedOperationException("Can only synchronize SimplifiedTeam");
+        }
+    }
+
+    private Team unsynchronizedTeam(Team team) {
+        if (team == null) {
+            return null;
+        }
+        if (team instanceof SynchronizedTeam syncTeam) {
+            return syncTeam.getSimplifiedTeam();
+        } else {
+            throw new UnsupportedOperationException("Can only unsynchronize SynchronizedTeam");
+        }
+    }
+
+    /**
      * SynchronizedScoreboardPlayerScore represents the external interface of the scoreboard.
      * @param scoreboardPlayerScore
      * @return
@@ -505,6 +535,17 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
             return new SynchronizedScoreboardPlayerScore(this, score);
         } else {
             throw new UnsupportedOperationException("Can only synchronize SimplifiedScoreboardPlayerScore");
+        }
+    }
+
+    private ScoreboardPlayerScore unsynchronizedScoreboardPlayerScore(ScoreboardPlayerScore scoreboardPlayerScore) {
+        if (scoreboardPlayerScore == null) {
+            return null;
+        }
+        if (scoreboardPlayerScore instanceof SynchronizedScoreboardPlayerScore score) {
+            return score.getSimplifiedScoreboardPlayerScore();
+        } else {
+            throw new UnsupportedOperationException("Can only unsynchronize SynchronizedScoreboardPlayerScore");
         }
     }
 
@@ -522,15 +563,12 @@ public class SynchronizedServerScoreboard extends ServerScoreboard {
         }
     }
 
-    /**
-     * SynchronizedScoreboardObjective represents the external interface of the scoreboard.
-     */
     private ScoreboardObjective unsynchronizedScoreboardObjective(ScoreboardObjective scoreboardObjective) {
         if (scoreboardObjective == null) {
             return null;
         }
         if (scoreboardObjective instanceof SynchronizedScoreboardObjective objective) {
-            return objective.getSimplifiedServerScoreboard();
+            return objective.getSimplifiedScoreboardObjective();
         } else {
             throw new UnsupportedOperationException("Can only unsynchronize SynchronizedScoreboardObjective");
         }

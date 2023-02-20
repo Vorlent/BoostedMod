@@ -54,4 +54,11 @@ public class SynchronizedScoreboardPlayerScore extends ScoreboardPlayerScore {
         }
     }
 
+    /**
+     * Do not use this outside SynchronizedScoreboardObjective
+     * @return
+     */
+    public ScoreboardPlayerScore getSimplifiedScoreboardPlayerScore() {
+        return scoreboardPlayerScore;
+    }
 }
