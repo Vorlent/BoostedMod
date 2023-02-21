@@ -135,3 +135,8 @@ https://learn.microsoft.com/en-us/minecraft/creator/documents/scoreboardintroduc
 # Maps
 
 Minecraft Maps can show the state of chunks that are far away from the player.
+
+# LootManager
+
+LootManager is almost threadsafe. It would be better to make it threadsafe
+than wrap it in MinecraftServer synchronization.
