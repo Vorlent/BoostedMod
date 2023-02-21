@@ -37,26 +37,20 @@ public class KnowledgeBookItemMixin {
 
     @Redirect(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
         at = @At(value = "INVOKE", target = "net/minecraft/nbt/NbtCompound.getList (Ljava/lang/String;I)Lnet/minecraft/nbt/NbtList;"))
-    private static NbtList skipGetList(NbtCompound instance, String key, int type) {
+    private NbtList skipGetList(NbtCompound instance, String key, int type) {
         return new NbtList(); // return empty list to skip the for loop
     }
 
     @Redirect(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
             at = @At(value = "INVOKE", target = "net/minecraft/world/World.getServer ()Lnet/minecraft/server/MinecraftServer;"))
-    private static MinecraftServer skipGetServer(World instance) {
+    private MinecraftServer skipGetServer(World instance) {
         return null;
     }
 
     @Redirect(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
             at = @At(value = "INVOKE", target = "net/minecraft/server/MinecraftServer.getRecipeManager ()Lnet/minecraft/recipe/RecipeManager;"))
-    private static RecipeManager skipGetRecipeManager(MinecraftServer instance) {
+    private RecipeManager skipGetRecipeManager(MinecraftServer instance) {
         return null;
-    }
-
-    @Redirect(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
-            at = @At(value = "INVOKE", target = "net/minecraft/nbt/NbtList.size ()I"))
-    private int skipForLoop(NbtList instance) { // this skips the entire for loop
-        return 0;
     }
 
     @Redirect(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
@@ -67,7 +61,8 @@ public class KnowledgeBookItemMixin {
 
     @Inject(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;",
         cancellable = true,
-        at = @At(value = "INVOKE", target = "net/minecraft/entity/player/PlayerEntity.unlockRecipes (Ljava/util/Collection;)I"))
+        at = @At(value = "INVOKE", target = "net/minecraft/entity/player/PlayerEntity.incrementStat (Lnet/minecraft/stat/Stat;)V",
+        shift = At.Shift.BEFORE))
     private void redirectUnlockRecipes(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
         ArrayList<Recipe<?>> list = Lists.newArrayList();
         ItemStack itemStack = user.getStackInHand(hand);
