@@ -4,6 +4,12 @@
   "package": "org.boosted.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "command.AdvancementRewardsMixin",
+    "command.CommandFunctionManagerMixin",
+    "command.DebugCommandMixin",
+    "command.FunctionCommandMixin",
+    "command.FunctionTagTimerCallbackMixin",
+    "command.FunctionTimerCallbackMixin",
     "context.WorldMixin",
     "dimensions.FabricDimensionsMixin",
     "dimensions.MinecraftServerMixin",

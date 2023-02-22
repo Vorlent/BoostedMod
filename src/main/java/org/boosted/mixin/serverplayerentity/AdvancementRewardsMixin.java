@@ -51,16 +51,5 @@ public class AdvancementRewardsMixin {
             .writeExp(server -> server.getLootManager().getTable(identifier).generateLoot(context));
     }
 
-    @Inject(method = "apply", cancellable = true,
-        at = @At(value = "FIELD", target = "net/minecraft/server/network/ServerPlayerEntity.server : Lnet/minecraft/server/MinecraftServer;",
-        ordinal = 1))
-    public void redirectCommandExecute(ServerPlayerEntity player, CallbackInfo ci) {
-        MinecraftServer minecraftServer = player.server;
-        minecraftServer.getSynchronizedServer().write(server -> {
-            this.function.get(minecraftServer.getCommandFunctionManager())
-                .ifPresent(function -> minecraftServer.getCommandFunctionManager()
-                    .execute((CommandFunction)function, player.getCommandSource().withSilent().withLevel(2)));
-        });
-        ci.cancel();
-    }
+    // last player.server access handled in command package
 }
