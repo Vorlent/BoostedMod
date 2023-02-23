@@ -216,7 +216,8 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
 
     @Override
     public RecipeManager getRecipeManager() {
-        //throw new UnsupportedOperationException();
+        /*throw*/ new UnsupportedOperationException().printStackTrace(); // print the exception but do not throw
+        // throwing an exception allows item duping as the input is not removed
         return this.getUnsynchronizedServer().getRecipeManager();
     }
 

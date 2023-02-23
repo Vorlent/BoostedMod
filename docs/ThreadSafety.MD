@@ -140,3 +140,8 @@ Minecraft Maps can show the state of chunks that are far away from the player.
 
 LootManager is almost threadsafe. It would be better to make it threadsafe
 than wrap it in MinecraftServer synchronization.
+
+# RecipeManager
+
+The RecipeManager should be threadsafe but since there are 25 Recipe
+subtypes all of them would have to be checked.
