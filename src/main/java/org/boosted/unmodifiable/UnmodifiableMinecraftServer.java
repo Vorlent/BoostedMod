@@ -135,10 +135,10 @@ public class UnmodifiableMinecraftServer {
         return server.getWorldRegistryKeys();
     }
 
-    //TODO consider unmodifiable server world
-    public Iterable<ServerWorld> getWorlds() {
+    // consider unmodifiable server world
+    /*public Iterable<ServerWorld> getWorlds() {
         return server.getWorlds();
-    }
+    }*/
 
     public String getVersion() {
         return server.getVersion();
@@ -189,10 +189,10 @@ public class UnmodifiableMinecraftServer {
         return server.isDemo();
     }
 
-    //TODO consider unmodifiable ServerResourcePackProperties
-    public Optional<net.minecraft.server.MinecraftServer.ServerResourcePackProperties> getResourcePackProperties() {
+    // consider unmodifiable ServerResourcePackProperties
+    /*public Optional<net.minecraft.server.MinecraftServer.ServerResourcePackProperties> getResourcePackProperties() {
         return server.getResourcePackProperties();
-    }
+    }*/
 
     public boolean requireResourcePack() {
         return server.requireResourcePack();
@@ -260,10 +260,10 @@ public class UnmodifiableMinecraftServer {
         return server.isRemote();
     }
 
-    //TODO consider unmodifiable ServerNetworkIo
-    public ServerNetworkIo getNetworkIo() {
+    // consider unmodifiable ServerNetworkIo
+    /*public ServerNetworkIo getNetworkIo() {
         return server.getNetworkIo();
-    }
+    }*/
 
     public boolean isLoading() {
         return server.isLoading();
@@ -300,30 +300,30 @@ public class UnmodifiableMinecraftServer {
         return server.getPlayerIdleTimeout();
     }
 
-    //TODO consider unmodifiable MinecraftSessionService
-    public MinecraftSessionService getSessionService() {
+    // consider unmodifiable MinecraftSessionService
+    /*public MinecraftSessionService getSessionService() {
         return server.getSessionService();
-    }
+    }*/
 
-    //TODO consider unmodifiable SignatureVerifier
-    public SignatureVerifier getServicesSignatureVerifier() {
+    // consider unmodifiable SignatureVerifier
+    /*public SignatureVerifier getServicesSignatureVerifier() {
         return server.getServicesSignatureVerifier();
-    }
+    }*/
 
-    //TODO consider unmodifiable GameProfileRepository
-    public GameProfileRepository getGameProfileRepo() {
+    // consider unmodifiable GameProfileRepository
+    /*public GameProfileRepository getGameProfileRepo() {
         return server.getGameProfileRepo();
-    }
+    }*/
 
-    //TODO consider unmodifiable UserCache
-    public UserCache getUserCache() {
+    // consider unmodifiable UserCache
+    /*public UserCache getUserCache() {
         return server.getUserCache();
-    }
+    }*/
 
-    //TODO consider unmodifiable ServerMetadata
-    public ServerMetadata getServerMetadata() {
+    // consider unmodifiable ServerMetadata
+    /*public ServerMetadata getServerMetadata() {
         return server.getServerMetadata();
-    }
+    }*/
 
     public int getMaxWorldBorderRadius() {
         return server.getMaxWorldBorderRadius();
@@ -349,10 +349,10 @@ public class UnmodifiableMinecraftServer {
         return server.getTimeReference();
     }
 
-    //TODO consider unmodifiable DataFixer
-    public DataFixer getDataFixer() {
+    // consider unmodifiable DataFixer
+    /*public DataFixer getDataFixer() {
         return server.getDataFixer();
-    }
+    }*/
 
     public int getSpawnRadius(@Nullable ServerWorld world) {
         return server.getSpawnRadius(world);
@@ -363,25 +363,25 @@ public class UnmodifiableMinecraftServer {
         return server.getAdvancementLoader();
     }
 
-    //TODO consider unmodifiable CommandFunctionManager
-    public CommandFunctionManager getCommandFunctionManager() {
+    //consider unmodifiable CommandFunctionManager
+    /*public CommandFunctionManager getCommandFunctionManager() {
         return server.getCommandFunctionManager();
-    }
+    }*/
 
-    //TODO consider unmodifiable ResourcePackManager
-    public ResourcePackManager getDataPackManager() {
+    // consider unmodifiable ResourcePackManager
+    /*public ResourcePackManager getDataPackManager() {
         return server.getDataPackManager();
-    }
+    }*/
 
-    //TODO consider unmodifiable CommandManager
-    public CommandManager getCommandManager() {
+    //consider unmodifiable CommandManager
+    /*public CommandManager getCommandManager() {
         return server.getCommandManager();
-    }
+    }*/
 
-    //TODO consider unmodifiable ServerCommandSource
-    public ServerCommandSource getCommandSource() {
+    // consider unmodifiable ServerCommandSource
+    /*public ServerCommandSource getCommandSource() {
         return server.getCommandSource();
-    }
+    }*/
 
     public boolean shouldReceiveFeedback() {
         return server.shouldReceiveFeedback();
@@ -420,20 +420,20 @@ public class UnmodifiableMinecraftServer {
         return server.getPredicateManager();
     }
 
-    //TODO consider unmodifiable LootFunctionManager
-    public LootFunctionManager getItemModifierManager() {
+    //consider unmodifiable LootFunctionManager
+    /*public LootFunctionManager getItemModifierManager() {
         return server.getItemModifierManager();
-    }
+    }*/
 
-    //TODO consider unmodifiable GameRules
-    public GameRules getGameRules() {
+    // consider unmodifiable GameRules
+    /*public GameRules getGameRules() {
         return server.getGameRules();
-    }
+    }*/
 
-    //TODO consider unmodifiable BossBarManager
-    public BossBarManager getBossBarManager() {
+    //consider unmodifiable BossBarManager
+    /*public BossBarManager getBossBarManager() {
         return server.getBossBarManager();
-    }
+    }*/
 
     public boolean isEnforceWhitelist() {
         return server.isEnforceWhitelist();
@@ -447,15 +447,15 @@ public class UnmodifiableMinecraftServer {
         return server.getPermissionLevel(profile);
     }
 
-    //TODO consider unmodifiable MetricsData
-    public MetricsData getMetricsData() {
+    //consider unmodifiable MetricsData
+    /*public MetricsData getMetricsData() {
         return server.getMetricsData();
-    }
+    }*/
 
-    //TODO consider unmodifiable Profiler
-    public Profiler getProfiler() {
+    // consider unmodifiable Profiler
+    /*public Profiler getProfiler() {
         return server.getProfiler();
-    }
+    }*/
 
     public boolean isHost(GameProfile profile) {
         return server.isHost(profile);
@@ -478,10 +478,10 @@ public class UnmodifiableMinecraftServer {
         return server.getStructureTemplateManager();
     }
 
-    //TODO consider unmodifiable SaveProperties
-    public SaveProperties getSaveProperties() {
+    // consider unmodifiable SaveProperties
+    /*public SaveProperties getSaveProperties() {
         return server.getSaveProperties();
-    }
+    }*/
 
     public DynamicRegistryManager.Immutable getRegistryManager() {
         return server.getRegistryManager();
@@ -492,20 +492,20 @@ public class UnmodifiableMinecraftServer {
         return server.createFilterer(player);
     }
 
-    //TODO consider unmodifiable ServerPlayerInteractionManager
-    public ServerPlayerInteractionManager getPlayerInteractionManager(ServerPlayerEntity player) {
+    // consider unmodifiable ServerPlayerInteractionManager
+    /*public ServerPlayerInteractionManager getPlayerInteractionManager(ServerPlayerEntity player) {
         return server.getPlayerInteractionManager(player);
-    }
+    }*/
 
     // GameMode is immutable
     public GameMode getForcedGameMode() {
         return server.getForcedGameMode();
     }
 
-    //TODO consider unmodifiable ResourceManager
-    public ResourceManager getResourceManager() {
+    //consider unmodifiable ResourceManager
+    /*public ResourceManager getResourceManager() {
         return server.getResourceManager();
-    }
+    }*/
 
     public boolean isSaving() {
         return server.isSaving();
