@@ -224,6 +224,7 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
     @Override
     public DynamicRegistryManager getRegistryManager() {
         //throw new UnsupportedOperationException();
+        // most likely no synchronization is necessary
         return this.getUnsynchronizedServer().getRegistryManager();
     }
 

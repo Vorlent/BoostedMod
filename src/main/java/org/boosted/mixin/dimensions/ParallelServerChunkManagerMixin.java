@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 @Mixin(ServerWorld.class)
-public class ParallelChunkMixin {
+public class ParallelServerChunkManagerMixin {
 	/**
 	 * Inject our ParallelServerChunkManager
 	 */

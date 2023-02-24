@@ -38,7 +38,6 @@ public class ParallelTileEntityMixin {
 				//final boolean doLock = filterTE(beTickInvoker);
 				//final ISerDesFilter filter = SerDesRegistry.getFilter(SerDesHookTypes.TETick, beTickInvoker.getClass());
 				Object filter = null;
-				threadCoordinator.getCurrentTEs().incrementAndGet();
 				if (filter != null) {
 					//filter.serialise(beTickInvoker::tick, beTickInvoker, ((TileEntity)beTickInvoker).getPos(), world, SerDesHookTypes.TETick);
 				} else {
@@ -48,7 +47,6 @@ public class ParallelTileEntityMixin {
 				System.err.println("Exception ticking TE at " + beTickInvoker.getPos());
 				e.printStackTrace();
 			} finally {
-				threadCoordinator.getCurrentTEs().decrementAndGet();
 				threadCoordinator.getPhaser().arriveAndDeregister();
 				if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 			}

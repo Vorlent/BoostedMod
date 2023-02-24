@@ -100,7 +100,7 @@ are run on a single thread, but we try to gather and pile up work that can be pr
 in parallel. Things like path finding can be rewritten so that entities request a path,
 and once all Entity.update, etc. finish, we have a pile of paths to compute in parallel.
 This possibly introduces one tick of delay, and it has the obvious downside of requiring every entity class
-that touches path finding to be rewritten.
+that touches path finding to be rewritten. Chunk ticks and monster spawners can be run in parallel.
 
 # Roadblocks and potential problems even if everything goes well
 

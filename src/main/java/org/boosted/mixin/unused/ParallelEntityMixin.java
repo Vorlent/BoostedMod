@@ -33,11 +33,8 @@ public class ParallelEntityMixin {
 		threadCoordinator.getPhaser().register();
 		threadCoordinator.getExecutorService().execute(() -> {
 			try {
-				threadCoordinator.getCurrentEnts().incrementAndGet();
-				threadCoordinator.getCurrentTEs().incrementAndGet();
 				entity.tick();
 			} finally {
-				threadCoordinator.getCurrentEnts().decrementAndGet();
 				threadCoordinator.getPhaser().arriveAndDeregister();
 				if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 			}

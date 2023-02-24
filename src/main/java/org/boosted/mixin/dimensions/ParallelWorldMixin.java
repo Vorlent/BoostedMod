@@ -100,7 +100,6 @@ public class ParallelWorldMixin {
 
 			BoostedWorldContext boostedWorldContext = serverWorld.getBoostedWorldContext();
 			try {
-				threadCoordinator.getCurrentWorlds().incrementAndGet();
 				boostedWorldContext.setThread(Thread.currentThread());
 				serverWorld.tick(shouldKeepTicking);
 				boostedWorldContext.postTick().runTasks();
@@ -108,7 +107,6 @@ public class ParallelWorldMixin {
 				boostedWorldContext.setThread(null);
 				barrier.finishWorld();
 				//LOGGER.warn(threadCoordinator.getPhaser().toString());
-				threadCoordinator.getCurrentWorlds().decrementAndGet();
 				if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 			}
 			//LOGGER.info("redirectTick end" + serverWorld.getRegistryKey().getValue());

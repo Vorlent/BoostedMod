@@ -15,7 +15,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,10 +25,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(targets = "net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal")
 public class CatEntityMixin {
 
-
     @Shadow @Final public CatEntity cat;
 
-    @Inject(method = "dropMorningGifts()V", cancellable = true,
+    @Inject(method = "dropMorningGifts()V",
         at = @At(value = "FIELD", target = "net/minecraft/entity/passive/CatEntity$SleepWithOwnerGoal.cat : Lnet/minecraft/entity/passive/CatEntity;",
         ordinal = 0),
         slice = @Slice(from = @At(value = "FIELD", target = "net/minecraft/entity/passive/CatEntity.world : Lnet/minecraft/world/World;", shift = At.Shift.BEFORE),

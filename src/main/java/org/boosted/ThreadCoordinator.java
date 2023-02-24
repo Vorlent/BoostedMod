@@ -15,9 +15,7 @@ public class ThreadCoordinator {
     @Nullable
     private ExecutorService executorService;
     private final Set<String> currentTasks = ConcurrentHashMap.newKeySet();
-    private final AtomicInteger currentEnts = new AtomicInteger();
     private final AtomicInteger currentEnvs = new AtomicInteger();
-    private final AtomicInteger currentTEs = new AtomicInteger();
     private final AtomicInteger threadID = new AtomicInteger();
     private final AtomicInteger currentWorlds = new AtomicInteger();
     private final AtomicBoolean isTicking = new AtomicBoolean();
@@ -66,10 +64,6 @@ public class ThreadCoordinator {
         return phaser;
     }
 
-    public void setPhaser(@Nullable Phaser phaser) {
-        this.phaser = phaser;
-    }
-
     @Nullable
     public ExecutorService getExecutorService() {
         return executorService;
@@ -79,20 +73,8 @@ public class ThreadCoordinator {
         return currentTasks;
     }
 
-    public AtomicInteger getCurrentEnts() {
-        return currentEnts;
-    }
-
-    public AtomicInteger getCurrentTEs() {
-        return currentTEs;
-    }
-
     public AtomicInteger getCurrentEnvs() {
         return currentEnvs;
-    }
-
-    public AtomicInteger getCurrentWorlds() {
-        return currentWorlds;
     }
 
     public AtomicBoolean getIsTicking() {
