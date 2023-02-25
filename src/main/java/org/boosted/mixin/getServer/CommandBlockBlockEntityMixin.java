@@ -1,19 +1,17 @@
 package org.boosted.mixin.getServer;
 
-import net.minecraft.block.entity.CommandBlockBlockEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(CommandBlockBlockEntity.class)
+@Mixin(targets = "net/minecraft/block/entity/CommandBlockBlockEntity$1")
 public class CommandBlockBlockEntityMixin {
 
-    // this is impossible to fix as it requires rewriting the command logic so the server is passed in via parameters
-    // and that would require breaking all commands.
-	/*
-        @Override
-        public ServerCommandSource getSource() {
-            return new ServerCommandSource(this, Vec3d.ofCenter(CommandBlockBlockEntity.this.pos), Vec2f.ZERO,
-                this.getWorld(), 2, this.getCustomName().getString(), this.getCustomName(),
-                this.getWorld().getServer(), null);
-        }
-	*/
+    @Redirect(method = "getSource",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;getServer()Lnet/minecraft/server/MinecraftServer;"))
+    public MinecraftServer redirect$getSource$getServer(ServerWorld instance) {
+        return instance.getUnsynchronizedServer(); // command execution is already wrapped with synchronization
+    }
 }

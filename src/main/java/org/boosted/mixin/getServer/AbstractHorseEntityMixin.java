@@ -17,7 +17,7 @@ public class AbstractHorseEntityMixin {
             at = @At(value = "INVOKE", target = "net/minecraft/entity/passive/AbstractHorseEntity.getServer ()Lnet/minecraft/server/MinecraftServer;"))
     public MinecraftServer redirectGetServer(AbstractHorseEntity instance) {
         if (instance.getWorld() instanceof ServerWorld serverWorld) {
-            return serverWorld.getUnsynchronizedServer(); // TODO check this
+            return serverWorld.getUnsynchronizedServer(); // most likely threadsafe
         }
         return null;
     }

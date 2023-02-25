@@ -478,10 +478,10 @@ public class UnmodifiableMinecraftServer {
         return server.getStructureTemplateManager();
     }
 
-    // consider unmodifiable SaveProperties
-    /*public SaveProperties getSaveProperties() {
+    // TODO consider unmodifiable SaveProperties
+    public SaveProperties getSaveProperties() {
         return server.getSaveProperties();
-    }*/
+    }
 
     public DynamicRegistryManager.Immutable getRegistryManager() {
         return server.getRegistryManager();

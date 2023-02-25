@@ -79,7 +79,6 @@ public class ParallelWorldMixin {
 		//LOGGER.info("redirectTick start"  + serverWorld.getRegistryKey().getValue());
 		if (GeneralConfig.disabled || GeneralConfig.disableWorld) {
 			try {
-				//TODO switch to single threaded executors
 				serverWorld.tick(shouldKeepTicking);
 			} catch (Exception e) {
 				throw e;
@@ -106,7 +105,6 @@ public class ParallelWorldMixin {
 			} finally {
 				boostedWorldContext.setThread(null);
 				barrier.finishWorld();
-				//LOGGER.warn(threadCoordinator.getPhaser().toString());
 				if (GeneralConfig.opsTracing) threadCoordinator.getCurrentTasks().remove(finalTaskName);
 			}
 			//LOGGER.info("redirectTick end" + serverWorld.getRegistryKey().getValue());
@@ -122,7 +120,6 @@ public class ParallelWorldMixin {
 		method = "tickWorlds(Ljava/util/function/BooleanSupplier;)V")
 	private void injectPostTick(CallbackInfo info) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		//LOGGER.info("injectPostTick");
 		// wait until all worlds have finished
 		barrier.waitForAllWorlds();
 		threadCoordinator.getIsTicking().set(false);

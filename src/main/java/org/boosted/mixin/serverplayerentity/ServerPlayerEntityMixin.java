@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.Optional;
 
 @Mixin(ServerPlayerEntity.class)
-public class ServerPlayerEntityMixin {
+public abstract class ServerPlayerEntityMixin {
 
     @Shadow @Final public MinecraftServer server;
 
@@ -80,7 +80,7 @@ public class ServerPlayerEntityMixin {
     }
 
     @Redirect(method = "isPvpEnabled",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isPvpEnabled()Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isPvpEnabled()Z"))
     private boolean redirectIsPvpEnabled(MinecraftServer instance) {
         return this.server.getSynchronizedServer()
             .readExp(server -> server.isPvpEnabled());
@@ -88,12 +88,30 @@ public class ServerPlayerEntityMixin {
 
     // TODO fix moveToWorld
 
-    /*@Redirect(method = "moveToWorld",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isPvpEnabled()Z"))
-    private boolean redirect$moveToWorld(MinecraftServer instance) {
-        return this.server.getSynchronizedServer()
-                .readExp(server -> server.isPvpEnabled());
-    }*/
+    @Redirect(method = "moveToWorld",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getPlayerManager()Lnet/minecraft/server/PlayerManager;"))
+    private PlayerManager redirect$moveToWorld$getPlayerManager(MinecraftServer instance) {
+        return null;
+    }
+
+    @Redirect(method = "moveToWorld",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendCommandTree(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
+    private void redirect$moveToWorld$sendCommandTree(PlayerManager instance, ServerPlayerEntity player) {
+        player.server.getSynchronizedServer().write(server -> server.getPlayerManager().sendCommandTree(player));
+    }
+
+    @Redirect(method = "moveToWorld",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendWorldInfo(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/world/ServerWorld;)V"))
+    private void redirect$moveToWorld$sendWorldInfo(PlayerManager instance, ServerPlayerEntity player, ServerWorld world) {
+        player.server.getSynchronizedServer().write(server -> server.getPlayerManager().sendWorldInfo(player, world));
+    }
+
+    @Redirect(method = "moveToWorld",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendPlayerStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V"))
+    private void redirect$moveToWorld$sendPlayerStatus(PlayerManager instance, ServerPlayerEntity player) {
+        player.server.getSynchronizedServer().write(server -> server.getPlayerManager().sendPlayerStatus(player));
+    }
+
 
     @Redirect(method = "unlockRecipes([Lnet/minecraft/util/Identifier;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getRecipeManager()Lnet/minecraft/recipe/RecipeManager;"))
