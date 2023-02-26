@@ -9,7 +9,7 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.boosted.ThreadCoordinator;
+import org.boosted.util.BoostedTeleportation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -69,9 +69,7 @@ public abstract class EntityMixin {
                 serverWorld.getProfiler().push("portal");
                 this.netherPortalTime = i;
                 this.resetPortalCooldown();
-                ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
-                    this.moveToWorld(serverWorld2)
-                );
+                BoostedTeleportation.teleportEntity((Entity)(Object)this, serverWorld2);
                 serverWorld.getProfiler().pop();
             }
         });
@@ -83,17 +81,12 @@ public abstract class EntityMixin {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @author Vorlent
-     * @reason I could @Redirect getServer() instead
-     */
-    @Overwrite
-    public ServerCommandSource getCommandSource() {
-        return new ServerCommandSource((Entity)(Object)this, this.getPos(), this.getRotationClient(),
-                this.getWorld() instanceof ServerWorld ? (ServerWorld)this.getWorld() : null,
-                this.getPermissionLevel(), this.getName().getString(),
-                this.getDisplayName(),
-                this.getWorld() instanceof ServerWorld ? ((ServerWorld)this.getWorld()).getUnsynchronizedServer() : null,
-                (Entity)(Object)this);
+    @Redirect(method = "getCommandSource",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getServer()Lnet/minecraft/server/MinecraftServer;"))
+    public MinecraftServer redirectGetServer(World instance) {
+        if (instance instanceof ServerWorld serverWorld) {
+            return serverWorld.getUnsynchronizedServer();
+        }
+        return instance.getServer();
     }
 }
