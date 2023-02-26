@@ -54,6 +54,7 @@
     "getServer.StructureContextMixin",
     "getServer.TameAbleEntityMixin",
     "getServer.ThreadedAnvilChunkStorageMixin",
+    "getServer.VehicleInventoryMixin",
     "getServer.VillagerEntityMixin",
     "getServer.WalkTowardJobSiteTaskMixin",
     "portal.EntityMoveToWorldMixin",
