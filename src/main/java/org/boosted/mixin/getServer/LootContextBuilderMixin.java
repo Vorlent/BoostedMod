@@ -31,8 +31,9 @@ public abstract class LootContextBuilderMixin {
     public void build(LootContextType type, CallbackInfoReturnable<LootContext> cir) {
         Random random = this.random == null ? Random.create() : this.random;
         LootContext returnValue = getWorld().getSynchronizedServer().readExp(minecraftServer -> {
-            // TODO this is indirectly leaking references to getServer
-            //  by passing in getLootManager() and getPredicateManager()
+            // this is indirectly leaking references to getServer
+            // by passing in getLootManager() and getPredicateManager()
+            // which is then resynchronized in LootContextMixin
             LootContext lootContext = new LootContext(random, this.luck, this.getWorld(),
                 minecraftServer.getLootManager()::getTable, minecraftServer.getPredicateManager()::get,
                 this.parameters, this.drops);
@@ -40,4 +41,15 @@ public abstract class LootContextBuilderMixin {
         });
         cir.setReturnValue(returnValue);
     }
+
+    /*
+        public LootTable getTable(Identifier id) {
+        return this.tableGetter.apply(id);
+    }
+
+    @Nullable
+    public LootCondition getCondition(Identifier id) {
+        return this.conditionGetter.apply(id);
+    }
+     */
 }

@@ -42,6 +42,7 @@
     "getServer.LivingEntityMixin",
     "getServer.LootableContainerBlockEntityMixin",
     "getServer.LootContextBuilderMixin",
+    "getServer.LootContextMixin",
     "getServer.MobEntityMixin",
     "getServer.NetworkThreadUtilsMixin",
     "getServer.PiglinBrainMixin",
