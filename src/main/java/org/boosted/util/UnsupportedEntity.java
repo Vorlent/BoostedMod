@@ -1158,11 +1158,10 @@ public class UnsupportedEntity extends Entity {
         throw unsupportedOperation();
     }
 
-    //@Override
-    public void sendSystemMessage(Text message, UUID sender) {
+    @Override
+    public void sendMessage(Text message) {
         throw unsupportedOperation();
     }
-    //TODO replace this...
 
     public World getEntityWorld() {
         throw unsupportedOperation();
