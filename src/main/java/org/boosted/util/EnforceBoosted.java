@@ -14,10 +14,10 @@ public class EnforceBoosted {
         // the current solution is quite ad hoc
         // and does not account for whether the correct executor is being used
         List<String> callingFrame = stackWalker.walk(frames ->
-                frames
-                        .dropWhile(frame -> !injectedMethod.equals(frame.getClassName() + ";" + frame.getMethodName()))
-                        .skip(1)
-                        .map(frame -> frame.getClassName() + ";" + frame.getMethodName()).limit(5).collect(Collectors.toList())
+            frames
+                .dropWhile(frame -> !injectedMethod.equals(frame.getClassName() + ";" + frame.getMethodName()))
+                .skip(1)
+                .map(frame -> frame.getClassName() + ";" + frame.getMethodName()).limit(5).collect(Collectors.toList())
         );
         Optional<String> relevantFrame = callingFrame.stream().filter(whiteListedMethods::contains).findFirst();
         if(relevantFrame.isEmpty()) {

@@ -40,7 +40,7 @@ public class ThreadCoordinator {
     }
 
     public boolean shouldThreadChunks() {
-        return true; //TODO
+        return true;
     }
 
     public boolean isThreadPooled(String poolName, Thread t) {
