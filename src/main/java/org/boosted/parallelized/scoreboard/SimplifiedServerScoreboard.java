@@ -12,6 +12,7 @@ import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.boosted.mixin.scoreboard.ModifiablePlayerListAccessor;
 import org.boosted.unmodifiable.UnmodifiableMinecraftServer;
 import org.boosted.util.SynchronizedResource;
 import org.jetbrains.annotations.Nullable;
@@ -183,7 +184,7 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
             this.clearPlayerTeam(playerName);
         }
         this.teamsByPlayer.put(playerName, team);
-        return team.getPlayerList().add(playerName);
+        return ((ModifiablePlayerListAccessor)team).getModifiablePlayerList().add(playerName);
     }
 
     /** Does call updateListeners and sends packets */
@@ -213,7 +214,7 @@ public class SimplifiedServerScoreboard extends ServerScoreboard {
             throw new IllegalStateException("Player is either on another team or not on any team. Cannot remove from team '" + team.getName() + "'.");
         }
         this.teamsByPlayer.remove(playerName);
-        team.getPlayerList().remove(playerName);
+        ((ModifiablePlayerListAccessor)team).getModifiablePlayerList().remove(playerName);
     }
 
     /** Does call updateListeners and sends packets */

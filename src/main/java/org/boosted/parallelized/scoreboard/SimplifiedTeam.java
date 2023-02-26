@@ -10,6 +10,7 @@ import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * setXNoUpdate skips the scoreboard call. Use this in SynchronizedTeam for explicit calls to SynchronizedScoreboard
@@ -80,9 +81,7 @@ public class SimplifiedTeam extends Team {
 
     @Override
     public Collection<String> getPlayerList() {
-        // TODO this leaks a mutable reference
-        // which is modified in Scoreboard
-        return super.getPlayerList();
+        return Collections.unmodifiableCollection(super.getPlayerList());
     }
 
     @Override
