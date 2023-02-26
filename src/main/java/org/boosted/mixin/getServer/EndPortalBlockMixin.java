@@ -10,38 +10,27 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import org.boosted.ThreadCoordinator;
+import org.boosted.util.BoostedTeleportation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EndPortalBlock.class)
 public class EndPortalBlockMixin {
 
-	/**
-     * @author Vorlent
-     * @reason onEntityCollision needs exclusive write access to MinecraftServer
-     * during portal collision to get the destination world
-     */
-    @Overwrite
-	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-		if (world instanceof ServerWorld
-            && !entity.hasVehicle()
-            && !entity.hasPassengers()
-            && entity.canUsePortals()
-            && VoxelShapes.matchesAnywhere(
-                VoxelShapes.cuboid(entity.getBoundingBox().offset(-pos.getX(), -pos.getY(), -pos.getZ())),
-                state.getOutlineShape(world, pos), BooleanBiFunction.AND)) {
-
-			RegistryKey<World> registryKey = world.getRegistryKey() == World.END ? World.OVERWORLD : World.END;
-            /* PATCH BEGIN */ // TODO using inject and return should simplify this mixin
-            ((ServerWorld)world).getSynchronizedServer().write(server -> {
-                ServerWorld serverWorld = server.getWorld(registryKey);
-                if (serverWorld == null) {
-                    return;
-                }
-                ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> entity.moveToWorld(serverWorld));
-                // TODO remove the teleported entities and put them in a queue that is emptied in a mid tick executor
-            });
-            /* PATCH END */
-		}
-	}
+    @Inject(method = "onEntityCollision", cancellable = true,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getRegistryKey()Lnet/minecraft/util/registry/RegistryKey;",
+        shift = At.Shift.BEFORE))
+    public void synchronizeOnEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci) {
+        RegistryKey<World> registryKey = world.getRegistryKey() == World.END ? World.OVERWORLD : World.END;
+        ((ServerWorld)world).getSynchronizedServer().write(server -> {
+            ServerWorld serverWorld = server.getWorld(registryKey);
+            if (serverWorld == null) {
+                return;
+            }
+            BoostedTeleportation.teleportEntity(entity, serverWorld);
+        });
+    }
 }

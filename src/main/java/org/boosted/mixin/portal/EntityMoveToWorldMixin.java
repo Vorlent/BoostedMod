@@ -3,6 +3,7 @@ package org.boosted.mixin.portal;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import org.boosted.ThreadCoordinator;
+import org.boosted.util.BoostedTeleportation;
 import org.boosted.util.EnforceBoosted;
 import org.boosted.util.UnsupportedEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,9 +28,7 @@ public abstract class EntityMoveToWorldMixin {
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;moveToWorld(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/entity/Entity;"),
 			method = "tickPortal ()V")
 	public Entity moveToWorldNetherworldPortal(Entity instance, ServerWorld destination) {
-		ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() ->
-			instance.moveToWorld(destination)
-		);
+		BoostedTeleportation.teleportEntity(instance, destination);
 		return new UnsupportedEntity(instance.getType(), destination); // may need to return a fake entity that throws on every method call just in case
 	}
 }
