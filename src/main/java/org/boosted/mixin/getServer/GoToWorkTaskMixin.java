@@ -19,6 +19,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.poi.PointOfInterestType;
+import org.boosted.ThreadCoordinator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -40,19 +41,19 @@ public class GoToWorkTaskMixin {
         if (villagerEntity.getVillagerData().getProfession() != VillagerProfession.NONE) {
             return;
         }
-        /* PATCH BEGIN */
-        serverWorld.getSynchronizedServer().write(minecraftServer -> {
-            // TODO warning, minecraftServer.getWorld() is used to obtain a cross reference to another world
-            Optional.ofNullable(minecraftServer.getWorld(globalPos.getDimension()))
-                    .flatMap(world -> world.getPointOfInterestStorage().getType(globalPos.getPos()))
-                    .flatMap(registryEntry -> Registry.VILLAGER_PROFESSION.stream()
-                            .filter(profession -> profession.heldWorkstation().test((RegistryEntry<PointOfInterestType>)registryEntry))
-                            .findFirst()).ifPresent(profession -> {
-                        villagerEntity.setVillagerData(villagerEntity.getVillagerData().withProfession((VillagerProfession)profession));
-                        villagerEntity.reinitializeBrain(serverWorld);
-                    });
+        ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> { // run cross world logic on the main thread
+            serverWorld.getSynchronizedServer().write(minecraftServer -> {
+                Optional.ofNullable(minecraftServer.getWorld(globalPos.getDimension()))
+                .flatMap(world -> world.getPointOfInterestStorage().getType(globalPos.getPos()))
+                .flatMap(registryEntry -> Registry.VILLAGER_PROFESSION.stream()
+                        .filter(profession -> profession.heldWorkstation().test((RegistryEntry<PointOfInterestType>)registryEntry))
+                        .findFirst()
+                ).ifPresent(profession -> {
+                    villagerEntity.setVillagerData(villagerEntity.getVillagerData().withProfession((VillagerProfession)profession));
+                    villagerEntity.reinitializeBrain(serverWorld);
+                });
+            });
         });
-        /* PATCH END */
 
     }
 }

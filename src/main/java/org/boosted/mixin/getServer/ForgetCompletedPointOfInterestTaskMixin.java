@@ -8,6 +8,7 @@ import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
+import org.boosted.ThreadCoordinator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -33,15 +34,17 @@ public abstract class ForgetCompletedPointOfInterestTaskMixin {
         GlobalPos globalPos = brain.getOptionalMemory(this.memoryModule).get();
         BlockPos blockPos = globalPos.getPos();
         /* PATCH BEGIN */
-        world.getSynchronizedServer().write(server -> {
-            ServerWorld serverWorld = server.getWorld(globalPos.getDimension());
-            if (serverWorld == null || this.hasCompletedPointOfInterest(serverWorld, blockPos)) {
-                brain.forget(this.memoryModule);
-            } else if (this.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
-                brain.forget(this.memoryModule);
-                world.getPointOfInterestStorage().releaseTicket(blockPos);
-                DebugInfoSender.sendPointOfInterest(world, blockPos);
-            }
+        ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> { // run cross world logic on the main thread
+            world.getSynchronizedServer().write(server -> {
+                ServerWorld serverWorld = server.getWorld(globalPos.getDimension());
+                if (serverWorld == null || this.hasCompletedPointOfInterest(serverWorld, blockPos)) {
+                    brain.forget(this.memoryModule);
+                } else if (this.isBedOccupiedByOthers(serverWorld, blockPos, entity)) {
+                    brain.forget(this.memoryModule);
+                    world.getPointOfInterestStorage().releaseTicket(blockPos);
+                    DebugInfoSender.sendPointOfInterest(world, blockPos);
+                }
+            });
         });
         /* PATCH END */
     }

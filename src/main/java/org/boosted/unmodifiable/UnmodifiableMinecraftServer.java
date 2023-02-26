@@ -56,7 +56,7 @@ import java.util.Set;
  * When one one ServerWorld has to write it will end up blocking all readers but this is still better
  * than delaying everything to the post tick phase which is sequential in nature.
  *
- * This class does not yet provide unmodifiable instances to referenced objects like the ScoreBoard. (TODO)
+ * This class does not yet provide unmodifiable instances to referenced objects like the ScoreBoard.
  *
  * When attempting to write, the class will throw an exception and the caller must fix their code. (e.g. acquire the write lock)
  */

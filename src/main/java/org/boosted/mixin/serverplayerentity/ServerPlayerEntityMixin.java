@@ -86,8 +86,6 @@ public abstract class ServerPlayerEntityMixin {
             .readExp(server -> server.isPvpEnabled());
     }
 
-    // TODO fix moveToWorld
-
     @Redirect(method = "moveToWorld",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getPlayerManager()Lnet/minecraft/server/PlayerManager;"))
     private PlayerManager redirect$moveToWorld$getPlayerManager(MinecraftServer instance) {

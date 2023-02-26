@@ -21,6 +21,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.minecraft.world.poi.PointOfInterestType;
+import org.boosted.ThreadCoordinator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -43,19 +44,21 @@ public class VillagerEntityMixin {
             return;
         }
         /* PATCH BEGIN */
-        ((ServerWorld)entity.world).getSynchronizedServer().write(minecraftServer -> {
-            entity.getBrain().getOptionalMemory(memoryModuleType).ifPresent(pos -> {
-                ServerWorld serverWorld = minecraftServer.getWorld(pos.getDimension());
-                if (serverWorld == null) {
-                    return;
-                }
-                PointOfInterestStorage pointOfInterestStorage = serverWorld.getPointOfInterestStorage();
-                Optional<RegistryEntry<PointOfInterestType>> optional = pointOfInterestStorage.getType(pos.getPos());
-                BiPredicate<VillagerEntity, RegistryEntry<PointOfInterestType>> biPredicate = POINTS_OF_INTEREST.get(memoryModuleType);
-                if (optional.isPresent() && biPredicate.test(entity, optional.get())) {
-                    pointOfInterestStorage.releaseTicket(pos.getPos());
-                    DebugInfoSender.sendPointOfInterest(serverWorld, pos.getPos());
-                }
+        ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> { // run cross world logic on the main thread
+            ((ServerWorld) entity.world).getSynchronizedServer().write(minecraftServer -> {
+                entity.getBrain().getOptionalMemory(memoryModuleType).ifPresent(pos -> {
+                    ServerWorld serverWorld = minecraftServer.getWorld(pos.getDimension());
+                    if (serverWorld == null) {
+                        return;
+                    }
+                    PointOfInterestStorage pointOfInterestStorage = serverWorld.getPointOfInterestStorage();
+                    Optional<RegistryEntry<PointOfInterestType>> optional = pointOfInterestStorage.getType(pos.getPos());
+                    BiPredicate<VillagerEntity, RegistryEntry<PointOfInterestType>> biPredicate = POINTS_OF_INTEREST.get(memoryModuleType);
+                    if (optional.isPresent() && biPredicate.test(entity, optional.get())) {
+                        pointOfInterestStorage.releaseTicket(pos.getPos());
+                        DebugInfoSender.sendPointOfInterest(serverWorld, pos.getPos());
+                    }
+                });
             });
         });
         /* PATCH BEGIN */

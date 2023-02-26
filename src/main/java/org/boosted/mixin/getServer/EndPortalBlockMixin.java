@@ -30,7 +30,8 @@ public class EndPortalBlockMixin {
             if (serverWorld == null) {
                 return;
             }
-            BoostedTeleportation.teleportEntity(entity, serverWorld);
+            BoostedTeleportation.teleportEntity(entity, serverWorld); // foreign serverWorld reference is contained
         });
+        ci.cancel();
     }
 }

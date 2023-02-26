@@ -15,6 +15,7 @@ import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.minecraft.world.poi.PointOfInterestType;
+import org.boosted.ThreadCoordinator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -32,18 +33,19 @@ public class WalkTowardJobSiteTaskMixin {
         optional.ifPresent(pos -> {
             BlockPos blockPos = pos.getPos();
             /* PATCH BEGIN */
-            serverWorld.getSynchronizedServer().write(server -> {
-                //TODO, warning there is a cross reference to another world
-                ServerWorld serverWorld2 = server.getWorld(pos.getDimension());
-                if (serverWorld2 == null) {
-                    return;
-                }
-                PointOfInterestStorage pointOfInterestStorage = serverWorld2.getPointOfInterestStorage();
-                if (pointOfInterestStorage.test(blockPos, registryEntry -> true)) {
-                    pointOfInterestStorage.releaseTicket(blockPos);
-                }
+            ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> { // run cross world logic on the main thread
+                serverWorld.getSynchronizedServer().write(server -> {
+                    ServerWorld serverWorld2 = server.getWorld(pos.getDimension());
+                    if (serverWorld2 == null) {
+                        return;
+                    }
+                    PointOfInterestStorage pointOfInterestStorage = serverWorld2.getPointOfInterestStorage();
+                    if (pointOfInterestStorage.test(blockPos, registryEntry -> true)) {
+                        pointOfInterestStorage.releaseTicket(blockPos);
+                    }
 
-                DebugInfoSender.sendPointOfInterest(serverWorld, blockPos);
+                    DebugInfoSender.sendPointOfInterest(serverWorld, blockPos);
+                });
             });
             /* PATCH END */
         });
