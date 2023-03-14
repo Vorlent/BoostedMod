@@ -20,7 +20,7 @@ public class ParallelTileEntityMixin {
 			method = "tickBlockEntities()V")
 	private void redirectTick(BlockEntityTickInvoker beTickInvoker) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		//TODO implement mid tick between tile entities
+		// implement mid tick between tile entities
 		World world = null;
 		if (GeneralConfig.disabled  || GeneralConfig.disableTileEntity || !(world instanceof ServerWorld)) {
 			beTickInvoker.tick();

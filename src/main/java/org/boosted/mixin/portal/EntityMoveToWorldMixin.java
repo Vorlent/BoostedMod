@@ -2,7 +2,6 @@ package org.boosted.mixin.portal;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
-import org.boosted.ThreadCoordinator;
 import org.boosted.util.BoostedTeleportation;
 import org.boosted.util.EnforceBoosted;
 import org.boosted.util.UnsupportedEntity;
@@ -24,6 +23,12 @@ public abstract class EntityMoveToWorldMixin {
 	private void moveToWorld(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
 		EnforceBoosted.enforceBoostedThreadExecutor(INJECTED_METHOD);
 	}
+
+	/*@Redirect(method = "moveToWorld",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isRemoved()Z"))
+	public boolean redirectIsRemoved(Entity instance) {
+		return instance.isRemoved() && instance.getRemovalReason() != Entity.RemovalReason.CHANGED_DIMENSION;
+	}*/
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;moveToWorld(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/entity/Entity;"),
 			method = "tickPortal ()V")

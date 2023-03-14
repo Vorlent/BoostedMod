@@ -21,7 +21,6 @@ import static net.minecraft.test.StructureTestUtil.testStructuresDirectoryName;
  */
 @Mixin(StructureTestUtil.class)
 public abstract class FabricGameTestBypassMixin {
-	private static final String GAMETEST_STRUCTURE_PATH = "gametest/structures/";
 
 	/**
 	 * Override createStructure call and replace it with a call that is compatible with both fabric-gametest-api and McTester.
@@ -31,7 +30,7 @@ public abstract class FabricGameTestBypassMixin {
 	@Redirect(method = "createStructureTemplate(Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/BlockRotation;ILnet/minecraft/server/world/ServerWorld;Z)Lnet/minecraft/block/entity/StructureBlockBlockEntity;",
 		at = @At(value = "INVOKE", target = "net/minecraft/test/StructureTestUtil.createStructureTemplate (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/StructureTemplate;"))
 	private static StructureTemplate createStructureTemplateRedirect1(String templateId, ServerWorld world) {
-		return createStructureTemplateFix(templateId, world);
+		return boosted$createStructureTemplateFix(templateId, world);
 	}
 
 	/**
@@ -42,26 +41,29 @@ public abstract class FabricGameTestBypassMixin {
 	@Redirect(method = "placeStructureTemplate(Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/BlockRotation;Lnet/minecraft/server/world/ServerWorld;Z)Lnet/minecraft/block/entity/StructureBlockBlockEntity;",
 			at = @At(value = "INVOKE", target = "net/minecraft/test/StructureTestUtil.createStructureTemplate (Ljava/lang/String;Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/structure/StructureTemplate;"))
 	private static StructureTemplate createStructureTemplateRedirect2(String templateId, ServerWorld world) {
-		return createStructureTemplateFix(templateId, world);
+		return boosted$createStructureTemplateFix(templateId, world);
 	}
 
-	private static StructureTemplate createStructureTemplateFix(String templateId, ServerWorld world) {
+	private static StructureTemplate boosted$createStructureTemplateFix(String templateId, ServerWorld world) {
 		try {
 			return StructureTestUtil.createStructureTemplate(templateId, world); // this uses fabric logic
 		} catch (RuntimeException e) { // this uses vanilla logic
-			StructureTemplateManager structureManager = world.getStructureTemplateManager();
-			Optional<StructureTemplate> optional = structureManager.getTemplate(new Identifier(templateId));
-			if (optional.isPresent()) {
-				return optional.get();
-			}
+			return world.getSynchronizedServer().readExp(server -> {
+				StructureTemplateManager structureManager = server.getStructureTemplateManager();
 
-			Path path = Paths.get(testStructuresDirectoryName, templateId + ".snbt");
-			NbtCompound nbtCompound = StructureTestUtil.loadSnbt(path);
-			if (nbtCompound == null) {
-				throw new RuntimeException("Fabric: Could not find structure file " + path + ", and the structure is not available in the world structures either." +
-					"Vanilla: Error while trying to load structure: " + templateId, e);
-			}
-			return structureManager.createTemplate(nbtCompound);
+				Optional<StructureTemplate> optional = structureManager.getTemplate(new Identifier(templateId));
+				if (optional.isPresent()) {
+					return optional.get();
+				}
+
+				Path path = Paths.get(testStructuresDirectoryName, templateId + ".snbt");
+				NbtCompound nbtCompound = StructureTestUtil.loadSnbt(path);
+				if (nbtCompound == null) {
+					throw new RuntimeException("Fabric: Could not find structure file " + path + ", and the structure is not available in the world structures either." +
+							"Vanilla: Error while trying to load structure: " + templateId, e);
+				}
+				return structureManager.createTemplate(nbtCompound);
+			});
 		}
 	}
 }

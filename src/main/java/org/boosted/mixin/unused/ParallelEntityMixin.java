@@ -19,7 +19,7 @@ public class ParallelEntityMixin {
 			method = "tickEntity(Lnet/minecraft/entity/Entity;)V")
 	private void redirectTick(Entity entity) {
 		final ThreadCoordinator threadCoordinator = ThreadCoordinator.getInstance();
-		//TODO implement mid tick between entities
+		// implement mid tick between entities
 		if (GeneralConfig.disabled || GeneralConfig.disableEntity) {
 			entity.tick();
 			return;

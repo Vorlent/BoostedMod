@@ -10,7 +10,7 @@ public class BoostedTeleportation {
             return;
         }
         entity.detach();
-        entity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+        //entity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
         ThreadCoordinator.getInstance().getBoostedContext().postTick().execute(() -> entity.moveToWorld(destination));
     }
 }

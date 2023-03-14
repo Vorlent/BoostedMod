@@ -257,7 +257,7 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
     @Override
     @Nullable
     public MapState getMapState(String id) {
-        // TODO verify if this can be read only
+        // this is read only as the map state is being read from a file
         return getSynchronizedServer().readExp(server ->
             server.getOverworld().getPersistentStateManager().get(MapState::fromNbt, id)
         );
