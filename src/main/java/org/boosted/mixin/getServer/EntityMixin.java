@@ -77,7 +77,7 @@ public abstract class EntityMixin {
     @Inject(method = "getServer()Lnet/minecraft/server/MinecraftServer;",
         at = @At(value = "HEAD"))
     public void blockGetServer(CallbackInfoReturnable<MinecraftServer> cir) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("getServer has been disabled for entities");
     }
 
     @Redirect(method = "getCommandSource",

@@ -57,6 +57,8 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
     private final SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> synchronizedServer;
     private final MinecraftServer unsynchronizedServer; // try to never use this!
 
+    private ThreadLocal<Integer> getServerAllowed = ThreadLocal.withInitial(() -> 0);
+
     public ParallelServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime) {
         super(server, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime);
 
@@ -170,17 +172,36 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
         this.syncedBlockEventQueue.addAll((Collection<BlockEvent>)this.blockEventQueue);
     }
 
+    public void allowGetServer() {
+        System.out.println("getServerAllowed 1: " + getServerAllowed.get());
+        getServerAllowed.set(getServerAllowed.get() + 1);
+        System.out.println("getServerAllowed 2: " + getServerAllowed.get());
+    }
+
+    public void disallowGetServer() {
+        System.out.println("disallowGetServer 1 getServerAllowed: " + getServerAllowed.get());
+        getServerAllowed.remove();
+        System.out.println("disallowGetServer 2 getServerAllowed: " + getServerAllowed.get());
+    }
+
     @Override
     @NotNull
     public MinecraftServer getServer() {
-        throw new UnsupportedOperationException();
+        System.out.println("getServer 1 getServerAllowed: " + getServerAllowed.get());
+        if (getServerAllowed.get() > 0) {
+            getServerAllowed.set(getServerAllowed.get() - 1);
+            System.out.println("getServer 2 getServerAllowed: " + getServerAllowed.get());
+            return getUnsynchronizedServer();
+        }
+        new UnsupportedOperationException().printStackTrace();
+        throw new UnsupportedOperationException("ParallelServerWorld.getServer() is unsupported");
     }
 
     @Override
     public SynchronizedResource<MinecraftServer, UnmodifiableMinecraftServer> getSynchronizedServer() {
         if (synchronizedServer == null) {
             return new UnsynchronizedResource<>(getUnsynchronizedServer(),
-                    new UnmodifiableMinecraftServer(getUnsynchronizedServer()));
+                new UnmodifiableMinecraftServer(getUnsynchronizedServer()));
         }
         return synchronizedServer;
     }
@@ -194,8 +215,10 @@ public class ParallelServerWorld extends ServerWorld implements SynchronizedServ
 
     @Override
     public StructureTemplateManager getStructureTemplateManager() {
-        throw new UnsupportedOperationException();
-        //return this.server.getStructureTemplateManager();
+        // check if current thread has locked this minecraft server, if yes, return the structureTemplateManager
+        //throw new UnsupportedOperationException("ParallelServerWorld.getStructureTemplateManager is unsupported");
+        // this is reasonably threadsafe
+        return synchronizedServer.readExp(server -> server.getStructureTemplateManager());
     }
 
     @Override

@@ -20,7 +20,7 @@ public class EnforceBoosted {
                 .map(frame -> frame.getClassName() + ";" + frame.getMethodName()).limit(5).collect(Collectors.toList())
         );
         Optional<String> relevantFrame = callingFrame.stream().filter(whiteListedMethods::contains).findFirst();
-        if(relevantFrame.isEmpty()) {
+        if (relevantFrame.isEmpty()) {
             throw new UnsupportedOperationException("Calling " + injectedMethod + " outside of a org.boosted.BoostedThreadExecutor;executeTask is not allowed. Actual frames: " + callingFrame);
         }
     }

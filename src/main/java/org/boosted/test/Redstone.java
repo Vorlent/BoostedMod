@@ -38,6 +38,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Redstone {
 
+    private static ServerWorld getNether(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getWorld(World.NETHER);
+    }
+
+    private static ServerWorld getEnd(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getWorld(World.END);
+    }
+
+    private static ServerWorld getOverworld(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getOverworld();
+    }
+
     private static Optional<BlockPos> getNetherTeleportTarget(BlockPos pos, ServerWorld origin, ServerWorld destination) {
         boolean destIsNether = destination.getRegistryKey() == World.NETHER;
         WorldBorder worldBorder = destination.getWorldBorder();
@@ -71,9 +86,9 @@ public class Redstone {
      */
     @GameTest
     public static void nether(GameTestHelper helper) {
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld overworld = server.getOverworld();
-        ServerWorld nether = Objects.requireNonNull(server.getWorld(World.NETHER));
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        ServerWorld overworld = getOverworld(helper);
+        ServerWorld nether = getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
 
         ServerPlayerEntity fakeOverworldPlayer = new ServerPlayerEntity(server, overworld, new GameProfile(UUID.randomUUID(), "redstone.nether.1"), null);

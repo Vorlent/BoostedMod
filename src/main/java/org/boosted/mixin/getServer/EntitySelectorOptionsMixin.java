@@ -78,7 +78,7 @@ public abstract class EntitySelectorOptionsMixin {
     private static void injectPredicate(Identifier identifier, boolean bl, Entity entity, CallbackInfoReturnable<Boolean> cir) {
         ServerWorld serverWorld = (ServerWorld)entity.world;
         Boolean result = serverWorld.getSynchronizedServer().readExp(server -> {
-            LootCondition lootCondition = serverWorld.getServer().getPredicateManager().get(identifier);
+            LootCondition lootCondition = server.getPredicateManager().get(identifier);
             if (lootCondition == null) {
                 return false;
             }

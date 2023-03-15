@@ -45,6 +45,22 @@ public class Portal {
 
     private static final Random RANDOM = new Random();
 
+    private static ServerWorld getNether(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getWorld(World.NETHER);
+    }
+
+    private static ServerWorld getEnd(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getWorld(World.END);
+    }
+
+    private static ServerWorld getOverworld(GameTestHelper helper) {
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        return server.getOverworld();
+    }
+
+
     private static BlockPos getNetherTeleportTarget(BlockPos pos, ServerWorld origin, ServerWorld destination) {
         boolean destIsNether = destination.getRegistryKey() == World.NETHER;
         WorldBorder worldBorder = destination.getWorldBorder();
@@ -91,8 +107,7 @@ public class Portal {
         cowEntity.setCustomNameVisible(true);
         helper.walkTo(cowEntity, 3,2,4);
         helper.succeedWhen(() -> {
-            MinecraftServer server = helper.gameTest.getWorld().getServer();
-            ServerWorld nether = server.getWorld(World.NETHER);
+            ServerWorld nether = Portal.getNether(helper);
             BlockPos gameTestPos = helper.gameTest.getPos();
             System.out.println("Overworld " + gameTestPos);
 
@@ -130,8 +145,7 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, Entity> entityByName = new HashMap<>();
 
@@ -193,6 +207,8 @@ public class Portal {
      */
     @GameTest
     public static void items(GameTestHelper helper) {
+        System.out.println("asdasdasdasdasd 11111");
+
         ArmorStandEntity itemsCounter = helper.spawnEntity(4, 2, 1, EntityType.ARMOR_STAND);
         itemsCounter.setCustomNameVisible(true);
 
@@ -202,8 +218,9 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        System.out.println("items 11111");
+
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ItemEntity> entityByName = new HashMap<>();
 
@@ -272,9 +289,7 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        @Nullable
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ItemEntity> entityByName = new HashMap<>();
 
@@ -344,9 +359,7 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        @Nullable
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ArrowEntity> entityByName = new HashMap<>();
 
@@ -418,8 +431,7 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 1, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ChestMinecartEntity> entityByName = new HashMap<>();
 
@@ -497,9 +509,8 @@ public class Portal {
         ArmorStandEntity otherOverworldCounter = helper.spawnEntity( 1, 2, 2, EntityType.ARMOR_STAND);
         otherOverworldCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld overworld = server.getOverworld();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld overworld = Portal.getOverworld(helper);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, Entity> netherEntityByName = new HashMap<>();
         Map<String, Entity> overworldEntityByName = new HashMap<>();
@@ -638,9 +649,8 @@ public class Portal {
         ArmorStandEntity otherOverworldCounter = helper.spawnEntity( 1, 2, 2, EntityType.ARMOR_STAND);
         otherOverworldCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld overworld = server.getOverworld();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        ServerWorld overworld = Portal.getOverworld(helper);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ItemEntity> netherEntityByName = new HashMap<>();
         Map<String, ItemEntity> overworldEntityByName = new HashMap<>();
@@ -777,9 +787,9 @@ public class Portal {
         ArmorStandEntity otherOverworldCounter = helper.spawnEntity( 1, 2, 2, EntityType.ARMOR_STAND);
         otherOverworldCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld overworld = server.getOverworld();
-        ServerWorld nether = server.getWorld(World.NETHER);
+        MinecraftServer server = helper.gameTest.getWorld().getUnsynchronizedServer();
+        ServerWorld overworld = Portal.getOverworld(helper);
+        ServerWorld nether = Portal.getNether(helper);
         BlockPos gameTestPos = helper.gameTest.getPos();
         Map<String, ServerPlayerEntity> netherEntityByName = new HashMap<>();
         Map<String, ServerPlayerEntity> overworldEntityByName = new HashMap<>();
@@ -921,8 +931,8 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 5, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld endDimension = server.getWorld(World.END); // ensure the end is actually running
+        ServerWorld endDimension = getEnd(helper); // ensure the end is actually running
+
         endDimension.resetIdleTimeout();
         Map<String, Entity> entityByName = new HashMap<>();
 
@@ -991,8 +1001,7 @@ public class Portal {
         ArmorStandEntity otherCounter = helper.spawnEntity( 1, 2, 5, EntityType.ARMOR_STAND);
         otherCounter.setCustomNameVisible(true);
 
-        MinecraftServer server = helper.gameTest.getWorld().getServer();
-        ServerWorld endDimension = server.getWorld(World.END); // ensure the end is actually running
+        ServerWorld endDimension = getEnd(helper); // ensure the end is actually running
         endDimension.resetIdleTimeout();
         Map<String, ItemEntity> entityByName = new HashMap<>();
 

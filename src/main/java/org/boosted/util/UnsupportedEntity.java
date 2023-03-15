@@ -68,7 +68,7 @@ public class UnsupportedEntity extends Entity {
     }
 
     public RuntimeException unsupportedOperation() {
-        return new UnsupportedOperationException();
+        return new UnsupportedOperationException("This is an unsupported entity.");
     }
 
     @Override
