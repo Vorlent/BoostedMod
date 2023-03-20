@@ -20,6 +20,9 @@
   "entrypoints": {
     "main": [
       "org.boosted.BoostedMod"
+    ],
+    "client": [
+      "org.boosted.stagetwo.BoostedClientMod"
     ]
   },
   "mixins": [

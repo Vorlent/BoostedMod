@@ -82,3 +82,5 @@ accessible field net/minecraft/scoreboard/ScoreboardPlayerScore score I
 accessible field net/minecraft/scoreboard/ScoreboardPlayerScore forceUpdate Z
 
 accessible method net/minecraft/server/command/DebugCommand executeFunction (Lnet/minecraft/server/command/ServerCommandSource;Ljava/util/Collection;)I
+
+accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage loadedChunks Lit/unimi/dsi/fastutil/longs/LongSet;
